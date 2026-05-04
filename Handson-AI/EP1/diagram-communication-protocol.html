@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Communication Protocol — Race Condition</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:56px 80px 40px;background:var(--white)}
+.slide.active{display:flex}
+.g-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.07);border:1px solid rgba(66,133,244,0.18)}
+.glass-green{background:rgba(52,168,83,0.07);border:1px solid rgba(52,168,83,0.18)}
+.glass-red{background:rgba(234,67,53,0.06);border:1px solid rgba(234,67,53,0.14)}
+.glass-yellow{background:rgba(251,188,4,0.07);border:1px solid rgba(251,188,4,0.18)}
+.glass-purple{background:rgba(171,71,188,0.06);border:1px solid rgba(171,71,188,0.16)}
+.section-tag{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+h2{font-size:38px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:8px}
+h3{font-size:22px;font-weight:400;color:var(--g600)}
+.pill{display:inline-block;padding:5px 14px;border-radius:16px;font-size:13px;font-weight:500}
+.row{display:flex;gap:28px;align-items:flex-start}
+.connector{display:flex;flex-direction:column;align-items:center;padding:4px 0}
+.connector .line{width:2px;height:18px;background:var(--g600);opacity:0.4}
+.connector .head{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--g600);opacity:0.4}
+.connector .clabel{font-size:11px;color:var(--g600);margin:2px 0}
+.node{padding:16px 24px;border-radius:16px;font-size:15px;font-weight:500;text-align:center}
+.node .sub{font-size:12px;font-weight:400;color:var(--g600);margin-top:3px}
+.slide-num{position:absolute;bottom:28px;right:56px;font-size:14px;color:var(--g600);font-weight:500}
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp 0.5s ease-out both}
+code{font-family:var(--mono);font-size:13px;background:var(--g100);padding:2px 6px;border-radius:4px}
+
+/* Sequence diagram styles */
+.seq{display:flex;flex-direction:column;gap:0;flex:1;margin-top:24px;position:relative}
+.seq-header{display:flex;gap:0;position:relative;z-index:2}
+.seq-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:0}
+.seq-actor{padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;text-align:center;min-width:120px;z-index:2}
+.seq-lifeline{position:relative;display:flex;flex-direction:column;align-items:center;flex:1}
+.seq-lifeline::before{content:'';position:absolute;top:0;bottom:0;width:2px;background:var(--g200);z-index:0}
+.seq-msgs{display:flex;flex-direction:column;gap:4px;padding-top:12px;flex:1;position:relative}
+.seq-msg{display:flex;align-items:center;gap:0;height:36px;position:relative}
+.seq-msg-line{height:2px;flex:1;position:relative}
+.seq-msg-label{font-size:12px;color:var(--g800);font-weight:500;white-space:nowrap;position:absolute;padding:2px 8px;border-radius:8px;z-index:2}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span> / <span id="tot"></span></div>
+<div class="deck">
+
+<!-- SLIDE 1: Communication Overview -->
+<div class="slide active" data-id="1">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:28px">
+    <div class="section-tag">Communication Protocol</div>
+    <h2>Hybrid Transport Model</h2>
+    <h3>Binary protobuf for speed · JSON-RPC for lifecycle · REST for discovery</h3>
+  </div>
+
+  <div class="row" style="flex:1;margin-top:32px">
+    <!-- Left: Transport diagram -->
+    <div style="flex:3;display:flex;flex-direction:column;align-items:center;gap:0">
+      <div class="glass glass-blue node anim" style="width:480px;padding:22px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px">Frontend Client</div>
+        <div class="sub">Simulation UI · Tester UI · Dashboard</div>
+      </div>
+      <div class="connector"><div class="clabel">WebSocket (binary protobuf)</div><div class="line" style="height:28px"></div><div class="head"></div></div>
+      <div class="glass glass-green node anim" style="width:480px;padding:22px 32px;animation-delay:0.1s">
+        <div style="font-weight:700;color:var(--green);font-size:20px">Go Gateway</div>
+        <div class="sub">Hub (per-instance) + Switchboard (cross-instance)</div>
+      </div>
+
+      <div style="display:flex;gap:80px;margin-top:8px">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="connector"><div class="clabel">Redis Pub/Sub</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+          <div class="glass glass-purple node anim" style="animation-delay:0.2s;min-width:200px;padding:18px 24px">
+            <div style="font-weight:700;color:#7B1FA2;font-size:17px">Switchboard</div>
+            <div class="sub">Cross-instance sync</div>
+          </div>
+          <div class="connector"><div class="clabel">orchestration</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+          <div class="glass glass-yellow node anim" style="animation-delay:0.3s;min-width:200px;padding:18px 24px">
+            <div style="font-weight:700;color:#E37400;font-size:17px">Python Agents</div>
+            <div class="sub">NPC agents</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="connector"><div class="clabel">aggregated telemetry</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+          <div class="glass node anim" style="animation-delay:0.25s;min-width:200px;padding:18px 24px;background:rgba(0,0,0,0.02)">
+            <div style="font-weight:600;color:var(--g600);font-size:17px">Session Hub</div>
+            <div class="sub">In-process routing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Transport layers + Wrapper -->
+    <div style="flex:2;display:flex;flex-direction:column;gap:16px;padding-top:8px">
+      <div style="font-weight:700;font-size:18px;margin-bottom:4px">Transport Layers</div>
+
+      <div class="glass glass-blue" style="padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div class="pill" style="background:rgba(66,133,244,0.12);color:var(--blue)">Primary</div>
+          <div style="font-weight:700;font-size:15px">Protobuf over WebSocket</div>
+        </div>
+        <div style="font-size:14px;color:var(--g600);line-height:1.5">High-frequency, state-critical events. Binary <code>gateway.Wrapper</code> envelope.</div>
+      </div>
+
+      <div class="glass glass-green" style="padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div class="pill" style="background:rgba(52,168,83,0.12);color:var(--green)">Admin</div>
+          <div style="font-weight:700;font-size:15px">JSON-RPC</div>
+        </div>
+        <div style="font-size:14px;color:var(--g600);line-height:1.5">Lifecycle commands — initial load, jump-to-phase. Low frequency.</div>
+      </div>
+
+      <div class="glass glass-yellow" style="padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div class="pill" style="background:rgba(251,188,4,0.12);color:#E37400">Bootstrap</div>
+          <div style="font-weight:700;font-size:15px">REST</div>
+        </div>
+        <div style="font-size:14px;color:var(--g600);line-height:1.5">Agent discovery <code>/.well-known/agent-card.json</code>, session creation.</div>
+      </div>
+
+      <!-- Wrapper proto -->
+      <div class="glass" style="padding:16px 20px;margin-top:4px;background:var(--g50)">
+        <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:var(--g800)">gateway.Wrapper fields</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px">
+          <code style="color:var(--blue)">type</code><span style="color:var(--g600)">"text" · "json" · "a2ui" · "telemetry"</span>
+          <code style="color:var(--blue)">event</code><span style="color:var(--g600)">"narrative" · "tool_call" · "model_end"</span>
+          <code style="color:var(--blue)">session_id</code><span style="color:var(--g600)">Routing target</span>
+          <code style="color:var(--blue)">payload</code><span style="color:var(--g600)">Serialized bytes</span>
+          <code style="color:var(--blue)">destination</code><span style="color:var(--g600)">Session UUIDs (empty = broadcast)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">1 · Transport Model</div>
+</div>
+
+
+<!-- SLIDE 2: Multi-Session Broadcast Sequence -->
+<div class="slide" data-id="2">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:28px">
+    <div class="section-tag">Communication Protocol</div>
+    <h2>Multi-Session Broadcast</h2>
+    <h3>How a single admin message fans out to agents and gateway instances</h3>
+  </div>
+
+  <div style="flex:1;display:flex;gap:32px;margin-top:24px">
+    <!-- Sequence diagram area -->
+    <div style="flex:3;position:relative">
+      <!-- Actor headers -->
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:0">
+        <div class="glass glass-blue" style="padding:10px 16px;border-radius:14px;text-align:center;flex:1;max-width:160px">
+          <div style="font-weight:700;color:var(--blue);font-size:14px">Tester UI</div>
+        </div>
+        <div class="glass glass-green" style="padding:10px 16px;border-radius:14px;text-align:center;flex:1;max-width:160px">
+          <div style="font-weight:700;color:var(--green);font-size:14px">Gateway A</div>
+        </div>
+        <div class="glass glass-purple" style="padding:10px 16px;border-radius:14px;text-align:center;flex:1;max-width:160px">
+          <div style="font-weight:700;color:#7B1FA2;font-size:14px">Redis</div>
+        </div>
+        <div class="glass glass-green" style="padding:10px 16px;border-radius:14px;text-align:center;flex:1;max-width:160px">
+          <div style="font-weight:700;color:var(--green);font-size:14px">Gateway B</div>
+        </div>
+        <div class="glass glass-yellow" style="padding:10px 16px;border-radius:14px;text-align:center;flex:1;max-width:160px">
+          <div style="font-weight:700;color:#E37400;font-size:14px">Subscriber</div>
+        </div>
+        <div class="glass glass-red" style="padding:10px 16px;border-radius:14px;text-align:center;flex:1;max-width:160px">
+          <div style="font-weight:700;color:var(--red);font-size:14px">Callable</div>
+        </div>
+      </div>
+
+      <!-- SVG sequence arrows -->
+      <svg width="100%" height="520" viewBox="0 0 1100 520" style="margin-top:8px">
+        <!-- Lifelines -->
+        <line x1="80" y1="0" x2="80" y2="520" stroke="#E8EAED" stroke-width="2" stroke-dasharray="6,4"/>
+        <line x1="280" y1="0" x2="280" y2="520" stroke="#E8EAED" stroke-width="2" stroke-dasharray="6,4"/>
+        <line x1="480" y1="0" x2="480" y2="520" stroke="#E8EAED" stroke-width="2" stroke-dasharray="6,4"/>
+        <line x1="680" y1="0" x2="680" y2="520" stroke="#E8EAED" stroke-width="2" stroke-dasharray="6,4"/>
+        <line x1="880" y1="0" x2="880" y2="520" stroke="#E8EAED" stroke-width="2" stroke-dasharray="6,4"/>
+        <line x1="1040" y1="0" x2="1040" y2="520" stroke="#E8EAED" stroke-width="2" stroke-dasharray="6,4"/>
+
+        <!-- Msg 1: UI -> GW1 -->
+        <line x1="80" y1="40" x2="270" y2="40" stroke="#4285F4" stroke-width="2"/>
+        <polygon points="270,40 262,35 262,45" fill="#4285F4"/>
+        <text x="175" y="32" text-anchor="middle" font-family="Google Sans" font-size="12" fill="#3C4043" font-weight="500">WS: Wrapper(broadcast)</text>
+
+        <!-- Msg 2: GW1 self -->
+        <rect x="252" y="65" width="56" height="30" rx="8" fill="rgba(52,168,83,0.08)" stroke="rgba(52,168,83,0.2)"/>
+        <text x="280" y="84" text-anchor="middle" font-family="Google Sans" font-size="11" fill="#2E7D32" font-weight="500">Hub</text>
+        <text x="340" y="84" font-family="Google Sans" font-size="11" fill="#5F6368">deliver to sess-1 (local)</text>
+
+        <!-- Msg 3: GW1 -> Redis (gateway:broadcast) -->
+        <line x1="280" y1="120" x2="470" y2="120" stroke="#34A853" stroke-width="2"/>
+        <polygon points="470,120 462,115 462,125" fill="#34A853"/>
+        <text x="375" y="112" text-anchor="middle" font-family="Google Sans" font-size="12" fill="#3C4043" font-weight="500">publish gateway:broadcast</text>
+
+        <!-- Msg 4: Redis -> GW2 -->
+        <line x1="480" y1="170" x2="670" y2="170" stroke="#7B1FA2" stroke-width="2" stroke-dasharray="6,3"/>
+        <polygon points="670,170 662,165 662,175" fill="#7B1FA2"/>
+        <text x="575" y="162" text-anchor="middle" font-family="Google Sans" font-size="12" fill="#3C4043" font-weight="500">notify gateway:broadcast</text>
+
+        <!-- Msg 5: GW2 self -->
+        <rect x="652" y="195" width="56" height="30" rx="8" fill="rgba(52,168,83,0.08)" stroke="rgba(52,168,83,0.2)"/>
+        <text x="680" y="214" text-anchor="middle" font-family="Google Sans" font-size="11" fill="#2E7D32" font-weight="500">Hub</text>
+        <text x="740" y="214" font-family="Google Sans" font-size="11" fill="#5F6368">deliver to sess-2 (remote)</text>
+
+        <!-- Msg 6: GW1 -> Redis (simulation:broadcast) -->
+        <line x1="280" y1="265" x2="470" y2="265" stroke="#34A853" stroke-width="2"/>
+        <polygon points="470,265 462,260 462,270" fill="#34A853"/>
+        <text x="375" y="257" text-anchor="middle" font-family="Google Sans" font-size="12" fill="#3C4043" font-weight="500">publish simulation:broadcast</text>
+
+        <!-- Msg 7: Redis -> Subscriber -->
+        <line x1="480" y1="320" x2="870" y2="320" stroke="#7B1FA2" stroke-width="2" stroke-dasharray="6,3"/>
+        <polygon points="870,320 862,315 862,325" fill="#7B1FA2"/>
+        <text x="675" y="312" text-anchor="middle" font-family="Google Sans" font-size="12" fill="#3C4043" font-weight="500">subscriber listener fires</text>
+
+        <!-- Msg 8: GW1 -> Callable (HTTP) -->
+        <line x1="280" y1="380" x2="1030" y2="380" stroke="#EA4335" stroke-width="2"/>
+        <polygon points="1030,380 1022,375 1022,385" fill="#EA4335"/>
+        <text x="655" y="372" text-anchor="middle" font-family="Google Sans" font-size="12" fill="#3C4043" font-weight="500">HTTP POST /orchestration</text>
+
+        <!-- Note box -->
+        <rect x="60" y="430" width="980" height="60" rx="14" fill="rgba(66,133,244,0.05)" stroke="rgba(66,133,244,0.15)"/>
+        <text x="550" y="455" text-anchor="middle" font-family="Google Sans" font-size="14" fill="#3C4043" font-weight="500">Gateway never needs to know which node holds which session — Redis fan-out handles cross-node delivery</text>
+        <text x="550" y="475" text-anchor="middle" font-family="Google Sans" font-size="13" fill="#5F6368">simulation:broadcast → subscribers · HTTP poke → callable agents (scale-to-zero compatible)</text>
+      </svg>
+    </div>
+
+    <!-- Right: Response flow -->
+    <div style="flex:1.2;display:flex;flex-direction:column;gap:14px;padding-top:0">
+      <div style="font-weight:700;font-size:17px;margin-bottom:2px">Agent → Client Response</div>
+
+      <div class="glass" style="padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--g800)">1</div>
+          <div style="font-weight:700;font-size:14px">Agent Output</div>
+        </div>
+        <div style="font-size:13px;color:var(--g600);line-height:1.5">RedisDashLogPlugin intercepts the event</div>
+      </div>
+
+      <div class="glass" style="padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white">2</div>
+          <div style="font-weight:700;font-size:14px">Wrap</div>
+        </div>
+        <div style="font-size:13px;color:var(--g600);line-height:1.5">Construct <code>Wrapper</code> with<br><code>event="narrative"</code></div>
+      </div>
+
+      <div class="glass" style="padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white">3</div>
+          <div style="font-weight:700;font-size:14px">Relay</div>
+        </div>
+        <div style="font-size:13px;color:var(--g600);line-height:1.5">Publish to <code>gateway:broadcast</code> on Redis</div>
+      </div>
+
+      <div class="glass" style="padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white">4</div>
+          <div style="font-weight:700;font-size:14px">Deliver</div>
+        </div>
+        <div style="font-size:13px;color:var(--g600);line-height:1.5">All gateways → local Hub → WebSocket → clients</div>
+      </div>
+
+      <div class="glass glass-blue" style="padding:14px 18px;margin-top:4px">
+        <div style="font-weight:700;color:var(--blue);font-size:13px;margin-bottom:6px">A2UI Embedding</div>
+        <div style="font-size:12px;color:var(--g600);line-height:1.5">If tool returns A2UI, <code>type="a2ui"</code> triggers the rendering engine (v0.8.0 spec)</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">2 · Broadcast Sequence</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>

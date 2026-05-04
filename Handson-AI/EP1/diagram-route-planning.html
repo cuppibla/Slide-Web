@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Route Planning — Spine &amp; Sprout — Race Condition</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.slide{display:flex;flex-direction:column;padding:56px 80px 40px;width:1920px;height:1080px}
+.g-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.07);border:1px solid rgba(66,133,244,0.18)}
+.glass-green{background:rgba(52,168,83,0.07);border:1px solid rgba(52,168,83,0.18)}
+.glass-red{background:rgba(234,67,53,0.06);border:1px solid rgba(234,67,53,0.14)}
+.glass-yellow{background:rgba(251,188,4,0.07);border:1px solid rgba(251,188,4,0.18)}
+.section-tag{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+h2{font-size:38px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:8px}
+h3{font-size:22px;font-weight:400;color:var(--g600)}
+.pill{display:inline-block;padding:5px 14px;border-radius:16px;font-size:13px;font-weight:500}
+.row{display:flex;gap:32px;align-items:flex-start}
+code{font-family:var(--mono);font-size:13px;background:var(--g100);padding:2px 6px;border-radius:4px}
+.credit{position:absolute;bottom:28px;right:56px;font-size:13px;color:var(--g600);font-weight:500}
+
+/* Route visualization */
+.route-vis{position:relative;flex:1}
+.route-node{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;position:absolute;z-index:2;box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.route-label{position:absolute;font-size:12px;font-weight:600;white-space:nowrap;z-index:3}
+
+/* Phase cards */
+.phase-card{padding:28px 32px;border-radius:20px}
+.phase-num{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.phase-title{font-size:22px;font-weight:700;margin-bottom:12px}
+
+/* Step items */
+.step-item{display:flex;align-items:flex-start;gap:10px;margin:8px 0}
+.step-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.step-text{font-size:15px;color:var(--g800);line-height:1.5}
+
+/* Landmark chain */
+.landmark-chain{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:12px}
+.landmark{padding:8px 16px;border-radius:12px;font-size:14px;font-weight:600;white-space:nowrap}
+.chain-arrow{color:var(--g600);font-size:18px;margin:0 4px}
+
+/* Post-processing cards */
+.post-card{padding:14px 20px;border-radius:14px;display:flex;align-items:center;gap:12px}
+.post-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:28px">
+    <div class="section-tag">Route Planning Architecture</div>
+    <h2>The Spine &amp; Sprout Algorithm</h2>
+    <h3>Deterministic 26.2-mile marathon route generation from raw GeoJSON</h3>
+  </div>
+
+  <div class="row" style="flex:1;margin-top:24px">
+    <!-- Left: Two phase visual -->
+    <div style="flex:5;display:flex;flex-direction:column;gap:20px">
+
+      <!-- Phase 1 -->
+      <div class="glass glass-blue phase-card" style="flex:1">
+        <div class="phase-num" style="color:var(--blue)">Phase 1</div>
+        <div class="phase-title" style="color:var(--blue)">The Dijkstra Spine</div>
+
+        <div class="row" style="gap:24px;align-items:flex-start">
+          <div style="flex:1">
+            <div class="step-item">
+              <div class="step-dot" style="background:var(--blue)"></div>
+              <div class="step-text"><strong>Graph construction</strong> — Load GeoJSON <code>LineString</code> features into adjacency list</div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot" style="background:var(--blue)"></div>
+              <div class="step-text"><strong>Haversine weights</strong> — Real geographic distance per edge from [lon, lat] coords</div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot" style="background:var(--blue)"></div>
+              <div class="step-text"><strong>Sequential Dijkstra</strong> — Shortest non-overlapping path through all landmarks</div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">Landmark Sequence</div>
+            <div class="landmark-chain">
+              <div class="landmark" style="background:rgba(66,133,244,0.12);color:var(--blue)">🏷️ Las Vegas Sign</div>
+              <span class="chain-arrow">→</span>
+              <div class="landmark" style="background:rgba(66,133,244,0.12);color:var(--blue)">🏟️ Allegiant Stadium</div>
+              <span class="chain-arrow">→</span>
+              <div class="landmark" style="background:rgba(66,133,244,0.12);color:var(--blue)">🔮 The Sphere</div>
+              <span class="chain-arrow">→</span>
+              <div class="landmark" style="background:rgba(66,133,244,0.10);color:var(--blue)">…</div>
+            </div>
+
+            <!-- SVG spine illustration -->
+            <svg width="100%" height="80" viewBox="0 0 500 80" style="margin-top:12px">
+              <path d="M20,60 C80,60 100,20 160,20 S240,60 300,60 S380,20 460,20" stroke="#4285F4" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <circle cx="20" cy="60" r="6" fill="#4285F4"/>
+              <circle cx="160" cy="20" r="6" fill="#4285F4"/>
+              <circle cx="300" cy="60" r="6" fill="#4285F4"/>
+              <circle cx="460" cy="20" r="6" fill="#4285F4"/>
+              <text x="20" y="78" text-anchor="middle" font-family="Google Sans" font-size="10" fill="#5F6368">Start</text>
+              <text x="460" y="16" text-anchor="middle" font-family="Google Sans" font-size="10" fill="#5F6368">Spine end</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="glass glass-green phase-card" style="flex:1">
+        <div class="phase-num" style="color:var(--green)">Phase 2</div>
+        <div class="phase-title" style="color:var(--green)">The Bounded DFS Sprout</div>
+
+        <div class="row" style="gap:24px;align-items:flex-start">
+          <div style="flex:1">
+            <div class="step-item">
+              <div class="step-dot" style="background:var(--green)"></div>
+              <div class="step-text"><strong>Guided heuristic</strong> — Prioritize nodes with most unvisited neighbors (avoid cul-de-sacs)</div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot" style="background:var(--green)"></div>
+              <div class="step-text"><strong>Deterministic tie-breaking</strong> — Sort by segment distance → then by exact coordinates</div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot" style="background:var(--green)"></div>
+              <div class="step-text"><strong>Exact interpolation</strong> — <code>remaining / segment_length</code> → interpolated [lon, lat] → exactly 26.2188 mi</div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <!-- SVG sprout illustration -->
+            <svg width="100%" height="120" viewBox="0 0 500 120" style="margin-top:0">
+              <!-- Spine (faded) -->
+              <path d="M20,80 C80,80 100,40 160,40 S240,80 300,80" stroke="#4285F4" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.3"/>
+              <!-- Sprout -->
+              <path d="M300,80 C330,80 340,50 370,30 S410,60 440,40 L470,55" stroke="#34A853" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <!-- Interpolation point -->
+              <circle cx="470" cy="55" r="7" fill="none" stroke="#EA4335" stroke-width="2.5"/>
+              <circle cx="470" cy="55" r="3" fill="#EA4335"/>
+              <text x="470" y="75" text-anchor="middle" font-family="Google Sans" font-size="11" fill="#EA4335" font-weight="600">26.2188 mi</text>
+              <!-- Nodes -->
+              <circle cx="20" cy="80" r="5" fill="#4285F4" opacity="0.4"/>
+              <circle cx="160" cy="40" r="5" fill="#4285F4" opacity="0.4"/>
+              <circle cx="300" cy="80" r="6" fill="#34A853"/>
+              <circle cx="370" cy="30" r="4" fill="#34A853"/>
+              <circle cx="440" cy="40" r="4" fill="#34A853"/>
+              <text x="300" y="100" text-anchor="middle" font-family="Google Sans" font-size="10" fill="#34A853" font-weight="500">Spine end → Sprout start</text>
+            </svg>
+
+            <div class="glass" style="padding:12px 16px;margin-top:8px;display:flex;gap:12px;align-items:center">
+              <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:12px">✓ Deterministic</span>
+              <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:12px">✓ Regression-tested</span>
+              <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:12px">✓ Zero LLM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post-processing -->
+      <div style="display:flex;gap:16px">
+        <div class="glass glass-yellow post-card" style="flex:1">
+          <div class="post-icon" style="background:rgba(251,188,4,0.15)">🚰</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#E37400">Water Stations</div>
+            <div style="font-size:13px;color:var(--g600)">Every ~1.86 mi via interpolation along full path</div>
+          </div>
+        </div>
+        <div class="glass glass-red post-card" style="flex:1">
+          <div class="post-icon" style="background:rgba(234,67,53,0.12)">🏥</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:var(--red)">Medical Tents</div>
+            <div style="font-size:13px;color:var(--g600)">Halfway (13.1 mi) + finish line</div>
+          </div>
+        </div>
+        <div class="glass post-card" style="flex:1;background:var(--g50)">
+          <div class="post-icon" style="background:var(--g200)">🛣️</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:var(--g800)">Road Segments</div>
+            <div style="font-size:13px;color:var(--g600)">Split by contiguous road name</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Code location -->
+    <div style="flex:2;display:flex;flex-direction:column;gap:14px;padding-top:0">
+      <div class="glass" style="padding:20px 24px;background:var(--g50)">
+        <div style="font-weight:700;font-size:16px;margin-bottom:10px;color:var(--g800)">Why Not an LLM?</div>
+        <div style="font-size:14px;color:var(--g600);line-height:1.7">
+          This is a <strong>graph theory problem</strong>, not a natural language problem.
+          <br><br>
+          ✗ Google Maps driving/walking directions can't handle closed roads or GeoJSON constraints
+          <br><br>
+          ✗ Naive DFS gets trapped in cul-de-sacs
+          <br><br>
+          ✗ LLMs can't guarantee exactly 26.2188 miles
+        </div>
+      </div>
+
+      <div class="glass glass-blue" style="padding:18px 24px">
+        <div style="font-weight:700;color:var(--blue);font-size:15px;margin-bottom:8px">Algorithm Pipeline</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">1</div>
+            <div style="font-size:14px">Load GeoJSON → adjacency graph</div>
+          </div>
+          <div style="width:2px;height:8px;background:var(--g200);margin-left:11px"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">2</div>
+            <div style="font-size:14px">Dijkstra through landmarks</div>
+          </div>
+          <div style="width:2px;height:8px;background:var(--g200);margin-left:11px"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">3</div>
+            <div style="font-size:14px">Bounded DFS with degree heuristic</div>
+          </div>
+          <div style="width:2px;height:8px;background:var(--g200);margin-left:11px"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--red);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">4</div>
+            <div style="font-size:14px">Interpolate to exactly 26.2188 mi</div>
+          </div>
+          <div style="width:2px;height:8px;background:var(--g200);margin-left:11px"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--yellow);color:var(--g800);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">5</div>
+            <div style="font-size:14px">Add water stations + medical tents</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass" style="padding:14px 20px;background:var(--g50)">
+        <div style="font-size:12px;font-family:var(--mono);color:var(--g600);line-height:1.6">
+          <strong>Code:</strong> agents/planner/skills/<br>gis-spatial-engineering/scripts/tools.py
+          <br><br>
+          <strong>Tests:</strong> agents/tests/<br>test_planner_route_skill.py
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="credit">Race Condition · Route Planning</div>
+</div>
+</body>
+</html>

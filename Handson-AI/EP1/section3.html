@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Marathon Agent Deep Dive — Section 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.sn{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:23px;color:var(--g800);padding:10px 0 10px 32px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:18px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dr::before{background:var(--red)!important}.dg::before{background:var(--green)!important}.dy::before{background:var(--yellow)!important}
+.gl{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.gl::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.gb{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.gg{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.gr{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.gy{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;font-size:21px;margin-top:12px}
+th{background:var(--blue);color:white;text-align:left;padding:14px 20px;font-weight:500}
+td{padding:12px 20px;border-bottom:1px solid var(--g200);background:var(--white)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--g50)}
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:28px;font-family:var(--mono);font-size:18px;line-height:1.6;overflow:hidden;margin-top:12px}
+code{font-family:var(--mono);font-size:18px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+.quote{border-left:4px solid var(--blue);padding:20px 28px;background:var(--g50);border-radius:0 12px 12px 0;font-size:24px;font-style:italic;color:var(--g800);margin:16px 0;line-height:1.5}
+.ds{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.ds h1{color:white;font-size:52px}.ds p{color:rgba(255,255,255,0.85);font-size:28px}.ds .tag{color:rgba(255,255,255,0.7)}
+.nh{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+.da{display:flex;flex-direction:column;align-items:center;padding:2px 0}
+.da .ln{width:2px;height:20px;background:var(--g600)}
+.da .hd{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--g600)}
+.da-l{font-size:14px;color:var(--g600);margin:2px 0}
+</style>
+</head>
+<body>
+<div class="nh">← → Arrow keys · Slide <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck">
+
+<!-- SECTION 3 DIVIDER -->
+<div class="slide ds active">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="tag">SECTION 3 · 26:00 – 38:00</div>
+    <h1 style="font-size:52px;margin-bottom:24px">Scaling to 1,000<br>Simultaneous Sessions</h1>
+    <p>Bottleneck hunting, session storage, and broadcast architecture</p>
+  </div>
+  <div class="sn" style="color:rgba(255,255,255,0.4)">3</div>
+</div>
+
+<!-- 3-A: Scaling Challenge -->
+<div class="slide">
+  <div class="tag">SECTION 3 · SCALING</div>
+  <h2>The Scaling Challenge</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div class="gl gb" style="flex:1">
+      <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:16px">What "1,000 runners" actually means</div>
+      <ul style="margin:0">
+        <li style="font-size:21px;padding:8px 0 8px 28px">1,000 independent ADK sessions — each with its own state</li>
+        <li style="font-size:21px;padding:8px 0 8px 28px">Each runner: receives tick → <code>process_tick</code> → writes to Redis</li>
+        <li style="font-size:21px;padding:8px 0 8px 28px">All 1,000 must complete before clock advances</li>
+        <li style="font-size:21px;padding:8px 0 8px 28px">Cloud Run: stateless, session state must be external</li>
+      </ul>
+    </div>
+    <div class="gl gr" style="flex:1">
+      <div style="font-weight:700;color:var(--red);font-size:22px;margin-bottom:16px">Why this is hard</div>
+      <ul style="margin:0">
+        <li class="dr" style="font-size:21px;padding:8px 0 8px 28px">Session reads/writes every tick → latency compounds</li>
+        <li class="dr" style="font-size:21px;padding:8px 0 8px 28px">1,000 WebSocket frames → thundering herd</li>
+        <li class="dr" style="font-size:21px;padding:8px 0 8px 28px">Agent communication → N×M fan-out if not batched</li>
+      </ul>
+    </div>
+  </div>
+  <div class="sn">3-A</div>
+</div>
+
+<!-- 3-B: Session Storage -->
+<div class="slide">
+  <div class="tag">SECTION 3 · SCALING</div>
+  <h2>Bottleneck #1 — Session Storage</h2>
+  <table style="font-size:22px">
+    <tr><th>Session store</th><th style="width:100px">Verdict</th><th>Why</th></tr>
+    <tr><td>SQLite (ADK default)</td><td>❌</td><td>File locking thrashes under concurrent agents</td></tr>
+    <tr><td><code>InMemorySessionService</code></td><td>❌</td><td>No cross-process sharing</td></tr>
+    <tr><td><code>VertexAiSessionService</code></td><td>❌</td><td>~200 ms/call round-trip</td></tr>
+    <tr><td>AlloyDB / PostgreSQL</td><td>❌</td><td>Connection overhead + row locking</td></tr>
+    <tr><td style="font-weight:700">Redis (Memorystore)</td><td>✅</td><td style="font-weight:700">Sub-millisecond, shared across processes</td></tr>
+  </table>
+  <div class="gl gg" style="margin-top:24px;padding:20px 28px">
+    <div style="font-weight:700;color:var(--green);font-size:20px;margin-bottom:8px">The fix: <code>PrunedRedisSessionService</code></div>
+    <p style="font-size:20px;margin:0">Wraps community <code>RedisSessionService</code> with event pruning — without pruning, session blob grows ~4 events/tick → progressive degradation at 1,000 runners.</p>
+  </div>
+  <div class="sn">3-B</div>
+</div>
+
+<!-- 3-C: Community -->
+<div class="slide">
+  <div class="tag">SECTION 3 · SCALING</div>
+  <h2>Community Contribution Shoutout</h2>
+  <div class="row" style="flex:1;margin-top:16px">
+    <div style="flex:1">
+      <div class="gl gb" style="margin-bottom:24px">
+        <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:16px">ADK doesn't ship a Redis session store natively.</div>
+        <p style="font-size:21px;margin:0">A community member contributed <code>RedisSessionService</code> to the <strong>ADK community repo</strong>.</p>
+      </div>
+      <pre style="font-size:20px"><span class="cm"># pyproject.toml</span>
+<span class="str">"google-adk-community>=0.4.1"</span></pre>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div class="quote" style="font-size:26px;border-left-color:var(--green)">We pulled it in directly. Real open-source moment: someone saw the gap, filled it, and it unblocked the keynote demo.</div>
+      <div class="gl gg" style="margin-top:20px;padding:20px 28px">
+        <div style="font-weight:700;color:var(--green);font-size:18px;margin-bottom:8px"><code>agents/utils/pruned_session_service.py</code></div>
+        <ul style="margin:0">
+          <li class="dg" style="font-size:19px;padding:6px 0 6px 24px">Wraps community <code>RedisSessionService</code></li>
+          <li class="dg" style="font-size:19px;padding:6px 0 6px 24px">Adds event pruning to cap blob growth</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="sn">3-C</div>
+</div>
+
+<!-- 3-D: Agent Communication -->
+<div class="slide">
+  <div class="tag">SECTION 3 · SCALING</div>
+  <h2>Bottleneck #2 — Agent Communication</h2>
+  <h3>HTTP is too slow for 1,000 tick-synchronized agents</h3>
+  <div class="row" style="flex:1">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+      <div class="gl gb" style="padding:18px 32px;min-width:360px;text-align:center;font-weight:700;font-size:20px;color:var(--blue)">Gateway ── publish ──▶</div>
+      <div class="da"><div class="ln" style="height:24px"></div><div class="hd"></div></div>
+      <div class="gl gy" style="padding:14px 28px;min-width:360px;text-align:center;font-weight:500;font-size:18px">simulation:broadcast</div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <div class="da" style="padding:0 40px"><div class="ln"></div><div class="hd"></div></div>
+        <div class="da" style="padding:0 40px"><div class="ln"></div><div class="hd"></div></div>
+        <div class="da" style="padding:0 40px"><div class="ln"></div><div class="hd"></div></div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:4px">
+        <div class="gl gg" style="padding:12px 20px;font-size:16px;text-align:center"><strong>runner:1</strong></div>
+        <div class="gl gg" style="padding:12px 20px;font-size:16px;text-align:center"><strong>runner:2</strong></div>
+        <div class="gl gg" style="padding:12px 20px;font-size:16px;text-align:center"><strong>runner:N</strong></div>
+      </div>
+    </div>
+    <div style="flex:1">
+      <ul>
+        <li>Runners hold a <strong>long-lived Redis subscription</strong></li>
+        <li class="dg">Pulse arrives with <strong>sub-millisecond latency</strong> simultaneously</li>
+        <li class="dy">Gateway still sends HTTP poke as <strong>cold-start fallback</strong></li>
+        <li class="dr">Dispatcher <strong>de-duplicates</strong> inside each runner process</li>
+      </ul>
+      <div class="gl" style="margin-top:20px;padding:16px 24px">
+        <p style="font-size:18px;margin:0"><strong>Dual-poke design</strong>: Redis gives speed to warm instances. HTTP gives correctness to cold-start ones. You get both.</p>
+      </div>
+    </div>
+  </div>
+  <div class="sn">3-D</div>
+</div>
+
+<!-- 3-E: Architecture Summary -->
+<div class="slide">
+  <div class="tag">SECTION 3 · SCALING</div>
+  <h2>Scaling Architecture Summary</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="display:flex;flex-direction:column;gap:16px;flex:1">
+      <div class="gl gb" style="padding:20px 28px">
+        <div style="font-weight:700;color:var(--blue);font-size:18px;margin-bottom:8px">Cloud Run (callable agents)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="pill" style="font-size:15px">planner</span>
+          <span class="pill" style="font-size:15px">simulator</span>
+          <span class="pill" style="font-size:15px">runner_autopilot</span>
+          <span class="pill" style="font-size:15px">runner_cloudrun</span>
+        </div>
+      </div>
+      <div class="gl gg" style="padding:20px 28px">
+        <div style="font-weight:700;color:var(--green);font-size:18px;margin-bottom:8px">GKE (LLM runner pool)</div>
+        <span class="pill" style="font-size:15px">runner_gke (HPA 20–200 pods)</span>
+      </div>
+      <div class="gl gr" style="padding:20px 28px">
+        <div style="font-weight:700;color:var(--red);font-size:18px;margin-bottom:8px">Memorystore (Redis)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="pill" style="font-size:15px">session store</span>
+          <span class="pill" style="font-size:15px">pub/sub broadcast</span>
+          <span class="pill" style="font-size:15px">simulation registry</span>
+        </div>
+      </div>
+      <div class="gl gy" style="padding:20px 28px">
+        <div style="font-weight:700;color:#E37400;font-size:18px;margin-bottom:8px">Go Gateway</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="pill" style="font-size:15px">WebSocket hub</span>
+          <span class="pill" style="font-size:15px">broadcast batching</span>
+          <span class="pill" style="font-size:15px">session routing</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div class="gl" style="margin-bottom:20px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:12px">Broadcast Batching</div>
+        <p style="font-size:20px;margin:0">Gateway coalesces <strong>1,000 runner updates → 1 WebSocket frame</strong> per tick</p>
+        <p style="font-size:18px;margin-top:8px;color:var(--g600)">Without batching: 1,000 frames/tick → frontend frame-rate collapse</p>
+      </div>
+      <table style="font-size:19px">
+        <tr><th>Layer</th><th>Stage</th><th>Latency</th></tr>
+        <tr><td>Edge</td><td>Redis trigger</td><td>&lt; 2 ms</td></tr>
+        <tr><td>Logic</td><td>ADK context</td><td>10–50 ms</td></tr>
+        <tr><td>AI</td><td>Flash-Lite TTFT</td><td>400–800 ms</td></tr>
+        <tr><td>Stream</td><td>Redis→WS→UI</td><td>&lt; 100 ms</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="sn">3-E</div>
+</div>
+
+</div>
+<script>
+const s=document.querySelectorAll('.slide');document.getElementById('tot').textContent=s.length;let i=0;
+function go(n){s[i].classList.remove('active');i=Math.max(0,Math.min(n,s.length-1));s[i].classList.add('active');document.getElementById('cur').textContent=i+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(i+1);if(e.key==='ArrowLeft')go(i-1)});
+</script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Agent Architecture — Race Condition</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:56px 80px 40px;background:var(--white)}
+.slide.active{display:flex}
+
+.g-bar{display:flex;gap:0;height:6px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.07);border:1px solid rgba(66,133,244,0.18)}
+.glass-green{background:rgba(52,168,83,0.07);border:1px solid rgba(52,168,83,0.18)}
+.glass-red{background:rgba(234,67,53,0.06);border:1px solid rgba(234,67,53,0.14)}
+.glass-yellow{background:rgba(251,188,4,0.07);border:1px solid rgba(251,188,4,0.18)}
+.glass-purple{background:rgba(171,71,188,0.06);border:1px solid rgba(171,71,188,0.16)}
+
+.section-tag{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+h1{font-size:44px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:8px}
+h2{font-size:38px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:8px}
+h3{font-size:22px;font-weight:400;color:var(--g600)}
+.pill{display:inline-block;padding:5px 14px;border-radius:16px;font-size:13px;font-weight:500}
+
+.row{display:flex;gap:28px;align-items:flex-start}
+.connector{display:flex;flex-direction:column;align-items:center;padding:4px 0}
+.connector .line{width:2px;height:18px;background:var(--g600);opacity:0.4}
+.connector .head{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--g600);opacity:0.4}
+.connector .clabel{font-size:11px;color:var(--g600);margin:2px 0}
+
+.node{padding:16px 24px;border-radius:16px;font-size:15px;font-weight:500;text-align:center}
+.node .sub{font-size:12px;font-weight:400;color:var(--g600);margin-top:3px}
+
+.credit{position:absolute;bottom:28px;right:56px;font-size:13px;color:var(--g600);font-weight:500}
+.slide-num{position:absolute;bottom:28px;right:56px;font-size:14px;color:var(--g600);font-weight:500}
+
+/* Nav */
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp 0.5s ease-out both}
+
+/* Step numbering */
+.step{display:flex;align-items:center;gap:10px;margin:6px 0}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0}
+.step-text{font-size:16px;color:var(--g800)}
+
+/* Mode badge */
+.mode-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:12px;font-size:13px;font-weight:600}
+
+/* Horizontal arrow */
+.h-arrow{display:flex;align-items:center;gap:0}
+.h-arrow .shaft{height:2px;width:40px;background:var(--g600);opacity:0.4}
+.h-arrow .tip{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid var(--g600);opacity:0.4}
+.h-arrow .alabel{font-size:11px;color:var(--g600);margin:0 8px}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span> / <span id="tot"></span></div>
+<div class="deck">
+
+<!-- SLIDE 1: A2A Network Topology -->
+<div class="slide active" data-id="1">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:28px">
+    <div class="section-tag">Agent Architecture</div>
+    <h2>A2A Network Topology</h2>
+    <h3>Dual dispatch: Redis pub/sub for hot agents, HTTP poke for cold agents</h3>
+  </div>
+
+  <div class="row" style="flex:1;margin-top:28px">
+    <!-- Left: Diagram -->
+    <div style="flex:3;display:flex;flex-direction:column;align-items:center;gap:0">
+
+      <!-- Client -->
+      <div class="glass glass-blue node anim" style="width:420px;padding:18px 28px">
+        <div style="font-weight:700;color:var(--blue);font-size:18px">Tester UI</div>
+        <div class="sub">web/tester</div>
+      </div>
+
+      <div class="connector"><div class="clabel">HTTP POST /api/v1/sessions</div><div class="line"></div><div class="head"></div></div>
+
+      <!-- Gateway -->
+      <div class="glass glass-green node anim" style="width:420px;padding:18px 28px;animation-delay:0.1s">
+        <div style="font-weight:700;color:var(--green);font-size:18px">Gateway</div>
+        <div class="sub">Port 9101</div>
+      </div>
+
+      <!-- Two paths branch -->
+      <div style="display:flex;gap:80px;margin-top:8px;align-items:flex-start">
+
+        <!-- Redis path -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+          <div class="connector"><div class="clabel">1. publish event</div><div class="line"></div><div class="head"></div></div>
+          <div class="glass glass-purple node anim" style="animation-delay:0.15s;min-width:220px">
+            <div style="font-weight:700;color:#7B1FA2;font-size:16px">Redis</div>
+            <div class="sub">simulation:orchestration</div>
+          </div>
+          <div class="connector"><div class="clabel">3. trigger</div><div class="line"></div><div class="head"></div></div>
+          <div class="glass glass-yellow node anim" style="animation-delay:0.25s;min-width:220px">
+            <div style="font-weight:600;color:#E37400;font-size:16px">Background Redis<br>Dispatcher</div>
+          </div>
+          <div class="connector"><div class="clabel">4. invoke agent</div><div class="line"></div><div class="head"></div></div>
+          <div class="glass glass-yellow node anim" style="animation-delay:0.35s;min-width:220px">
+            <div style="font-weight:600;color:#E37400;font-size:16px">ADK Runner</div>
+          </div>
+        </div>
+
+        <!-- Registry path -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+          <div class="connector"><div class="clabel">2. track session</div><div class="line"></div><div class="head"></div></div>
+          <div class="glass glass-purple node anim" style="animation-delay:0.2s;min-width:220px">
+            <div style="font-weight:700;color:#7B1FA2;font-size:16px">Session Registry</div>
+            <div class="sub">Distributed state</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Explanation -->
+    <div style="flex:2;display:flex;flex-direction:column;gap:16px;padding-top:20px">
+
+      <div class="glass glass-green" style="padding:20px 24px">
+        <div style="font-weight:700;color:var(--green);font-size:16px;margin-bottom:12px">Subscriber Mode</div>
+        <div class="mode-badge" style="background:rgba(52,168,83,0.1);color:var(--green);margin-bottom:8px">⚡ DISPATCH_MODE=subscriber</div>
+        <div style="font-size:15px;color:var(--g800);line-height:1.6">
+          <strong>runner</strong>, <strong>runner_autopilot</strong><br>
+          Long-lived Redis subscription on <code style="font-size:13px;background:var(--g100);padding:2px 6px;border-radius:4px">simulation:broadcast</code><br>
+          Sub-millisecond latency
+        </div>
+      </div>
+
+      <div class="glass glass-blue" style="padding:20px 24px">
+        <div style="font-weight:700;color:var(--blue);font-size:16px;margin-bottom:12px">Callable Mode</div>
+        <div class="mode-badge" style="background:rgba(66,133,244,0.1);color:var(--blue);margin-bottom:8px">📡 DISPATCH_MODE=callable</div>
+        <div style="font-size:15px;color:var(--g800);line-height:1.6">
+          Every other agent<br>
+          HTTP poke on <code style="font-size:13px;background:var(--g100);padding:2px 6px;border-radius:4px">/orchestration</code> endpoint<br>
+          Supports Cloud Run scale-to-zero
+        </div>
+      </div>
+
+      <div class="glass glass-red" style="padding:16px 24px">
+        <div style="font-weight:700;color:var(--red);font-size:15px;margin-bottom:8px">De-duplication</div>
+        <div style="font-size:14px;color:var(--g600);line-height:1.6">
+          Subscribers receive events <strong>twice</strong> (Redis + HTTP).<br>
+          The dispatcher de-duplicates inside the agent process.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">1 · A2A Topology</div>
+</div>
+
+
+<!-- SLIDE 2: Telemetry Streaming Flow -->
+<div class="slide" data-id="2">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:28px">
+    <div class="section-tag">Agent Architecture</div>
+    <h2>Telemetry Streaming Flow</h2>
+    <h3>RedisDashLogPlugin captures lifecycle events without polluting agent code</h3>
+  </div>
+
+  <div class="row" style="flex:1;margin-top:32px">
+    <!-- Left: Flow Diagram -->
+    <div style="flex:3;display:flex;flex-direction:column;align-items:center;gap:0">
+
+      <!-- ADK Agent -->
+      <div class="glass glass-blue node anim" style="width:500px;padding:24px 36px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px">ADK Agent Run</div>
+        <div class="sub">agent_start · tool_start · model_end</div>
+      </div>
+
+      <div class="connector"><div class="clabel">event fires</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+
+      <!-- Plugin -->
+      <div class="glass glass-red node anim" style="width:500px;padding:24px 36px;animation-delay:0.1s">
+        <div style="font-weight:700;color:var(--red);font-size:20px">RedisDashLogPlugin</div>
+        <div class="sub">ADK lifecycle callbacks</div>
+      </div>
+
+      <!-- Branch to two outputs -->
+      <div style="display:flex;gap:100px;margin-top:8px">
+        <!-- Live path -->
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="connector"><div class="clabel">live UI path</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+          <div class="glass glass-purple node anim" style="animation-delay:0.2s;min-width:200px;padding:20px 28px">
+            <div style="font-weight:700;color:#7B1FA2;font-size:18px">Redis</div>
+            <div class="sub">gateway:broadcast</div>
+          </div>
+          <div class="connector"><div class="clabel">subscription stream</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+          <div class="glass glass-blue node anim" style="animation-delay:0.3s;min-width:200px;padding:20px 28px">
+            <div style="font-weight:700;color:var(--blue);font-size:18px">Web Dashboard</div>
+            <div class="sub">Live telemetry UI</div>
+          </div>
+        </div>
+
+        <!-- Debug path -->
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="connector"><div class="clabel">debug log path</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+          <div class="glass glass-purple node anim" style="animation-delay:0.25s;min-width:200px;padding:20px 28px">
+            <div style="font-weight:700;color:#7B1FA2;font-size:18px">Pub/Sub</div>
+            <div class="sub">debug topic</div>
+          </div>
+          <div class="connector"><div class="clabel">offline analysis</div><div class="line" style="height:24px"></div><div class="head"></div></div>
+          <div class="glass node anim" style="animation-delay:0.35s;min-width:200px;padding:20px 28px;background:rgba(0,0,0,0.02)">
+            <div style="font-weight:600;color:var(--g600);font-size:16px">Audit Log /<br>Offline Tools</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Plugin lifecycle -->
+    <div style="flex:2;display:flex;flex-direction:column;gap:14px;padding-top:16px">
+      <div style="font-weight:700;color:var(--g800);font-size:18px;margin-bottom:4px">Plugin Lifecycle</div>
+
+      <div class="step">
+        <div class="step-num" style="background:var(--blue)">1</div>
+        <div>
+          <div style="font-weight:700;font-size:15px">Intercept</div>
+          <div style="font-size:14px;color:var(--g600)">Hooks into ADK callbacks:<br><code style="font-size:12px;background:var(--g100);padding:2px 6px;border-radius:4px">agent_start, tool_start, model_end</code></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num" style="background:var(--green)">2</div>
+        <div>
+          <div style="font-weight:700;font-size:15px">Enrich</div>
+          <div style="font-size:14px;color:var(--g600)">Attaches <code style="font-size:12px;background:var(--g100);padding:2px 6px;border-radius:4px">session_id</code> + <code style="font-size:12px;background:var(--g100);padding:2px 6px;border-radius:4px">invocation_id</code><br>to every payload</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num" style="background:var(--yellow);color:var(--g800)">3</div>
+        <div>
+          <div style="font-weight:700;font-size:15px">Dual Emit</div>
+          <div style="font-size:14px;color:var(--g600)">Async publish to Redis (live UI)<br>+ Pub/Sub (debug topic)</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num" style="background:var(--red)">4</div>
+        <div>
+          <div style="font-weight:700;font-size:15px">Display</div>
+          <div style="font-size:14px;color:var(--g600)">Dashboard subscribes via WebSocket,<br>orders events by <code style="font-size:12px;background:var(--g100);padding:2px 6px;border-radius:4px">invocation_id</code></div>
+        </div>
+      </div>
+
+      <div class="glass" style="padding:14px 20px;margin-top:8px">
+        <div style="font-size:13px;font-family:var(--mono);color:var(--g600)">agents/utils/plugins.py:RedisDashLogPlugin</div>
+      </div>
+
+      <!-- Latency Budget -->
+      <div class="glass glass-green" style="padding:16px 20px;margin-top:4px">
+        <div style="font-weight:700;color:var(--green);font-size:14px;margin-bottom:8px">Latency Budget (per tick)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px">
+          <div style="color:var(--g600)">Redis dispatcher</div><div style="font-weight:600">< 2 ms</div>
+          <div style="color:var(--g600)">Context assembly</div><div style="font-weight:600">10–50 ms</div>
+          <div style="color:var(--g600)">Vertex Flash-Lite TTFT</div><div style="font-weight:600;color:var(--red)">400–800 ms</div>
+          <div style="color:var(--g600)">Redis → WS → UI</div><div style="font-weight:600">< 100 ms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">2 · Telemetry Flow</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>

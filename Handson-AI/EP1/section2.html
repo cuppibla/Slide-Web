@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Marathon Agent Deep Dive — Section 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:28px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:24px;color:var(--g800);padding:10px 0;padding-left:32px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:18px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dot-red::before{background:var(--red)!important}
+.dot-green::before{background:var(--green)!important}
+.dot-yellow::before{background:var(--yellow)!important}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;font-size:22px;margin-top:12px}
+th{background:var(--blue);color:white;text-align:left;padding:14px 20px;font-weight:500}
+td{padding:12px 20px;border-bottom:1px solid var(--g200);background:var(--white)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--g50)}
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:28px;font-family:var(--mono);font-size:19px;line-height:1.6;overflow:hidden;margin-top:12px}
+code{font-family:var(--mono);font-size:19px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}.fn{color:#F28B82}.op{color:#FDD663}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+.d-node{padding:14px 24px;border-radius:16px;font-size:20px;font-weight:500;text-align:center}
+.d-arrow{display:flex;flex-direction:column;align-items:center;padding:2px 0}
+.d-arrow .line{width:2px;height:20px;background:var(--g600)}
+.d-arrow .head{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--g600)}
+.d-arrow-label{font-size:14px;color:var(--g600);margin:2px 0}
+.quote{border-left:4px solid var(--blue);padding:20px 28px;background:var(--g50);border-radius:0 12px 12px 0;font-size:24px;font-style:italic;color:var(--g800);margin:16px 0;line-height:1.5}
+.divider-slide{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.divider-slide h1{color:white;font-size:52px}
+.divider-slide p{color:rgba(255,255,255,0.85);font-size:28px}
+.divider-slide .section-tag{color:rgba(255,255,255,0.7)}
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck">
+
+<!-- SECTION 2 DIVIDER -->
+<div class="slide divider-slide active" data-id="S2">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">SECTION 2 · 14:00 – 26:00</div>
+    <h1>The Juicy Part —<br>LLM vs Deterministic Code</h1>
+    <p>Where to reach for the model, and where to write code</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">2</div>
+</div>
+
+<!-- SLIDE 2-A: Las Vegas Problem -->
+<div class="slide" data-id="2A">
+  <div class="section-tag">SECTION 2 · LLM VS CODE</div>
+  <h2>The Las Vegas Problem</h2>
+  <h3 style="font-size:26px">Why you can't just call Google Maps</h3>
+  <div class="row" style="flex:1">
+    <div style="flex:1">
+      <ul>
+        <li class="dot-red">Route must use <strong>approved city streets only</strong><br><span style="font-size:20px;color:var(--g600)">GeoJSON from city permit — no arbitrary paths</span></li>
+        <li class="dot-red"><strong>Driving directions</strong>: blocked<br><span style="font-size:20px;color:var(--g600)">One-way rules don't apply when roads are closed</span></li>
+        <li class="dot-red"><strong>Walking directions</strong>: blocked<br><span style="font-size:20px;color:var(--g600)">Routes through buildings, wrong surface type</span></li>
+      </ul>
+    </div>
+    <div style="flex:1;display:flex;align-items:center">
+      <div class="glass glass-blue" style="width:100%">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">The Constraint</div>
+        <div class="quote" style="margin:0;border-left-color:var(--blue);background:rgba(66,133,244,0.06)">
+          Generate a valid 26.2188-mile loop over the Las Vegas road network from raw GeoJSON.
+        </div>
+        <p style="font-size:18px;margin-top:16px;color:var(--g600)">This is a <strong>graph theory problem</strong>, not a directions API problem.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">2-A</div>
+</div>
+
+<!-- SLIDE 2-B: Spine and Sprout -->
+<div class="slide" data-id="2B">
+  <div class="section-tag">SECTION 2 · LLM VS CODE</div>
+  <h2>The Spine and Sprout Algorithm</h2>
+  <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:16px">agents/planner/skills/gis-spatial-engineering/scripts/tools.py</p>
+  <div class="row" style="flex:1">
+    <div class="glass glass-blue" style="flex:1">
+      <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:16px">Phase 1 — Dijkstra Spine</div>
+      <ul style="margin:0">
+        <li style="font-size:21px;padding:8px 0;padding-left:28px">Build adjacency graph from GeoJSON <code>LineString</code> features</li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px">Haversine-weighted edges (real geographic distance)</li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px">Dijkstra: Las Vegas Sign → Stadium → Sphere → …</li>
+      </ul>
+    </div>
+    <div class="glass glass-green" style="flex:1">
+      <div style="font-weight:700;color:var(--green);font-size:22px;margin-bottom:16px">Phase 2 — Bounded DFS Sprout</div>
+      <ul style="margin:0">
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Extend from spine endpoint until 26.2188 mi</li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Degree heuristic: prefer connected nodes</li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Tie-break: by distance, then coordinates</li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Linear interpolation → <strong>exactly</strong> 26.2188 mi</li>
+      </ul>
+    </div>
+  </div>
+  <div class="glass" style="margin-top:20px;padding:16px 28px;display:flex;align-items:center;gap:16px">
+    <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">✓ Fully deterministic</span>
+    <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">✓ Regression-tested</span>
+    <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">✓ Zero LLM involvement</span>
+  </div>
+  <div class="slide-num">2-B</div>
+</div>
+
+<!-- SLIDE 2-C: Decision Framework -->
+<div class="slide" data-id="2C">
+  <div class="section-tag">SECTION 2 · LLM VS CODE</div>
+  <h2>LLM vs Code Decision Framework</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div class="glass glass-blue" style="flex:1">
+      <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:16px">When to reach for an LLM</div>
+      <ul style="margin:0">
+        <li style="font-size:21px;padding:8px 0;padding-left:28px">Open-ended synthesis:<br><span style="color:var(--g600);font-size:18px">"Write a race narrative"</span></li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px">Multi-preference constraint satisfaction:<br><span style="color:var(--g600);font-size:18px">"Balance safety, community, and revenue"</span></li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px">Adaptive response to novel inputs</li>
+      </ul>
+    </div>
+    <div class="glass glass-green" style="flex:1">
+      <div style="font-weight:700;color:var(--green);font-size:22px;margin-bottom:16px">When to write deterministic code</div>
+      <ul style="margin:0">
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Mathematical precision required<br><span style="color:var(--g600);font-size:18px">26.2188 mi exactly</span></li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Fixed tool-call sequences<br><span style="color:var(--g600);font-size:18px">spawn → collect → fire</span></li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Speed + cost at scale<br><span style="color:var(--g600);font-size:18px">1,000 × N calls = $$$</span></li>
+        <li style="font-size:21px;padding:8px 0;padding-left:28px" class="dot-green">Testability is non-negotiable</li>
+      </ul>
+    </div>
+  </div>
+  <div class="quote" style="margin-top:20px;font-size:26px;border-left-color:var(--blue)">If you can write a unit test that fully specifies the expected output, write code. Otherwise, use the LLM.</div>
+  <div class="slide-num">2-C</div>
+</div>
+
+<!-- SLIDE 2-D: Simulator Structure -->
+<div class="slide" data-id="2D">
+  <div class="section-tag">SECTION 2 · LLM VS CODE</div>
+  <h2>Simulator Agent Structure</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1">
+      <!-- Liquid Glass nested tree -->
+      <div class="glass glass-blue" style="padding:24px 28px">
+        <div style="font-weight:700;font-size:20px;color:var(--blue)">LlmAgent("simulator") <span style="font-weight:400;color:var(--g600)">← root router</span></div>
+        <div style="margin-left:24px;margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <div class="glass glass-green" style="padding:12px 20px"><code>verify_plan()</code> <span style="color:var(--g600);font-size:16px">← cheap validation</span></div>
+          <div class="glass glass-yellow" style="padding:16px 20px">
+            <div style="font-weight:700;color:#E37400;font-size:18px">SequentialAgent("simulation_pipeline")</div>
+            <div style="margin-left:20px;margin-top:10px;display:flex;flex-direction:column;gap:8px">
+              <div class="glass" style="padding:10px 16px;font-size:17px"><strong>pre_race</strong> <span style="color:var(--g600)">→ spawn runners, start collector</span></div>
+              <div class="glass" style="padding:10px 16px;font-size:17px"><strong>LoopAgent("race_engine")</strong> <span style="color:var(--g600)">→ up to 200 ticks</span>
+                <div style="margin-left:16px;margin-top:6px" class="glass glass-red" style="padding:8px 12px;font-size:16px"><strong>tick</strong> <span style="color:var(--g600)">→ advance_tick → check_race_complete</span></div>
+              </div>
+              <div class="glass" style="padding:10px 16px;font-size:17px"><strong>post_race</strong> <span style="color:var(--g600)">→ compile results, stop collector</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass glass-red" style="margin-bottom:20px">
+        <div style="font-weight:700;color:var(--red);font-size:20px;margin-bottom:12px">The Trick</div>
+        <p style="font-size:20px;color:var(--g800);line-height:1.6"><code>before_model_callback</code> intercepts every LLM call. The model is <strong>never invoked</strong>.</p>
+      </div>
+      <pre style="font-size:18px"><span class="cm"># The LLM never fires</span>
+tick_agent = LlmAgent(
+    name=<span class="str">"tick"</span>,
+    model=resilient_model(
+        <span class="str">"gemini-flash-lite"</span>),
+    <span class="fn">before_model_callback</span>=tick_callback,
+)</pre>
+    </div>
+  </div>
+  <div class="slide-num">2-D</div>
+</div>
+
+<!-- SLIDE 2-E: Why Keep It as Agent -->
+<div class="slide" data-id="2E">
+  <div class="section-tag">SECTION 2 · LLM VS CODE</div>
+  <h2>Why Keep It as an "Agent"?</h2>
+  <h3>Even when the LLM is replaced, the agent gives you:</h3>
+  <div class="row" style="flex:1">
+    <div style="flex:1">
+      <ul>
+        <li><strong>Lifecycle</strong> — ADK manages session state, callbacks, error handling</li>
+        <li class="dot-green"><strong>A2A interface</strong> — same API regardless of internal implementation</li>
+        <li class="dot-yellow"><strong>Telemetry</strong> — <code>RedisDashLogPlugin</code> fires automatically</li>
+        <li class="dot-red"><strong>Plugin compatibility</strong> — attach without code changes</li>
+        <li><strong>Swappability</strong> — swap autopilot ↔ LLM runner with one env var</li>
+      </ul>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:4px">runner_autopilot/agent.py — the entire override</p>
+      <pre><span class="cm"># The entire override</span>
+<span class="kw">def</span> <span class="fn">get_agent</span>():
+    agent = get_base_agent()
+    agent.before_model_callback \
+        = autopilot_callback
+    <span class="kw">return</span> agent</pre>
+      <div class="glass glass-blue" style="margin-top:16px;padding:16px 24px">
+        <p style="font-size:18px;margin:0;color:var(--g800)">The agent boundary is about <strong>interface, lifecycle, and observability</strong> — not about whether an LLM is running inside.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">2-E</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>

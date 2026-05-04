@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Marathon Agent Deep Dive — Sections 0–1</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&family=Google+Sans+Text:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:28px;font-weight:500;color:var(--g600);margin-bottom:32px}
+p,.desc{font-size:24px;color:var(--g600);line-height:1.6}
+.subtitle{font-size:28px;color:var(--g600);font-weight:400;line-height:1.5;max-width:1100px}
+ul{list-style:none;margin-top:12px}
+ul li{font-size:26px;color:var(--g800);padding:14px 0;padding-left:36px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:22px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+ul li strong{color:var(--g800)}
+.accent{color:var(--blue)}
+.dot-red::before{background:var(--red)!important}
+.dot-yellow::before{background:var(--yellow)!important}
+.dot-green::before{background:var(--green)!important}
+
+/* Google 4-color bar */
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}
+.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+
+/* Liquid Glass panels */
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:36px 40px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+
+/* Tables */
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;font-size:22px;margin-top:16px}
+th{background:var(--blue);color:white;text-align:left;padding:16px 24px;font-weight:500}
+td{padding:14px 24px;border-bottom:1px solid var(--g200);background:var(--white)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--g50)}
+
+/* Code */
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:32px;font-family:var(--mono);font-size:20px;line-height:1.6;overflow:hidden;margin-top:16px}
+code{font-family:var(--mono);font-size:20px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}.fn{color:#F28B82}.op{color:#FDD663}
+
+/* Diagram */
+.diagram{display:flex;flex-direction:column;align-items:center;gap:0}
+.diagram-row{display:flex;align-items:center;gap:24px}
+.d-node{padding:18px 32px;border-radius:16px;font-size:22px;font-weight:500;text-align:center;min-width:200px}
+.d-arrow{display:flex;flex-direction:column;align-items:center;color:var(--g600);font-size:14px;padding:4px 0}
+.d-arrow .line{width:2px;height:28px;background:var(--g600)}
+.d-arrow .head{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--g600)}
+.d-arrow-label{font-size:15px;color:var(--g600);margin:2px 0}
+.d-connector{width:2px;height:20px;background:var(--g600);margin:0 auto}
+
+/* Layout helpers */
+.row{display:flex;gap:32px;align-items:flex-start}
+.col{flex:1}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center}
+.mt-auto{margin-top:auto}
+.gap-24{gap:24px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px}
+.flex-grow{flex:1}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+
+/* Title slide special */
+.title-slide{background:linear-gradient(160deg,#FFFFFF 0%,#F0F4FF 50%,#E8F0FE 100%)}
+.title-slide h1{font-size:64px;max-width:1400px}
+.title-slide .subtitle{font-size:30px;margin-top:8px}
+
+/* Demo slide */
+.demo-slide{background:var(--g800);color:white}
+.demo-slide h2{color:white}
+.demo-slide .section-tag{color:var(--yellow)}
+.demo-ring{width:280px;height:280px;border-radius:50%;border:4px solid var(--blue);display:flex;align-items:center;justify-content:center;animation:pulse 2s infinite;font-size:20px;color:var(--blue);font-weight:500;text-align:center;margin:0 auto}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(66,133,244,0.3)}50%{box-shadow:0 0 0 30px rgba(66,133,244,0)}}
+
+/* Section divider */
+.divider-slide{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.divider-slide h1{color:white;font-size:52px}
+.divider-slide .subtitle{color:rgba(255,255,255,0.85);font-size:28px}
+.divider-slide .section-tag{color:rgba(255,255,255,0.7)}
+
+/* Nav hint */
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5;transition:opacity 0.3s}
+.nav-hint:hover{opacity:1}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys to navigate · Slide <span id="cur">1</span> / <span id="tot"></span></div>
+<div class="deck">
+
+<!-- SLIDE 0-A: Title -->
+<div class="slide title-slide active" data-id="0A">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">Google Cloud Next '26 Developer Keynote Follow-up</div>
+    <h1>Marathon Agent Deep Dive</h1>
+    <h3 style="font-size:32px;color:var(--g600);max-width:1200px;margin-top:8px">How we built a 1,000-runner multi-agent simulation<br>with Google ADK &amp; Gemini</h3>
+    <div style="margin-top:48px;display:flex;gap:12px">
+      <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue)">Google ADK</span>
+      <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green)">Gemini</span>
+      <span class="pill" style="background:rgba(234,67,53,0.1);color:var(--red)">A2A Protocol</span>
+      <span class="pill" style="background:rgba(251,188,4,0.15);color:#E37400">Multi-Agent</span>
+    </div>
+  </div>
+  <div class="slide-num">0-A</div>
+</div>
+
+<!-- SLIDE 0-B: Cold Open -->
+<div class="slide demo-slide" data-id="0B">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div class="section-tag">LIVE DEMO</div>
+    <h2 style="font-size:48px;margin-bottom:48px">1,000 Runners · Real-Time Simulation</h2>
+    <div class="demo-ring">LIVE DEMO<br>PLAYS HERE</div>
+    <p style="color:rgba(255,255,255,0.5);margin-top:40px;font-size:20px">3D Las Vegas course · Weather overlay · Agent telemetry dashboard</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">0-B</div>
+</div>
+
+<!-- SLIDE 0-C: What You'll Learn -->
+<div class="slide" data-id="0C">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">INTRO</div>
+  <h2>What you'll learn today</h2>
+  <div style="margin-top:24px">
+    <ul>
+      <li>Why marathon route planning is a surprisingly <strong>hard agent problem</strong></li>
+      <li class="dot-red">Where to use an <strong>LLM</strong> — and where <strong>not</strong> to</li>
+      <li class="dot-yellow">How we scaled to <strong>1,000 simultaneous ADK sessions</strong></li>
+      <li class="dot-green">The <strong>AI-driven dev workflow</strong> behind this codebase</li>
+    </ul>
+  </div>
+  <div class="slide-num">0-C</div>
+</div>
+
+<!-- SLIDE 0-D: Roadmap -->
+<div class="slide" data-id="0D">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">INTRO</div>
+  <h2>Episode Roadmap</h2>
+  <div style="margin-top:24px">
+    <table>
+      <tr><th style="width:120px">Time</th><th>Section</th></tr>
+      <tr><td><strong>4:00</strong></td><td>Architecture &amp; why agents</td></tr>
+      <tr><td><strong>14:00</strong></td><td>LLM vs deterministic code</td></tr>
+      <tr><td><strong>26:00</strong></td><td>Scaling to 1,000 sessions</td></tr>
+      <tr><td><strong>38:00</strong></td><td>AI-driven dev workflow</td></tr>
+      <tr><td><strong>52:00</strong></td><td>Wrap-up &amp; next steps</td></tr>
+    </table>
+  </div>
+  <div class="slide-num">0-D</div>
+</div>
+
+<!-- SECTION 1 DIVIDER -->
+<div class="slide divider-slide" data-id="S1">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">SECTION 1 · 4:00 – 14:00</div>
+    <h1>Architecture Walkthrough<br>&amp; Why Agents</h1>
+    <p class="subtitle">Grounding viewers in the system before diving deep</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">1</div>
+</div>
+
+<!-- SLIDE 1-A: System Architecture -->
+<div class="slide" data-id="1A">
+  <div class="section-tag">SECTION 1 · ARCHITECTURE</div>
+  <h2>System Architecture</h2>
+  <div class="row" style="flex:1;margin-top:16px">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+      <!-- Liquid Glass Diagram -->
+      <div class="glass glass-blue d-node" style="width:520px">
+        <div style="font-weight:700;font-size:22px;color:var(--blue)">Frontend</div>
+        <div style="font-size:16px;color:var(--g600);margin-top:4px">Angular 21 + Three.js</div>
+      </div>
+      <div class="d-arrow"><div class="d-arrow-label">WebSocket · protobuf</div><div class="line"></div><div class="head"></div></div>
+      <div class="glass glass-green d-node" style="width:520px">
+        <div style="font-weight:700;font-size:22px;color:var(--green)">Gateway</div>
+        <div style="font-size:16px;color:var(--g600);margin-top:4px">Go / Gin</div>
+      </div>
+      <div class="d-arrow"><div class="d-arrow-label">A2A · HTTP + Redis pub/sub</div><div class="line"></div><div class="head"></div></div>
+      <div class="glass glass-yellow d-node" style="width:520px">
+        <div style="font-weight:700;font-size:22px;color:#E37400">Agent Network</div>
+        <div style="font-size:16px;color:var(--g600);margin-top:4px">Python · Google ADK</div>
+        <div style="display:flex;gap:12px;margin-top:10px;justify-content:center">
+          <span class="pill" style="font-size:14px">Planner</span>
+          <span class="pill" style="font-size:14px">Simulator</span>
+          <span class="pill" style="font-size:14px">Runners ×N</span>
+        </div>
+      </div>
+      <div class="d-arrow"><div class="line"></div><div class="head"></div></div>
+      <div class="glass glass-red d-node" style="width:520px">
+        <div style="font-weight:700;font-size:22px;color:var(--red)">Infrastructure</div>
+        <div style="display:flex;gap:12px;margin-top:8px;justify-content:center">
+          <span class="pill" style="font-size:14px">Redis</span>
+          <span class="pill" style="font-size:14px">Pub/Sub</span>
+          <span class="pill" style="font-size:14px">AlloyDB</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="margin-bottom:20px">
+        <div style="font-weight:700;color:var(--blue);font-size:18px;margin-bottom:12px">Four Layers</div>
+        <ul style="margin:0">
+          <li style="font-size:20px;padding:8px 0;padding-left:28px"><strong>Frontend</strong> — <code style="font-size:16px">web/frontend/</code></li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-green"><strong>Gateway</strong> — <code style="font-size:16px">cmd/gateway/</code> · owns sessions</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-yellow"><strong>Agents</strong> — <code style="font-size:16px">agents/</code> · one process per type</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-red"><strong>Infra</strong> — Redis · Pub/Sub · AlloyDB</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">1-A</div>
+</div>
+
+<!-- SLIDE 1-B: Agent Communication -->
+<div class="slide" data-id="1B">
+  <div class="section-tag">SECTION 1 · ARCHITECTURE</div>
+  <h2>Agent Communication</h2>
+  <div class="row" style="flex:1;margin-top:16px">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+      <div class="glass glass-blue d-node" style="width:400px"><strong>Planner Agent</strong></div>
+      <div class="d-arrow"><div class="d-arrow-label">A2A (HTTP)</div><div class="line" style="height:36px"></div><div class="head"></div></div>
+      <div class="glass glass-green d-node" style="width:400px"><strong>Simulator Agent</strong></div>
+      <div class="d-arrow"><div class="d-arrow-label">Redis pub/sub broadcast</div><div class="line" style="height:36px"></div><div class="head"></div></div>
+      <div style="display:flex;gap:20px">
+        <div class="glass glass-yellow d-node" style="min-width:180px"><strong>runner</strong><div style="font-size:15px;color:var(--g600);margin-top:4px">LLM</div></div>
+        <div class="glass glass-red d-node" style="min-width:180px"><strong>runner_autopilot</strong><div style="font-size:15px;color:var(--g600);margin-top:4px">deterministic</div></div>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="margin-bottom:24px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">Two Dispatch Modes</div>
+        <table style="font-size:20px;margin:0">
+          <tr><th>Mode</th><th>Agents</th><th>Transport</th></tr>
+          <tr><td><code>subscriber</code></td><td>runner, runner_autopilot</td><td>Long-lived Redis sub</td></tr>
+          <tr><td><code>callable</code></td><td>All others</td><td>HTTP <code>/orchestration</code></td></tr>
+        </table>
+      </div>
+      <div class="glass glass-green" style="padding:20px 28px">
+        <div style="font-size:18px;line-height:1.6;color:var(--g800)">
+          <strong>Subscriber</strong> = sub-millisecond latency (hot runners)<br>
+          <strong>Callable</strong> = supports scale-to-zero (Cloud Run)
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">1-B</div>
+</div>
+
+<!-- SLIDE 1-C: Why Agents? -->
+<div class="slide" data-id="1C">
+  <div class="section-tag">SECTION 1 · ARCHITECTURE</div>
+  <h2>Why Agents?</h2>
+  <h3 style="font-size:24px;margin-bottom:20px">What plain code can't do (without reinventing it)</h3>
+  <table style="font-size:22px">
+    <tr><th>Concern</th><th>Agent Approach (ADK)</th><th>DIY Cost</th></tr>
+    <tr><td>Session lifecycle</td><td>ADK <code>App</code> + session service</td><td>Custom state machine</td></tr>
+    <tr><td>Inter-agent communication</td><td>A2A protocol, <code>call_agent()</code></td><td>Custom HTTP client + registry</td></tr>
+    <tr><td>Telemetry</td><td><code>RedisDashLogPlugin</code> per event</td><td>Custom instrumentation</td></tr>
+    <tr><td>Tool calling</td><td>ADK tool dispatch</td><td>Custom function routing</td></tr>
+    <tr><td>Scale-to-zero</td><td>Callable dispatch mode</td><td>Custom orchestrator</td></tr>
+  </table>
+  <div class="slide-num">1-C</div>
+</div>
+
+<!-- SLIDE 1-D: Planner Agent Tour -->
+<div class="slide" data-id="1D">
+  <div class="section-tag">SECTION 1 · ARCHITECTURE</div>
+  <h2>Planner Agent Tour</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1">
+      <p style="font-size:18px;color:var(--g600);margin-bottom:8px;font-family:var(--mono)">agents/planner/agent.py</p>
+      <pre><span class="cm"># [START planner_agent]</span>
+<span class="kw">def</span> <span class="fn">get_agent</span>():
+    <span class="kw">return</span> LlmAgent(
+        name=<span class="str">"planner"</span>,
+        model=resilient_model(<span class="str">"gemini-3-flash-preview"</span>),
+        static_instruction=PLANNER.build(),
+        tools=get_tools(),
+        before_model_callback=financial_guardrail_callback,
+    )</pre>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="padding:28px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">Skills loaded on demand</div>
+        <table style="font-size:19px;margin:0">
+          <tr><th>Skill</th><th>What it does</th></tr>
+          <tr><td><code>gis-spatial-engineering</code></td><td>Route geometry</td></tr>
+          <tr><td><code>directing-the-event</code></td><td>Event logistics</td></tr>
+          <tr><td><code>mapping</code></td><td>Maps MCP: landmarks</td></tr>
+          <tr><td><code>insecure-financial</code></td><td>Budget advisory</td></tr>
+          <tr><td><code>secure-financial</code></td><td>Refuses changes</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">1-D</div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const tot=document.getElementById('tot');
+const cur=document.getElementById('cur');
+let idx=0;
+tot.textContent=slides.length;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');cur.textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1);if(e.key==='Home')go(0);if(e.key==='End')go(slides.length-1)});
+</script>
+</body>
+</html>
