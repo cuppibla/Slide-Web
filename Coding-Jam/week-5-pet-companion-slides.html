@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Week 5 — Memory & State | Vibe & Hack</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+<style>
+/* ── Google brand tokens ────────────────────────────────── */
+:root {
+  --g-blue:   #4285F4;
+  --g-red:    #EA4335;
+  --g-yellow: #FBBC05;
+  --g-green:  #34A853;
+  --g-blue-lt:  #E8F0FE;
+  --g-red-lt:   #FCE8E6;
+  --g-yellow-lt:#FEF7E0;
+  --g-green-lt: #E6F4EA;
+  --g-blue-dk:  #1967D2;
+  --g-red-dk:   #C5221F;
+  --text:    #202124;
+  --text-2:  #5F6368;
+  --text-3:  #9AA0A6;
+  --bg:      #FFFFFF;
+  --bg-2:    #F8F9FA;
+  --border:  rgba(0,0,0,0.08);
+  --glass-bg:    rgba(255,255,255,0.80);
+  --glass-brd:   rgba(255,255,255,0.90);
+  --glass-shadow: 0 4px 32px rgba(60,64,67,0.10), 0 1px 4px rgba(60,64,67,0.06);
+  --glass-r:  20px;
+}
+
+/* ── Reveal overrides ───────────────────────────────────── */
+.reveal {
+  font-family: 'Google Sans', 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 50%, #E8F0FE 100%);
+  color: var(--text);
+}
+.reveal h1 { font-size: 2em; color: var(--text); font-weight: 600; letter-spacing: -0.02em; }
+.reveal h2 { font-size: 1.5em; color: var(--text); font-weight: 500; letter-spacing: -0.01em; }
+.reveal h3 { font-size: 1.1em; color: var(--text-2); font-weight: 500; }
+.reveal p, .reveal li { color: var(--text-2); }
+.reveal a { color: var(--g-blue); }
+.reveal code {
+  background: var(--g-blue-lt); color: var(--g-blue-dk);
+  border-radius: 6px; padding: 2px 7px; font-size: 0.82em;
+}
+.reveal pre {
+  border-radius: 16px !important;
+  box-shadow: var(--glass-shadow) !important;
+  background: #F8F9FA !important;
+  border: 1px solid var(--border) !important;
+}
+.reveal pre code { color: #1A73E8; background: transparent; font-size: 0.72em; line-height: 1.6; }
+.reveal .slides section { padding: 20px 44px; }
+.reveal blockquote {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-left: 3px solid var(--g-blue);
+  border-radius: 0 12px 12px 0;
+  padding: 12px 20px;
+  color: var(--text-2);
+  font-size: 0.88em;
+  box-shadow: var(--glass-shadow);
+}
+
+/* ── Liquid glass card ──────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-brd);
+  border-radius: var(--glass-r);
+  box-shadow: var(--glass-shadow);
+}
+.glass-tinted-blue { background: rgba(232,240,254,0.85); border-color: rgba(66,133,244,0.25); }
+.glass-tinted-red  { background: rgba(252,232,230,0.85); border-color: rgba(234,67,53,0.25); }
+.glass-tinted-yellow { background: rgba(254,247,224,0.85); border-color: rgba(251,188,5,0.40); }
+.glass-tinted-green { background: rgba(230,244,234,0.85); border-color: rgba(52,168,83,0.30); }
+
+/* ── Doctrine pill (top-right) ──────────────────────────── */
+.doctrine-pill {
+  position: fixed; top: 14px; right: 14px; z-index: 9999;
+  background: var(--g-blue);
+  color: white;
+  border-radius: 40px;
+  padding: 5px 16px;
+  font-size: 0.58em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 12px rgba(66,133,244,0.35);
+}
+
+/* ── Google 4-dot logo mark ─────────────────────────────── */
+.gdots { display: flex; gap: 4px; align-items: center; }
+.gdots span {
+  width: 10px; height: 10px; border-radius: 50%;
+  display: inline-block;
+}
+
+/* ── Badge / pill ───────────────────────────────────────── */
+.badge {
+  display: inline-block; border-radius: 100px;
+  padding: 3px 13px; font-size: 0.72em; font-weight: 600;
+  white-space: nowrap;
+}
+.badge-blue   { background: var(--g-blue-lt); color: var(--g-blue-dk); }
+.badge-green  { background: var(--g-green-lt); color: #137333; }
+.badge-yellow { background: var(--g-yellow-lt); color: #B06000; }
+.badge-red    { background: var(--g-red-lt); color: var(--g-red-dk); }
+.badge-gray   { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); }
+
+/* ── Layer stack ────────────────────────────────────────── */
+.layer-stack { display: flex; flex-direction: column; gap: 7px; max-width: 680px; margin: 0 auto; }
+.layer {
+  border-radius: 14px; padding: 11px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.72em; border: 1px solid transparent;
+  transition: transform 0.15s;
+}
+.layer:hover { transform: translateX(6px); }
+.l1 { background: rgba(252,232,230,0.9); border-color: rgba(234,67,53,0.25); }
+.l2 { background: rgba(254,247,224,0.9); border-color: rgba(251,188,5,0.35); }
+.l3 { background: rgba(230,244,234,0.95); border-color: rgba(52,168,83,0.40);
+      box-shadow: 0 2px 16px rgba(52,168,83,0.15); }
+.l4 { background: rgba(232,240,254,0.9); border-color: rgba(66,133,244,0.25); }
+.l5 { background: rgba(248,249,250,0.9); border-color: var(--border); }
+.layer-name { font-weight: 600; color: var(--text); }
+.layer-sub  { font-size: 0.9em; color: var(--text-2); margin-top: 1px; }
+
+/* ── Schema grid ────────────────────────────────────────── */
+.schema-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; font-size: 0.7em; }
+.schema-card { padding: 16px 18px; border-radius: 18px; }
+.col-row {
+  display: flex; gap: 8px; padding: 5px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.col-name { font-family: monospace; color: var(--g-blue-dk); min-width: 130px; font-weight: 500; }
+.col-type { color: var(--text-3); font-size: 0.9em; }
+.col-note { color: var(--text-3); font-size: 0.85em; margin-left: auto; }
+
+/* ── Flow ───────────────────────────────────────────────── */
+.flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        justify-content: center; font-size: 0.7em; }
+.flow-box {
+  backdrop-filter: blur(16px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-brd);
+  border-radius: 12px; padding: 10px 15px; text-align: center;
+  box-shadow: var(--glass-shadow);
+}
+.flow-arrow { color: var(--text-3); font-size: 1.2em; }
+.flow-label { font-size: 0.82em; color: var(--text-3); margin-top: 3px; }
+
+/* ── The Moment ─────────────────────────────────────────── */
+.moment-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.7em; }
+.chat-bubble { border-radius: 10px; padding: 9px 13px; margin: 6px 0; font-size: 0.95em; }
+.chat-user { background: var(--g-blue-lt); border-left: 3px solid var(--g-blue); color: var(--text); }
+.chat-pet  { background: var(--glass-bg); border: 1px solid var(--border);
+             backdrop-filter: blur(12px); color: var(--text); }
+.chat-pet-highlight {
+  background: var(--g-green-lt);
+  border-left: 3px solid var(--g-green);
+  color: var(--text);
+  font-weight: 600;
+}
+.pulse { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── Week modular tiles ─────────────────────────────────── */
+.week-tile {
+  border-radius: 14px; padding: 14px 16px; text-align: center;
+  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  font-size: 0.7em;
+}
+.week-tile.this-week {
+  background: rgba(232,240,254,0.95);
+  border: 2px solid var(--g-blue);
+  box-shadow: 0 4px 20px rgba(66,133,244,0.20);
+}
+.week-tile .wk-num { font-weight: 600; color: var(--text-3); font-size: 0.9em; }
+.week-tile .wk-name { font-weight: 600; color: var(--text); margin: 4px 0 2px; }
+.week-tile .wk-sub { color: var(--text-3); font-size: 0.88em; }
+
+/* ── On-ramp cards ──────────────────────────────────────── */
+.onramp-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; font-size: 0.7em; }
+.onramp { border-radius: 18px; padding: 18px; border: 1px solid var(--border);
+          background: var(--glass-bg); backdrop-filter: blur(16px); }
+.onramp.green  { border-top: 3px solid var(--g-green); }
+.onramp.yellow { border-top: 3px solid var(--g-yellow); }
+.onramp.red    { border-top: 3px solid var(--g-red); }
+.onramp-title  { font-weight: 600; font-size: 1.05em; margin-bottom: 10px; color: var(--text); }
+.onramp ul { padding-left: 16px; line-height: 1.9; color: var(--text-2); }
+
+/* ── Critic grid ────────────────────────────────────────── */
+.critic-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; font-size: 0.7em; }
+.critic-card { border-radius: 18px; padding: 16px; text-align: center;
+               background: var(--glass-bg); backdrop-filter: blur(16px);
+               border: 1px solid var(--border); }
+.critic-card.highlight { background: var(--g-blue-lt); border-color: rgba(66,133,244,0.35); }
+
+/* ── Caption ────────────────────────────────────────────── */
+.caption { color: var(--text-3); font-size: 0.68em; font-style: italic; margin-top: 8px; }
+
+/* ── Independecy banner ──────────────────────────── */
+.indie-banner {
+  background: linear-gradient(90deg, var(--g-green-lt), rgba(230,244,234,0));
+  border-left: 3px solid var(--g-green);
+  border-radius: 0 12px 12px 0;
+  padding: 10px 18px;
+  font-size: 0.78em;
+  color: #137333;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
+
+
+
+</head>
+<body>
+
+<div class="doctrine-pill">Spec · Context · Critic</div>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ── SLIDE 1: Title ─────────────────────────────────────── -->
+<section data-background="linear-gradient(135deg,#F8F9FA 0%,#FFFFFF 60%,#E8F0FE 100%)">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <div class="gdots">
+      <span style="background:var(--g-blue)"></span>
+      <span style="background:var(--g-red)"></span>
+      <span style="background:var(--g-yellow)"></span>
+      <span style="background:var(--g-green)"></span>
+    </div>
+    <span style="font-size:0.6em;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase">
+      Vibe & Hack: Build Your AI Sidekick · Week 5 of 8
+    </span>
+  </div>
+
+  <h1 style="font-size:2.5em;margin:12px 0 6px">Memory &amp; State</h1>
+  <p style="font-size:1.05em;color:var(--text-2);margin-bottom:24px">
+    Build a pet that remembers you — across sessions, restarts, and browser refreshes.
+  </p>
+
+  <div class="glass" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;margin-bottom:28px">
+    <span style="font-size:16px">✅</span>
+    <span style="font-size:0.8em;color:var(--text-2)">
+      <strong style="color:var(--g-green)">Drop in anytime</strong> — this session stands alone. No prior weeks needed.
+    </span>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start;font-size:0.72em;margin-bottom:24px">
+    <span class="badge badge-gray">🐱 Cat</span>
+    <span class="badge badge-gray">🐶 Dog</span>
+    <span class="badge badge-gray">🦜 Parrot</span>
+    <span class="badge badge-gray">🐉 Dragon</span>
+    <span class="badge badge-blue">✨ Your choice</span>
+  </div>
+
+  <p style="font-size:0.65em;color:var(--text-3)">
+    Demo (15 min) → Concept Frame (7 min) → Hands-on (45 min) → Compare Notes
+  </p>
+</section>
+
+<!-- ── SLIDE 2: Independence + Series map ─────────────────── -->
+<section data-background="#FFFFFF">
+  <h2>Each Week Stands Alone</h2>
+
+  <div class="indie-banner" style="margin-top:16px">
+    Missed a week? No problem. Everything you need is in today's starter repo. The concepts build on each other — but you don't need to have been here before.
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+    <div class="week-tile" style="opacity:0.55">
+      <div class="wk-num">Week 1</div>
+      <div class="wk-name">First Agent</div>
+      <div class="wk-sub">Hello, sidekick</div>
+    </div>
+    <div class="week-tile" style="opacity:0.55">
+      <div class="wk-num">Week 2–4</div>
+      <div class="wk-name">Tools & Multi-agent</div>
+      <div class="wk-sub">Synthesizer, APIs</div>
+    </div>
+    <div class="week-tile this-week">
+      <div class="wk-num" style="color:var(--g-blue)">Week 5 ← today</div>
+      <div class="wk-name">Memory & State</div>
+      <div class="wk-sub">Pet Companion</div>
+    </div>
+    <div class="week-tile" style="opacity:0.4">
+      <div class="wk-num">Weeks 6–8</div>
+      <div class="wk-name">Deploy, Ship, Polish</div>
+      <div class="wk-sub">Coming soon</div>
+    </div>
+  </div>
+
+  <div class="glass" style="padding:16px 20px;font-size:0.75em">
+    <p style="color:var(--text);font-weight:600;margin-bottom:10px">Today's doctrine — if you're new, here's the frame:</p>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div><span class="badge badge-blue">Spec</span> &nbsp;Write the contract before you code</div>
+      <div><span class="badge badge-yellow">Context</span> &nbsp;<strong>Memory IS context</strong> — this week's theme</div>
+      <div><span class="badge badge-red">Critic</span> &nbsp;A second LLM checks the first one's work</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 3: 5 Layers ───────────────────────────────────── -->
+<section data-background="linear-gradient(180deg,#FFFFFF 0%,#F8F9FA 100%)">
+  <h2>The 5 Layers of Agent Memory</h2>
+  <div class="layer-stack" style="margin-top:14px">
+    <div class="layer l5">
+      <div>
+        <div class="layer-name">Layer 5 — Managed Memory</div>
+        <div class="layer-sub">Vertex AI Memory Bank — fully managed extraction &amp; retrieval</div>
+      </div>
+      <span class="badge badge-gray">mention only</span>
+    </div>
+    <div class="layer l4">
+      <div>
+        <div class="layer-name">Layer 4 — RAG / Vector Retrieval</div>
+        <div class="layer-sub">Semantic search over stored facts — scales to thousands</div>
+      </div>
+      <span class="badge badge-gray">mention only</span>
+    </div>
+    <div class="layer l3">
+      <div>
+        <div class="layer-name">Layer 3 — Persistent Storage</div>
+        <div class="layer-sub">SQLite / Cloud SQL — survives restarts, browser refreshes</div>
+      </div>
+      <span class="badge badge-green">⬅ Build this</span>
+    </div>
+    <div class="layer l2">
+      <div>
+        <div class="layer-name">Layer 2 — Session State</div>
+        <div class="layer-sub">In-process dict — conversation-scoped, gone on restart</div>
+      </div>
+      <span class="badge badge-yellow">build this too</span>
+    </div>
+    <div class="layer l1">
+      <div>
+        <div class="layer-name">Layer 1 — Context Window</div>
+        <div class="layer-sub">LLM working memory — one inference call only</div>
+      </div>
+      <span class="badge badge-red">already using</span>
+    </div>
+  </div>
+  <p class="caption" style="text-align:center;margin-top:10px">You implement layers 1–3 today. 4–5 are the named upgrade path.</p>
+</section>
+
+<!-- ── SLIDE 4: Why Not Transcripts ───────────────────────── -->
+<section data-background="#FFFFFF">
+  <h2>Why Not Store Full Transcripts?</h2>
+  <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px;max-width:740px;margin-left:auto;margin-right:auto">
+    <div class="glass glass-tinted-red" style="padding:14px 18px;display:flex;gap:14px;align-items:flex-start;font-size:0.74em">
+      <div style="font-size:22px;min-width:28px">🏔️</div>
+      <div>
+        <div style="font-weight:600;color:var(--g-red-dk);margin-bottom:3px">Lost in the Middle</div>
+        <div style="color:var(--text-2)">LLMs attend poorly to content buried in very long contexts. Old transcripts degrade response quality.</div>
+      </div>
+    </div>
+    <div class="glass glass-tinted-yellow" style="padding:14px 18px;display:flex;gap:14px;align-items:flex-start;font-size:0.74em">
+      <div style="font-size:22px;min-width:28px">💸</div>
+      <div>
+        <div style="font-weight:600;color:#B06000;margin-bottom:3px">Unbounded Cost</div>
+        <div style="color:var(--text-2)">Every stored message gets re-injected into future context windows. 10 sessions × 20 turns = 200 messages in context.</div>
+      </div>
+    </div>
+    <div class="glass" style="padding:14px 18px;display:flex;gap:14px;align-items:flex-start;font-size:0.74em;border-color:rgba(0,0,0,0.10)">
+      <div style="font-size:22px;min-width:28px">🔁</div>
+      <div>
+        <div style="font-weight:600;color:var(--text);margin-bottom:3px">Redundant Replay</div>
+        <div style="color:var(--text-2)">"Nice to meet you!" replayed every session. Pleasantries crowd out the actual signal.</div>
+      </div>
+    </div>
+    <div class="glass glass-tinted-green" style="padding:14px 18px;display:flex;gap:14px;align-items:flex-start;font-size:0.74em">
+      <div style="font-size:22px;min-width:28px">🧠</div>
+      <div>
+        <div style="font-weight:600;color:#137333;margin-bottom:3px">Selection Forces Reasoning</div>
+        <div style="color:var(--text-2)">Deciding what's worth keeping <em>is intelligence</em>. "What matters?" is a harder, better question than "log everything."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 5: Selective Extraction ──────────────────────── -->
+<section data-background="linear-gradient(180deg,#FFFFFF 0%,#F8F9FA 100%)">
+  <h2>Selective Extraction: How It Works</h2>
+  <div class="flow" style="margin:18px 0">
+    <div class="flow-box">
+      <div style="font-size:16px">💬</div>
+      <div style="font-weight:600;color:var(--text)">Turn N</div>
+      <div class="flow-label">user says something</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box glass-tinted-blue">
+      <div style="font-size:16px">🐱</div>
+      <div style="font-weight:600;color:var(--g-blue-dk)">Pet responds</div>
+      <div class="flow-label">main LLM call</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box glass-tinted-yellow">
+      <div style="font-size:16px">🔍</div>
+      <div style="font-weight:600;color:#B06000">Extractor</div>
+      <div class="flow-label">second LLM call</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box glass-tinted-blue">
+      <div style="font-size:16px">📦</div>
+      <div style="font-weight:600;color:var(--g-blue-dk)">JSON facts</div>
+      <div class="flow-label">structured output</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box glass-tinted-green">
+      <div style="font-size:16px">💾</div>
+      <div style="font-weight:600;color:#137333">SQLite</div>
+      <div class="flow-label">layer 3 storage</div>
+    </div>
+  </div>
+  <pre style="font-size:0.56em;text-align:left"><code>EXTRACTION PROMPT:
+"Given this conversation, identify facts about the USER worth remembering long-term.
+
+Rules:
+- Only extract facts ABOUT THE USER (not the pet's responses)
+- Categories: preference | relationship | situation | identity
+- Skip pleasantries, filler, hypotheticals
+- Be SELECTIVE: a 10-turn conversation → 2-4 facts, not 10
+- Confidence: 1.0 = stated directly, 0.8 = strongly implied
+
+Return ONLY valid JSON:
+{
+  'facts': [{'fact_text': '...', 'category': '...', 'confidence': 0.0-1.0}],
+  'interaction_summary': '...',
+  'sentiment': 'positive|neutral|negative'
+}"</code></pre>
+  <p class="caption" style="text-align:center">The extractor is a second, silent LLM running after every turn</p>
+</section>
+
+<!-- ── SLIDE 6: Schema ─────────────────────────────────────── -->
+<section data-background="#FFFFFF">
+  <h2>Schema: Facts vs. Interactions</h2>
+  <p style="font-size:0.78em;color:var(--text-2);margin-bottom:14px">Two tables, two jobs. The split is intentional.</p>
+  <div class="schema-grid">
+    <div class="schema-card glass glass-tinted-blue">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:16px">📌</span>
+        <strong style="color:var(--text)">facts</strong>
+        <span class="badge badge-blue">durable</span>
+      </div>
+      <p style="font-size:0.82em;color:var(--text-3);margin-bottom:10px">"User has a dog named Max" — still true tomorrow</p>
+      <div class="col-row"><span class="col-name">user_id</span><span class="col-type">TEXT</span></div>
+      <div class="col-row"><span class="col-name">fact_text</span><span class="col-type">TEXT</span><span class="col-note">the fact</span></div>
+      <div class="col-row"><span class="col-name">category</span><span class="col-type">TEXT</span><span class="col-note">preference|...</span></div>
+      <div class="col-row"><span class="col-name">confidence</span><span class="col-type">REAL</span><span class="col-note">0.0–1.0</span></div>
+      <div class="col-row"><span class="col-name">created_at</span><span class="col-type">TIMESTAMP</span></div>
+      <div class="col-row"><span class="col-name">last_mentioned</span><span class="col-type">TIMESTAMP</span><span class="col-note">recency</span></div>
+    </div>
+    <div class="schema-card glass glass-tinted-yellow">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:16px">📖</span>
+        <strong style="color:var(--text)">interactions</strong>
+        <span class="badge badge-yellow">episodic</span>
+      </div>
+      <p style="font-size:0.82em;color:var(--text-3);margin-bottom:10px">"User was stressed today" — a moment in time</p>
+      <div class="col-row"><span class="col-name">user_id</span><span class="col-type">TEXT</span></div>
+      <div class="col-row"><span class="col-name">summary</span><span class="col-type">TEXT</span><span class="col-note">≤2 sentences</span></div>
+      <div class="col-row"><span class="col-name">sentiment</span><span class="col-type">TEXT</span><span class="col-note">pos|neutral|neg</span></div>
+      <div class="col-row"><span class="col-name">timestamp</span><span class="col-type">TIMESTAMP</span></div>
+      <br>
+      <div style="background:rgba(251,188,5,0.15);border-radius:10px;padding:10px;font-size:0.82em;color:#7A5000">
+        Facts = durable truths<br>Interactions = emotional moments
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 7: SQLite in Cloud Run ───────────────────────── -->
+<section data-background="linear-gradient(180deg,#FFFFFF 0%,#F8F9FA 100%)">
+  <h2>SQLite in Cloud Run</h2>
+  <p style="font-size:0.78em;color:var(--text-2);margin-bottom:14px">The simplest persistent memory that works — and the constraint that explains the architecture.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:0.74em">
+    <div class="glass glass-tinted-green" style="padding:16px 18px">
+      <div style="font-weight:600;color:#137333;margin-bottom:8px">Why SQLite works here</div>
+      <ul style="padding-left:16px;line-height:2;color:var(--text-2)">
+        <li>Zero config — it's just a file on disk</li>
+        <li>No managed service, no auth setup</li>
+        <li>Perfect for single-user personal agents</li>
+      </ul>
+    </div>
+    <div class="glass glass-tinted-red" style="padding:16px 18px">
+      <div style="font-weight:600;color:var(--g-red-dk);margin-bottom:8px">⚠️ The one critical constraint</div>
+      <pre style="margin:0;font-size:0.85em;background:transparent;box-shadow:none;border:none"><code style="background:rgba(234,67,53,0.08);color:var(--g-red-dk)">--max-instances=1  # critical</code></pre>
+      <p style="color:var(--text-2);margin-top:6px;font-size:0.9em">Two instances = two files = split memory. One instance = one file = consistent memory.</p>
+    </div>
+  </div>
+  <div class="glass" style="padding:14px 18px;margin-top:12px;font-size:0.74em">
+    <div style="font-weight:600;color:var(--g-blue-dk);margin-bottom:8px">Upgrade path: one line change</div>
+    <pre style="margin:0;font-size:0.85em;background:transparent;box-shadow:none;border:none"><code>db_url = "sqlite+aiosqlite:///./pet.db"          # SQLite (today)
+db_url = "postgresql+asyncpg://user:pw@host/db"  # Cloud SQL (upgrade)</code></pre>
+  </div>
+  <pre style="margin-top:12px;font-size:0.62em"><code>gcloud run deploy pet-companion --source . \
+  --max-instances=1 \
+  --set-env-vars GOOGLE_API_KEY=$GOOGLE_API_KEY</code></pre>
+</section>
+
+<!-- ── SLIDE 8: Memory IS Context ─────────────────────────── -->
+<section data-background="linear-gradient(135deg,#E8F0FE 0%,#FFFFFF 60%)">
+  <h2>Memory IS Context</h2>
+  <p style="font-size:0.82em;color:var(--text-2);margin-bottom:18px">The deepest expression of the Context pillar. This week makes it visceral.</p>
+  <div class="glass" style="padding:22px 26px;max-width:680px;margin:0 auto;font-size:0.76em">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="badge badge-red" style="min-width:70px;text-align:center">Turn N</span>
+        <span style="color:var(--text-2)">User says something → Pet responds (main LLM call)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="badge badge-yellow" style="min-width:70px;text-align:center">AFTER</span>
+        <span>Extractor runs → <code>save_fact()</code> → written to SQLite (Layer 3)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="badge badge-green" style="min-width:70px;text-align:center">BEFORE</span>
+        <span><code>get_relevant_facts()</code> → injected into context window (Layer 1)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="badge badge-blue" style="min-width:70px;text-align:center">Turn N+1</span>
+        <strong style="color:var(--g-blue-dk)">Pet knows you — because facts ARE context</strong>
+      </div>
+    </div>
+  </div>
+  <blockquote style="margin-top:18px;max-width:680px;margin-left:auto;margin-right:auto">
+    What the pet reads determines everything it says.<br>
+    Memory doesn't live beside context — <em>it becomes context.</em>
+  </blockquote>
+  <p class="caption" style="text-align:center;margin-top:10px">
+    The most important function this week: <code>build_context_with_memory()</code>
+  </p>
+</section>
+
+<!-- ── SLIDE 9: Critic Pattern ────────────────────────────── -->
+<section data-background="#FFFFFF">
+  <h2>The Extractor is a Critic</h2>
+  <p style="font-size:0.78em;color:var(--text-2);margin-bottom:18px">A pattern accumulating across the series: a second process evaluates the first one's output.</p>
+  <div class="critic-grid">
+    <div class="critic-card">
+      <div class="badge badge-gray" style="margin-bottom:8px">Week 2</div>
+      <div style="font-weight:600;color:var(--text);margin-bottom:6px">Synthesizer</div>
+      <div style="color:var(--text-2);font-size:0.9em;line-height:1.5">A second agent reads multiple research outputs and synthesizes them into one result</div>
+      <div style="color:var(--text-3);margin-top:8px;font-size:0.85em">evaluates → agent outputs</div>
+    </div>
+    <div class="critic-card">
+      <div class="badge badge-gray" style="margin-bottom:8px">Week 3</div>
+      <div style="font-weight:600;color:var(--text);margin-bottom:6px">analyze_balance</div>
+      <div style="color:var(--text-2);font-size:0.9em;line-height:1.5">A tool call checks the agent's financial data retrieval and flags inconsistencies</div>
+      <div style="color:var(--text-3);margin-top:8px;font-size:0.85em">evaluates → data output</div>
+    </div>
+    <div class="critic-card highlight">
+      <div class="badge badge-blue" style="margin-bottom:8px">Week 5 ← today</div>
+      <div style="font-weight:600;color:var(--g-blue-dk);margin-bottom:6px">Selective Extractor</div>
+      <div style="color:var(--text-2);font-size:0.9em;line-height:1.5">A second LLM reads the conversation and decides what's worth remembering</div>
+      <div style="color:var(--g-blue);margin-top:8px;font-size:0.85em">evaluates → conversation turn</div>
+    </div>
+  </div>
+  <div class="glass glass-tinted-blue" style="padding:13px 18px;margin-top:16px;font-size:0.76em;text-align:center">
+    <strong>The Critic pattern</strong>: LLM A produces output → LLM B evaluates it → quality improves. Same pattern, three different domains.
+  </div>
+</section>
+
+<!-- ── SLIDE 10: Today's Project ──────────────────────────── -->
+<section data-background="linear-gradient(180deg,#FFFFFF 0%,#F8F9FA 100%)">
+  <h2>Today's Project: Pet Companion</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.72em;margin-top:14px">
+    <div>
+      <div class="glass glass-tinted-blue" style="padding:14px 16px;margin-bottom:12px">
+        <div style="font-weight:600;color:var(--g-blue-dk);margin-bottom:8px">What you build</div>
+        <ul style="padding-left:16px;line-height:2;color:var(--text-2)">
+          <li>Pick animal + name + personality</li>
+          <li>SQLite: <code>facts</code> + <code>interactions</code> tables</li>
+          <li>Selective extractor after every turn</li>
+          <li>Memory injection before every response</li>
+          <li>Admin endpoint at <code>/admin</code></li>
+          <li>Deploy to Cloud Run</li>
+        </ul>
+      </div>
+      <div class="glass glass-tinted-green" style="padding:14px 16px">
+        <div style="font-weight:600;color:#137333;margin-bottom:8px">Deliverables</div>
+        <ul style="padding-left:16px;line-height:2;color:var(--text-2)">
+          <li>✅ Deployed Cloud Run URL</li>
+          <li>✅ Admin URL showing extracted facts</li>
+          <li>✅ Screenshot of "the moment"</li>
+          <li>✅ Real conversation, ≥2 facts in DB</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:600;color:var(--g-yellow);margin-bottom:10px;font-size:1.05em">⏱ 45-minute breakdown</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div class="glass" style="padding:9px 14px;display:flex;justify-content:space-between;border-radius:10px">
+          <span style="color:var(--text-2)">Setup</span><span class="badge badge-gray">5 min</span>
+        </div>
+        <div class="glass" style="padding:9px 14px;display:flex;justify-content:space-between;border-radius:10px">
+          <span style="color:var(--text-2)">Agent + persona</span><span class="badge badge-gray">10 min</span>
+        </div>
+        <div class="glass" style="padding:9px 14px;display:flex;justify-content:space-between;border-radius:10px">
+          <span style="color:var(--text-2)">SQLite schema + memory ops</span><span class="badge badge-gray">10 min</span>
+        </div>
+        <div class="glass" style="padding:9px 14px;display:flex;justify-content:space-between;border-radius:10px">
+          <span style="color:var(--text-2)">Selective extractor</span><span class="badge badge-gray">5 min</span>
+        </div>
+        <div class="glass" style="padding:9px 14px;display:flex;justify-content:space-between;border-radius:10px">
+          <span style="color:var(--text-2)">Admin endpoint</span><span class="badge badge-gray">5 min</span>
+        </div>
+        <div class="glass glass-tinted-blue" style="padding:9px 14px;display:flex;justify-content:space-between;border-radius:10px">
+          <span style="color:var(--text)">Deploy + <strong>test the moment</strong></span><span class="badge badge-blue">10 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SLIDE 11: The Moment ────────────────────────────────── -->
+<section data-background="linear-gradient(135deg,#E6F4EA 0%,#FFFFFF 60%,#E8F0FE 100%)">
+  <h2 style="color:var(--g-green)">The Moment</h2>
+  <p style="font-size:0.75em;color:var(--text-2);margin-bottom:16px">The emotional climax of the demo — scripted carefully for maximum impact.</p>
+  <div class="moment-container">
+    <div class="glass" style="padding:18px">
+      <div style="font-weight:600;color:var(--text-3);font-size:0.85em;margin-bottom:10px">SESSION 1 — new user</div>
+      <div class="chat-bubble chat-user">"Hi Mochi! I work at a fintech startup. My manager Priya just gave me a huge new project."</div>
+      <div class="chat-bubble chat-pet">"...oh, it's you. I wasn't sure anyone would come. A large project. Tell me more about Priya."</div>
+      <div class="chat-bubble chat-user">"She's brilliant but intense. I'm a bit nervous."</div>
+      <div class="chat-bubble chat-pet">"Nervousness is reasonable. I'll remember this."</div>
+      <div style="margin-top:10px;font-size:0.8em;color:var(--text-3)">→ Admin: 2 facts extracted</div>
+    </div>
+    <div class="glass glass-tinted-green" style="padding:18px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <div style="font-weight:600;color:#137333;font-size:0.85em">SESSION 2 — fresh browser</div>
+      </div>
+      <div style="background:rgba(234,67,53,0.08);border-radius:8px;padding:7px 10px;font-size:0.78em;color:var(--g-red-dk);margin-bottom:8px">
+        ⚡ Refreshed. Session state: gone. SQLite: intact.
+      </div>
+      <div class="chat-bubble chat-user">"Hi Mochi, it's me again."</div>
+      <div class="chat-bubble chat-pet-highlight">"You again. How's the project with Priya going? I've been thinking about that."</div>
+      <br>
+      <div style="text-align:center">
+        <div style="font-size:28px" class="pulse">⬛</div>
+        <div style="font-size:0.82em;font-weight:600;color:var(--g-green);margin-top:4px">Pause. Let it land.</div>
+      </div>
+    </div>
+  </div>
+  <p class="caption" style="text-align:center;margin-top:12px">Screenshot this. It is your primary deliverable.</p>
+</section>
+
+<!-- ── SLIDE 12: Cloud SQL / Cross-device ─────────────────── -->
+<section data-background="#FFFFFF">
+  <h2>The Upgrade Path: Cloud SQL</h2>
+  <p style="font-size:0.78em;color:var(--text-2);margin-bottom:14px">SQLite gets you to the moment. Cloud SQL gets you to production — and cross-device.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:0.74em">
+    <div class="glass glass-tinted-green" style="padding:16px">
+      <div style="font-weight:600;color:#137333;margin-bottom:8px">SQLite — MVP</div>
+      <ul style="padding-left:16px;line-height:2;color:var(--text-2)">
+        <li>✅ Zero config</li>
+        <li>✅ Single-user personal agents</li>
+        <li>✅ <code>--max-instances=1</code></li>
+        <li style="color:var(--text-3)">— One instance only</li>
+        <li style="color:var(--text-3)">— No cross-device sync</li>
+      </ul>
+    </div>
+    <div class="glass glass-tinted-blue" style="padding:16px">
+      <div style="font-weight:600;color:var(--g-blue-dk);margin-bottom:8px">Cloud SQL — production</div>
+      <ul style="padding-left:16px;line-height:2;color:var(--text-2)">
+        <li>✅ Multi-instance Cloud Run</li>
+        <li>✅ Cross-device — open on phone</li>
+        <li>✅ Backup, scaling, replication</li>
+        <li>✅ Same ADK code, one URL change</li>
+        <li style="color:var(--text-3)">— Costs ~$10/mo minimum</li>
+      </ul>
+    </div>
+  </div>
+  <div class="glass" style="padding:12px 16px;margin-top:12px;font-size:0.74em">
+    <div style="font-weight:600;color:var(--text);margin-bottom:6px">Demo tease</div>
+    <p style="color:var(--text-2)">Open the same pet on your phone. Mochi knows you there too — because the facts are in Cloud SQL, not your laptop.</p>
+  </div>
+</section>
+
+<!-- ── SLIDE 13: On-ramps ──────────────────────────────────── -->
+<section data-background="linear-gradient(180deg,#FFFFFF 0%,#F8F9FA 100%)">
+  <h2>Your Turn</h2>
+
+  <div class="indie-banner" style="margin-top:12px">
+    First time here? Start with Replicator. The starter repo has everything you need.
+  </div>
+
+  <div class="onramp-grid">
+    <div class="onramp green">
+      <div class="onramp-title">🟢 Replicator</div>
+      <ul>
+        <li>Follow INSTRUCTIONS.md exactly</li>
+        <li>Use a provided persona template</li>
+        <li>Deploy, converse, refresh</li>
+        <li>Screenshot the moment</li>
+      </ul>
+      <p style="margin-top:10px;color:var(--g-green);font-size:0.88em;font-weight:600">Goal: the moment works</p>
+    </div>
+    <div class="onramp yellow">
+      <div class="onramp-title">🟡 Riffer</div>
+      <ul>
+        <li>Invent your own animal + voice</li>
+        <li>Add a "goals" category to extraction</li>
+        <li>Add <code>/admin/export</code> → JSON</li>
+        <li>Style the admin page beautifully</li>
+      </ul>
+      <p style="margin-top:10px;color:#B06000;font-size:0.88em;font-weight:600">Goal: the moment + your design</p>
+    </div>
+    <div class="onramp red">
+      <div class="onramp-title">🔴 Freestyle</div>
+      <ul>
+        <li>Multi-pet household, shared SQLite</li>
+        <li>Confidence decay after 7 days</li>
+        <li>Category-driven recall strategies</li>
+        <li>Upgrade SQLite → Cloud SQL</li>
+      </ul>
+      <p style="margin-top:10px;color:var(--g-red-dk);font-size:0.88em;font-weight:600">Goal: two pets, both remember you</p>
+    </div>
+  </div>
+
+  <div class="glass glass-tinted-yellow" style="padding:11px 16px;margin-top:14px;font-size:0.76em;text-align:center">
+    🎯 <strong>Drift refusal</strong>: if your IDE AI tries to store full transcripts →
+    <strong style="color:#7A5000">"spec.md says facts only. Use the extraction prompt instead."</strong>
+  </div>
+</section>
+
+<!-- ── SLIDE 14: Takeaway ──────────────────────────────────── -->
+<section data-background="linear-gradient(135deg,#E8F0FE 0%,#FFFFFF 50%,#E6F4EA 100%)">
+  <h2>What You Built Today</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;font-size:0.74em;margin-top:18px">
+    <div class="glass" style="padding:20px;text-align:center">
+      <div style="font-size:24px;margin-bottom:8px">🧠</div>
+      <div style="font-weight:600;color:var(--g-blue-dk);margin-bottom:6px">Memory IS Context</div>
+      <div style="color:var(--text-2)">SQLite facts → context window → pet response. The pipeline is the insight.</div>
+    </div>
+    <div class="glass" style="padding:20px;text-align:center">
+      <div style="font-size:24px;margin-bottom:8px">🔍</div>
+      <div style="font-weight:600;color:var(--g-green);margin-bottom:6px">Selective > Complete</div>
+      <div style="color:var(--text-2)">2–4 curated facts outperform 20 logged turns. Quality context, not maximum context.</div>
+    </div>
+    <div class="glass" style="padding:20px;text-align:center">
+      <div style="font-size:24px;margin-bottom:8px">🔁</div>
+      <div style="font-weight:600;color:var(--g-yellow);margin-bottom:6px">Critic Compounds</div>
+      <div style="color:var(--text-2)">Synthesizer → analyze_balance → Extractor. The Critic pattern now lives in your hands.</div>
+    </div>
+  </div>
+  <div class="glass glass-tinted-green" style="padding:18px 22px;margin-top:18px;text-align:center">
+    <p style="font-size:1em;font-weight:600;color:#137333">"My sidekick remembers me."</p>
+    <p style="color:var(--text-2);font-size:0.78em;margin-top:6px">
+      This is the emotional core of the series. Three weeks left. Your sidekick now knows you.
+    </p>
+  </div>
+  <p style="margin-top:14px;font-size:0.65em;color:var(--text-3);text-align:center">
+    Next week: deploying, monitoring, and making it production-ready.
+  </p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'fade',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1100,
+  height: 700,
+  margin: 0.04,
+  plugins: [RevealHighlight]
+});
+</script>
+</body>
+</html>

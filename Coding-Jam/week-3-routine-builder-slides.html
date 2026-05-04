@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 3 – Tools & Callbacks | Vibe & Hack</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/white.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/googlecode.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g-blue: #4285F4;
+  --g-red: #EA4335;
+  --g-yellow: #FBBC04;
+  --g-green: #34A853;
+  --g-dark: #202124;
+  --g-mid: #3C4043;
+  --g-gray: #5F6368;
+  --g-light: #BDC1C6;
+  --g-surface: #F8F9FA;
+  --glass: rgba(255,255,255,0.72);
+  --glass-strong: rgba(255,255,255,0.88);
+  --glass-border: rgba(255,255,255,0.85);
+  --glass-border-soft: rgba(66,133,244,0.15);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.09),0 1px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.06);
+}
+
+.reveal {
+  font-family: 'Google Sans', 'Segoe UI', system-ui, sans-serif !important;
+  color: var(--g-dark);
+  background: transparent;
+}
+.reveal .slides section {
+  text-align: left;
+}
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: 'Google Sans', system-ui, sans-serif !important;
+  color: var(--g-dark);
+  letter-spacing: -0.01em;
+}
+.reveal h2 { font-size: 1.5em; font-weight: 700; margin-bottom: 0.15em; }
+.reveal h3 { font-size: 1.0em; font-weight: 700; color: var(--g-blue); margin-bottom: 0.3em; }
+.reveal p, .reveal li { font-size: 0.78em; line-height: 1.6; color: var(--g-mid); }
+.reveal pre {
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  margin: 0.4em 0;
+  background: rgba(248,249,250,0.95) !important;
+  border: 1px solid rgba(0,0,0,0.07);
+}
+.reveal code { font-family: 'Google Sans Mono', 'Fira Code', monospace !important; font-size: 0.78em; }
+.reveal pre code { max-height: 380px; background: transparent !important; padding: 1em !important; }
+.reveal .slide-number { color: var(--g-gray); font-size: 0.5em; }
+
+/* ── Slide backgrounds ── */
+.slide-bg-white { background: #ffffff; }
+.slide-bg-blue { background: linear-gradient(135deg, #E8F0FE 0%, #F0F4FF 60%, #FAFBFF 100%); }
+.slide-bg-green { background: linear-gradient(135deg, #E6F4EA 0%, #F0FAF2 60%, #FAFFFE 100%); }
+.slide-bg-warm { background: linear-gradient(135deg, #FEF7E0 0%, #FAFAF5 60%, #FFFFFF 100%); }
+.slide-bg-cool { background: linear-gradient(135deg, #F0F4FF 0%, #EEF2FF 50%, #F8FFFE 100%); }
+
+/* ── Glass card ── */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: 16px 18px;
+}
+.glass-strong {
+  background: var(--glass-strong);
+  backdrop-filter: blur(24px) saturate(2);
+  -webkit-backdrop-filter: blur(24px) saturate(2);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 18px 20px;
+}
+.glass-pill {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.9);
+  border-radius: 999px;
+  padding: 4px 14px;
+  display: inline-block;
+  font-size: 0.58em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Google color chips ── */
+.chip-blue  { background: rgba(66,133,244,0.10); color: #185ABC; border: 1px solid rgba(66,133,244,0.25); border-radius: 999px; padding: 3px 12px; font-size: 0.65em; font-weight: 700; display:inline-block; }
+.chip-red   { background: rgba(234,67,53,0.10);  color: #C5221F; border: 1px solid rgba(234,67,53,0.22);  border-radius: 999px; padding: 3px 12px; font-size: 0.65em; font-weight: 700; display:inline-block; }
+.chip-green { background: rgba(52,168,83,0.10);  color: #137333; border: 1px solid rgba(52,168,83,0.22);  border-radius: 999px; padding: 3px 12px; font-size: 0.65em; font-weight: 700; display:inline-block; }
+.chip-yellow{ background: rgba(251,188,4,0.12);  color: #B06000; border: 1px solid rgba(251,188,4,0.30);   border-radius: 999px; padding: 3px 12px; font-size: 0.65em; font-weight: 700; display:inline-block; }
+
+/* ── Google 4-dot logo ── */
+.g4 { display:inline-flex; gap:3px; align-items:center; margin-right:8px; }
+.g4 span { width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+/* ── Highlight strip ── */
+.hl-blue  { border-left: 3px solid var(--g-blue);  padding-left:12px; }
+.hl-green { border-left: 3px solid var(--g-green); padding-left:12px; }
+.hl-red   { border-left: 3px solid var(--g-red);   padding-left:12px; }
+.hl-yellow{ border-left: 3px solid var(--g-yellow);padding-left:12px; }
+
+/* ── Grids ── */
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:0.6em; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:0.5em; }
+.grid-2x2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* ── Big number ── */
+.big-num { font-size:2.2em; font-weight:700; line-height:1; display:block; margin-bottom:5px; }
+
+/* ── Tag badge ── */
+.tag { display:inline-block; background:rgba(66,133,244,0.08); color:var(--g-blue); border-radius:6px; padding:2px 8px; font-size:0.62em; font-weight:600; margin:2px 2px 0 0; }
+
+/* ── Timeline ── */
+.timeline { display:flex; gap:0; margin:0.6em 0; border-radius:12px; overflow:hidden; border:1px solid rgba(0,0,0,0.06); }
+.tl { flex:1; padding:10px 8px; text-align:center; font-size:0.62em; font-weight:600; color:var(--g-mid); }
+.tl-t { font-size:1.5em; font-weight:800; color:var(--g-dark); display:block; }
+.tl-label { color:var(--g-gray); font-weight:400; margin-top:2px; font-size:0.9em; }
+.tl-1 { background:rgba(66,133,244,0.07); }
+.tl-2 { background:rgba(52,168,83,0.07); }
+.tl-3 { background:rgba(251,188,4,0.08); }
+.tl-4 { background:rgba(234,67,53,0.07); }
+
+/* ── Arch boxes ── */
+.arch-box { border-radius:10px; padding:9px 14px; font-size:0.68em; font-weight:600; text-align:center; min-width:110px; }
+.ab-user   { background:rgba(52,168,83,0.10);  border:1.5px solid rgba(52,168,83,0.3);  color:#137333; }
+.ab-agent  { background:rgba(66,133,244,0.10); border:1.5px solid rgba(66,133,244,0.3); color:#185ABC; }
+.ab-tool   { background:rgba(251,188,4,0.10);  border:1.5px solid rgba(251,188,4,0.4);  color:#B06000; }
+.ab-data   { background:rgba(234,67,53,0.08);  border:1.5px solid rgba(234,67,53,0.25); color:#C5221F; }
+.arch-row { display:flex; align-items:center; gap:8px; margin:8px 0; }
+.arr { color:var(--g-light); font-size:1.2em; font-weight:300; }
+
+/* ── Onramp table ── */
+.onramp-t { width:100%; border-collapse:collapse; font-size:0.7em; margin-top:0.6em; }
+.onramp-t th { color:var(--g-gray); font-weight:600; padding:6px 10px; text-align:left; border-bottom:1.5px solid rgba(0,0,0,0.08); font-size:0.9em; text-transform:uppercase; letter-spacing:0.05em; }
+.onramp-t td { padding:8px 10px; border-bottom:1px solid rgba(0,0,0,0.05); vertical-align:top; }
+.onramp-t tr:last-child td { border-bottom:none; }
+
+/* ── Standalone badge ── */
+.standalone-badge { background:rgba(52,168,83,0.12); border:1px solid rgba(52,168,83,0.3); border-radius:999px; color:#137333; font-size:0.58em; font-weight:700; padding:4px 14px; display:inline-block; letter-spacing:0.04em; }
+
+/* ── Good/bad compare ── */
+.compare-label { font-size:0.62em; font-weight:700; padding:4px 12px; border-radius:8px 8px 0 0; display:block; }
+.cl-bad  { background:rgba(234,67,53,0.10);  color:#C5221F; }
+.cl-good { background:rgba(52,168,83,0.10);  color:#137333; }
+
+/* ── Subline ── */
+.subline { color:var(--g-gray); font-size:0.72em; margin-top:0.1em; margin-bottom:0.5em; }
+
+/* ── Doctrine corner ── */
+.doctrine-corner { position:absolute; top:16px; right:20px; font-size:0.52em; font-weight:700; letter-spacing:0.06em; color:var(--g-blue); border:1px solid rgba(66,133,244,0.3); border-radius:6px; padding:3px 9px; text-transform:uppercase; background:rgba(66,133,244,0.06); }
+
+/* ── Critic flow ── */
+.cf-row { display:flex; align-items:center; gap:10px; margin:0.8em 0; flex-wrap:wrap; }
+.cf-box { border-radius:10px; padding:10px 16px; font-size:0.68em; font-weight:600; text-align:center; min-width:110px; }
+
+/* Indent utility */
+.indent { margin-left: 1em; }
+</style>
+
+
+
+
+
+
+</head>
+<body style="background:#F0F4FF;">
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══ SLIDE 1 — Title ═══ -->
+<section data-background="linear-gradient(145deg,#EAF2FB 0%,#F5F0FF 50%,#E6F4EA 100%)">
+  <div style="padding:0 0.5em;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.8em;">
+      <div class="g4"><span style="background:#4285F4"></span><span style="background:#EA4335"></span><span style="background:#FBBC04"></span><span style="background:#34A853"></span></div>
+      <span class="glass-pill" style="color:#185ABC;">Vibe &amp; Hack · Google ADK</span>
+      <span class="standalone-badge">✓ Week 3 is self-contained — start here</span>
+    </div>
+
+    <div class="glass-strong" style="padding:28px 32px; max-width:820px;">
+      <div style="font-size:0.6em;font-weight:700;color:var(--g-blue);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.3em;">Week 3 of 8</div>
+      <h1 style="font-size:2.2em;font-weight:700;line-height:1.1;margin:0 0 0.2em;color:var(--g-dark);">Tools &amp; Callbacks</h1>
+      <p style="font-size:0.85em;color:var(--g-mid);margin:0 0 1.2em;">When does your agent need a tool?</p>
+      <div style="display:flex;gap:1.5em;flex-wrap:wrap;">
+        <div><div style="font-size:0.55em;color:var(--g-gray);text-transform:uppercase;letter-spacing:.06em;">Project</div><div style="font-size:0.8em;font-weight:700;color:var(--g-dark);">Routine Builder</div></div>
+        <div><div style="font-size:0.55em;color:var(--g-gray);text-transform:uppercase;letter-spacing:.06em;">New today</div><div style="font-size:0.8em;font-weight:700;color:var(--g-dark);">FunctionTool · Callbacks</div></div>
+        <div><div style="font-size:0.55em;color:var(--g-gray);text-transform:uppercase;letter-spacing:.06em;">Doctrine</div><div style="font-size:0.8em;font-weight:700;color:var(--g-blue);">Spec · Context · Critic</div></div>
+      </div>
+    </div>
+
+    <div class="glass" style="margin-top:14px;max-width:820px;padding:12px 18px;background:rgba(52,168,83,0.08);border-color:rgba(52,168,83,0.25);">
+      <p style="margin:0;color:#137333;font-size:0.68em;font-weight:500;">
+        <strong>Missed Weeks 1–2?</strong> No problem. Everything you need is in the repo.
+        Slide 2 gives you the 3-minute doctrine catchup. Today stands on its own.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 2 — Doctrine Catchup (independent-first) ═══ -->
+<section data-background="linear-gradient(150deg,#F8F9FA 0%,#EAF2FB 100%)">
+  <div class="doctrine-corner">Doctrine</div>
+  <h2>New here? 3-minute catchup.</h2>
+  <p class="subline">One doctrine. Three pillars. Today we complete the set.</p>
+
+  <div class="grid-3">
+    <div class="glass hl-blue">
+      <span class="big-num" style="color:var(--g-blue);">Spec</span>
+      <div style="font-size:0.75em;font-weight:600;color:var(--g-dark);margin-bottom:4px;">Write the contract first</div>
+      <div style="font-size:0.65em;color:var(--g-gray);line-height:1.5;">Hard limits, out-of-scope list, acceptance criteria. The spec prevents drift before it starts.</div>
+      <div style="margin-top:10px;"><span class="chip-blue">Wk 1</span></div>
+    </div>
+    <div class="glass hl-yellow">
+      <span class="big-num" style="color:var(--g-yellow);">Context</span>
+      <div style="font-size:0.75em;font-weight:600;color:var(--g-dark);margin-bottom:4px;">Everything the agent reads</div>
+      <div style="font-size:0.65em;color:var(--g-gray);line-height:1.5;">Instructions, files, tool docs. Better context = better output. Change the file, change the behavior.</div>
+      <div style="margin-top:10px;"><span class="chip-yellow">Wk 2</span></div>
+    </div>
+    <div class="glass hl-red" style="border:1.5px solid rgba(234,67,53,0.25);">
+      <span class="big-num" style="color:var(--g-red);">Critic</span>
+      <div style="font-size:0.75em;font-weight:600;color:var(--g-dark);margin-bottom:4px;">A second process checks the first</div>
+      <div style="font-size:0.65em;color:var(--g-gray);line-height:1.5;">Today's <code>analyze_balance</code> IS a critic. We'll formalize this in Weeks 5–7.</div>
+      <div style="margin-top:10px;"><span class="chip-red">Wk 3 ← you are here</span></div>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:14px;background:rgba(66,133,244,0.06);border-color:rgba(66,133,244,0.2);padding:12px 18px;">
+    <p style="margin:0;font-size:0.7em;color:var(--g-mid);">
+      <strong style="color:var(--g-blue);">If you did Weeks 1–2:</strong> you already know this. Today adds the third pillar. &nbsp;
+      <strong style="color:var(--g-green);">If today is your first session:</strong> this slide is your full context. Read spec.md and context/tool-design-principles.md in the repo — you'll be fully caught up in 5 minutes.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 3 — The Tool Question ═══ -->
+<section data-background="#FFFFFF">
+  <h2>When does an agent need a tool?</h2>
+  <p class="subline">Not everything needs a tool. Most things don't. Here's how you tell the difference.</p>
+
+  <div class="grid-2" style="align-items:start;">
+    <div class="glass" style="background:rgba(234,67,53,0.04);border-color:rgba(234,67,53,0.18);">
+      <h3 style="color:var(--g-red);">Instruction is enough when…</h3>
+      <ul style="font-size:0.72em;color:var(--g-gray);padding-left:1.2em;line-height:1.9;margin:0;">
+        <li>LLM handles it reliably (draft, summarize, translate)</li>
+        <li>Free text output is acceptable</li>
+        <li>No need to unit test the logic</li>
+        <li>No external / curated data needed</li>
+      </ul>
+    </div>
+    <div class="glass" style="background:rgba(52,168,83,0.05);border-color:rgba(52,168,83,0.22);">
+      <h3 style="color:var(--g-green);">Tool is necessary when…</h3>
+      <ul style="font-size:0.72em;color:var(--g-mid);padding-left:1.2em;line-height:1.9;margin:0;">
+        <li>LLM is unreliable for this task</li>
+        <li>Structured data is required back</li>
+        <li>The function must be independently testable</li>
+        <li>You need to access curated / external data</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:14px;text-align:center;padding:14px;background:rgba(66,133,244,0.05);border-color:rgba(66,133,244,0.18);">
+    <p style="margin:0;font-size:0.78em;color:var(--g-dark);">The question isn't "can the LLM do this?" — it's <strong style="color:var(--g-blue);">"can the LLM do this reliably, every time?"</strong></p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 4 — 3 Criteria ═══ -->
+<section data-background="linear-gradient(150deg,#F8F9FA 0%,#E8F0FE 100%)">
+  <div class="doctrine-corner">3 Criteria</div>
+  <h2>The 3 "tool necessary" criteria</h2>
+  <p class="subline">A tool earns its existence when at least one of these is true.</p>
+
+  <div class="grid-3">
+    <div class="glass-strong" style="text-align:center;">
+      <span class="big-num" style="color:var(--g-blue);">1</span>
+      <div style="font-size:0.76em;font-weight:700;color:var(--g-dark);margin-bottom:6px;">LLM is unreliable</div>
+      <div style="font-size:0.63em;color:var(--g-gray);line-height:1.5;">Counting, summing, rule-checking, set operations. Works in testing, breaks in production.</div>
+      <div style="margin-top:10px;"><span class="tag">math</span><span class="tag">counting</span></div>
+    </div>
+    <div class="glass-strong" style="text-align:center;">
+      <span class="big-num" style="color:var(--g-green);">2</span>
+      <div style="font-size:0.76em;font-weight:700;color:var(--g-dark);margin-bottom:6px;">Structured data needed</div>
+      <div style="font-size:0.63em;color:var(--g-gray);line-height:1.5;">Downstream code needs a typed dict. "Looks balanced" is not a contract you can parse.</div>
+      <div style="margin-top:10px;"><span class="tag" style="background:rgba(52,168,83,0.08);color:#137333;">typed return</span></div>
+    </div>
+    <div class="glass-strong" style="text-align:center;">
+      <span class="big-num" style="color:var(--g-yellow);">3</span>
+      <div style="font-size:0.76em;font-weight:700;color:var(--g-dark);margin-bottom:6px;">Must be testable</div>
+      <div style="font-size:0.63em;color:var(--g-gray);line-height:1.5;">If it lives in an instruction, you can't write a unit test. Pure functions have tests. Instructions have vibes.</div>
+      <div style="margin-top:10px;"><span class="tag" style="background:rgba(251,188,4,0.10);color:#B06000;">unit test</span></div>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:12px;padding:10px 16px;background:rgba(248,249,250,0.9);">
+    <p style="margin:0;font-size:0.65em;color:var(--g-gray);text-align:center;">
+      <code>analyze_balance</code> satisfies all three. &nbsp;·&nbsp; <code>propose_alternatives</code> adds a fourth: access to a curated catalog the LLM doesn't have.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 5 — Good Tool Criteria ═══ -->
+<section data-background="#FFFFFF">
+  <h2>What makes a "good tool"?</h2>
+  <p class="subline">Four properties every FunctionTool should have.</p>
+
+  <div class="grid-2x2" style="margin-top:0.6em;">
+    <div class="glass">
+      <div style="font-size:1.3em;margin-bottom:6px;">🔒</div>
+      <div style="font-size:0.76em;font-weight:700;color:var(--g-blue);">Pure function</div>
+      <div style="font-size:0.64em;color:var(--g-gray);margin-top:4px;line-height:1.5;">No LLM calls inside. Deterministic input → output. If your tool calls a model, you built a mini-agent, not a tool.</div>
+    </div>
+    <div class="glass">
+      <div style="font-size:1.3em;margin-bottom:6px;">📦</div>
+      <div style="font-size:0.76em;font-weight:700;color:var(--g-green);">Typed return</div>
+      <div style="font-size:0.64em;color:var(--g-gray);margin-top:4px;line-height:1.5;">Return a typed dict with known keys. The LLM and your test suite both depend on this contract. Free text isn't a contract.</div>
+    </div>
+    <div class="glass">
+      <div style="font-size:1.3em;margin-bottom:6px;">🧪</div>
+      <div style="font-size:0.76em;font-weight:700;color:var(--g-yellow);">Independently testable</div>
+      <div style="font-size:0.64em;color:var(--g-gray);margin-top:4px;line-height:1.5;">3-line unit test. No agent. No model. No network. If you can't test it in isolation, it's not a good tool.</div>
+    </div>
+    <div class="glass">
+      <div style="font-size:1.3em;margin-bottom:6px;">⚠️</div>
+      <div style="font-size:0.76em;font-weight:700;color:var(--g-red);">LLM can't do this reliably</div>
+      <div style="font-size:0.64em;color:var(--g-gray);margin-top:4px;line-height:1.5;">If a well-written instruction would work 99% of the time, skip the tool. Build tools for the 1% failures that matter in production.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 6 — Docstrings are Prompts ═══ -->
+<section data-background="linear-gradient(150deg,#F8F9FA 0%,#E8F0FE 100%)">
+  <div class="doctrine-corner">Context</div>
+  <h2>Docstrings <em>are</em> prompts</h2>
+  <p class="subline">ADK reads your docstring to build the tool schema. The LLM reads the schema to decide <em>when</em> and <em>how</em> to call your tool.</p>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <span class="compare-label cl-bad">✗ Bad — LLM won't know when to call it</span>
+      <pre style="border-radius:0 0 12px 12px;margin-top:0;"><code class="language-python">def analyze_balance(routine: dict) -> dict:
+    """Analyzes routine balance."""
+    ...</code></pre>
+      <p style="font-size:0.62em;color:var(--g-red);margin-top:6px;">LLM sees: "analyzes balance." When? What balance? What does it return? Unknown → tool ignored.</p>
+    </div>
+    <div>
+      <span class="compare-label cl-good">✓ Good — LLM knows exactly when + how</span>
+      <pre style="border-radius:0 0 12px 12px;margin-top:0;"><code class="language-python">def analyze_balance(routine: dict) -> dict:
+    """
+    Analyzes a routine for timing accuracy
+    and theme diversity.
+
+    ALWAYS call after generating a routine,
+    before presenting it to the user.
+
+    Args:
+        routine: dict with "days" key. Each day
+          has "activities" list with name,
+          duration_min, and theme.
+
+    Returns:
+        dict: total_minutes, minutes_per_day,
+        theme_counts, theme_diversity_score,
+        warnings (list[str]).
+
+    If warnings non-empty, state each one
+    and offer to fix the affected days.
+    """</code></pre>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:10px;padding:10px 16px;background:rgba(251,188,4,0.07);border-color:rgba(251,188,4,0.3);">
+    <p style="margin:0;font-size:0.65em;color:#B06000;text-align:center;"><strong>Rule of thumb:</strong> write the docstring for a smart colleague who needs to know <em>when</em> to call this, what to pass, and what comes back. That colleague is the LLM.</p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 7 — FunctionTool in ADK ═══ -->
+<section data-background="#FFFFFF">
+  <h2>FunctionTool in ADK</h2>
+  <p class="subline">Define a Python function, pass it to the agent — ADK does the rest.</p>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <h3>Define the function</h3>
+      <pre><code class="language-python">def analyze_balance(routine: dict) -> dict:
+    """[full docstring — LLM reads this]"""
+    # pure Python logic here
+    # NO: model.generate(...)
+    # NO: from google.adk import ...
+    warnings = []
+    totals = [
+        sum(a["duration_min"]
+            for a in day["activities"])
+        for day in routine["days"]
+    ]
+    return {
+        "total_minutes": sum(totals),
+        "minutes_per_day": totals,
+        "warnings": warnings,
+    }</code></pre>
+    </div>
+    <div>
+      <h3>Register on the Agent</h3>
+      <pre><code class="language-python">from google.adk.agents import Agent
+
+agent = Agent(
+    name="routine_builder",
+    model="gemini-2.5-flash",
+    instruction="...",
+    tools=[
+        analyze_balance,       # auto-wrapped ✓
+        propose_alternatives,  # auto-wrapped ✓
+    ]
+)</code></pre>
+      <div class="glass" style="margin-top:10px;padding:10px 14px;background:rgba(66,133,244,0.05);border-color:rgba(66,133,244,0.18);">
+        <p style="margin:0;font-size:0.64em;color:var(--g-mid);">ADK extracts: <strong>name →</strong> tool name &nbsp; <strong>docstring →</strong> description &nbsp; <strong>type hints →</strong> arg types &nbsp; <strong>defaults →</strong> optional vs required</p>
+      </div>
+      <div style="margin-top:10px;">
+        <span class="chip-blue">Auto-wrapped</span>
+        <span style="font-size:0.62em;color:var(--g-gray);margin-left:8px;">No explicit FunctionTool() needed</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 8 — Critic-in-Disguise ═══ -->
+<section data-background="linear-gradient(150deg,#FFF8E1 0%,#F8F9FA 70%,#E8F0FE 100%)">
+  <div class="doctrine-corner">Critic preview</div>
+  <h2>The critic-in-disguise</h2>
+  <p class="subline"><code>analyze_balance</code> is your first Critic — you just didn't name it that until now.</p>
+
+  <div class="cf-row" style="justify-content:center;margin:1.2em 0;">
+    <div class="cf-box ab-agent" style="min-width:120px;">
+      🤖 LLM Generator<br><span style="font-size:0.75em;color:var(--g-gray);">produces a routine</span>
+    </div>
+    <div class="arr">→</div>
+    <div class="cf-box ab-tool" style="min-width:130px;">
+      🔍 analyze_balance<br><span style="font-size:0.75em;color:var(--g-gray);">pure Python critic</span>
+    </div>
+    <div class="arr">→</div>
+    <div class="cf-box ab-data" style="min-width:120px;">
+      ⚠️ warnings<br><span style="font-size:0.75em;color:var(--g-gray);">feedback loop</span>
+    </div>
+    <div class="arr">→</div>
+    <div class="cf-box ab-user" style="min-width:120px;">
+      ✅ Final routine<br><span style="font-size:0.75em;color:var(--g-gray);">after critic approval</span>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:0.4em;">
+    <div class="glass">
+      <h3>Why it's a critic</h3>
+      <p style="font-size:0.68em;color:var(--g-mid);margin:0;line-height:1.6;">It independently checks the generator's output against rules the generator wrote. Generator creates. Critic audits. No LLM can reliably check its own arithmetic — that's exactly why the external function exists.</p>
+    </div>
+    <div class="glass">
+      <h3>Why it works as a tool</h3>
+      <p style="font-size:0.68em;color:var(--g-mid);margin:0;line-height:1.6;">Separation is the point. The critic has no stake in the output it checks. A pure function with a typed return is auditable, testable, and wrong in the same way every time — not randomly wrong.</p>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:12px;padding:9px 14px;background:rgba(251,188,4,0.07);border-color:rgba(251,188,4,0.25);">
+    <p style="margin:0;font-size:0.62em;color:#B06000;text-align:center;">In Weeks 5–7 we automate this: Generator → Critic → Generator loop, fully wired. Today you're building the Critic by hand.</p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 9 — Context as Data ═══ -->
+<section data-background="linear-gradient(150deg,#E6F4EA 0%,#F8F9FA 100%)">
+  <div class="doctrine-corner">Context</div>
+  <h2>Context as data — the activity catalog</h2>
+  <p class="subline"><code>context/activities.json</code> is the agent's world. Change it, change the output. No code changes.</p>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <pre><code class="language-json">{
+  "writing": [
+    {
+      "name": "Freewriting Sprint",
+      "duration_min": 20,
+      "tags": ["generative","warm-up"],
+      "description": "Pen moving, no stopping."
+    },
+    {
+      "name": "Drafting Session",
+      "duration_min": 45,
+      "tags": ["drafting","focused"],
+      "description": "Write forward on draft."
+    }
+  ],
+  "fitness": [ ... ],
+  "reading":  [ ... ]
+}</code></pre>
+    </div>
+    <div>
+      <h3>The context experiment</h3>
+      <div class="glass" style="margin-bottom:10px;">
+        <ol style="font-size:0.72em;color:var(--g-mid);padding-left:1.2em;margin:0;line-height:2.0;">
+          <li>Run agent → see routine A</li>
+          <li>Add 3 new activities to the JSON</li>
+          <li>Run same prompt → see routine B</li>
+        </ol>
+      </div>
+      <div class="glass" style="background:rgba(52,168,83,0.07);border-color:rgba(52,168,83,0.22);padding:12px 14px;">
+        <p style="margin:0;font-size:0.7em;color:#137333;"><strong>No code changed.</strong> The context changed.</p>
+        <p style="margin:4px 0 0;font-size:0.63em;color:var(--g-gray);">This is "context = what the agent reads" in its most literal form. The catalog is context. <code>propose_alternatives</code> reads it at runtime.</p>
+      </div>
+      <div style="margin-top:10px;">
+        <span class="chip-green">7 domains</span>
+        <span class="chip-green">54 activities</span>
+        <span style="font-size:0.62em;color:var(--g-gray);margin-left:4px;">— customize freely</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 10 — Callbacks ═══ -->
+<section data-background="#FFFFFF">
+  <h2>Optional: callbacks</h2>
+  <p class="subline">Observe, log, or intercept — without changing any agent logic.</p>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <h3>before_model_callback</h3>
+      <pre><code class="language-python">from google.adk.agents.callback_context \
+    import CallbackContext
+from google.adk.models.llm_request \
+    import LlmRequest
+from google.adk.models.llm_response \
+    import LlmResponse
+from typing import Optional
+import datetime
+
+def log_model_call(
+    callback_context: CallbackContext,
+    llm_request: LlmRequest,
+) -> Optional[LlmResponse]:
+    ts = datetime.datetime.now().strftime(
+        "%H:%M:%S")
+    print(f"[{ts}] === MODEL CALL ===")
+    return None  # None = proceed normally</code></pre>
+      <pre style="margin-top:8px;"><code class="language-python">agent = Agent(
+    ...,
+    before_model_callback=log_model_call
+)</code></pre>
+    </div>
+    <div>
+      <h3>When callbacks are useful</h3>
+      <div class="glass" style="margin-bottom:10px;">
+        <ul style="font-size:0.68em;color:var(--g-mid);padding-left:1.1em;line-height:1.9;margin:0;">
+          <li><strong style="color:var(--g-blue);">Observability</strong> — log every LLM call</li>
+          <li><strong style="color:var(--g-green);">Debugging</strong> — see what the model receives</li>
+          <li><strong style="color:var(--g-yellow);">Caching</strong> — return LlmResponse to skip the call</li>
+          <li><strong style="color:var(--g-red);">Rate limiting</strong> — intercept and delay</li>
+        </ul>
+      </div>
+      <div class="glass" style="background:rgba(248,249,250,0.9);">
+        <div style="font-size:0.62em;font-weight:700;color:var(--g-gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">after_tool_callback signature</div>
+        <code style="font-size:0.68em;color:var(--g-mid);display:block;line-height:1.7;">def cb(<br>&nbsp;&nbsp;tool: BaseTool,<br>&nbsp;&nbsp;args: Dict[str, Any],<br>&nbsp;&nbsp;tool_context: ToolContext,<br>&nbsp;&nbsp;tool_response: Dict<br>) -> Optional[Dict]</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 11 — Architecture ═══ -->
+<section data-background="linear-gradient(150deg,#F8F9FA 0%,#E8F0FE 100%)">
+  <h2>Today's project: Routine Builder</h2>
+  <p class="subline">Domain-agnostic. Fitness, writing, reading, learning, creative — or your own.</p>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <h3>Architecture</h3>
+      <div style="font-size:0.75em;">
+        <div class="arch-row">
+          <div class="arch-box ab-user">👤 User<br><span style="font-size:0.8em;color:var(--g-gray);">domain · N days · min/day · goal</span></div>
+          <div class="arr">→</div>
+          <div class="arch-box ab-agent">🤖 LlmAgent<br><span style="font-size:0.8em;color:var(--g-gray);">routine_builder</span></div>
+        </div>
+        <div style="margin-left:70px;color:var(--g-light);font-size:1.2em;margin:4px 0;">↓</div>
+        <div class="arch-row" style="flex-wrap:wrap;gap:6px;">
+          <div class="arch-box ab-tool">🔍 analyze_balance<br><span style="font-size:0.8em;">critic tool</span></div>
+          <div class="arr">+</div>
+          <div class="arch-box ab-tool">💡 propose_alternatives<br><span style="font-size:0.8em;">catalog lookup</span></div>
+          <div class="arr">←</div>
+          <div class="arch-box ab-data">📄 activities.json<br><span style="font-size:0.8em;">context</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Doctrine in one project</h3>
+      <div class="glass" style="margin-bottom:8px;background:rgba(66,133,244,0.05);border-color:rgba(66,133,244,0.18);">
+        <div style="font-size:0.68em;font-weight:700;color:var(--g-blue);">Spec moment</div>
+        <div style="font-size:0.63em;color:var(--g-gray);margin-top:3px;">Ask for a 30-day routine → agent refuses. Max 7 days lives in spec.md, enforced by INSTRUCTION.</div>
+      </div>
+      <div class="glass" style="margin-bottom:8px;background:rgba(251,188,4,0.06);border-color:rgba(251,188,4,0.25);">
+        <div style="font-size:0.68em;font-weight:700;color:#B06000;">Context moment</div>
+        <div style="font-size:0.63em;color:var(--g-gray);margin-top:3px;">Edit activities.json → routine changes. No code touched. The file is context.</div>
+      </div>
+      <div class="glass" style="background:rgba(234,67,53,0.05);border-color:rgba(234,67,53,0.18);">
+        <div style="font-size:0.68em;font-weight:700;color:var(--g-red);">Critic moment</div>
+        <div style="font-size:0.63em;color:var(--g-gray);margin-top:3px;"><code>analyze_balance</code> checks what the generator produced. Generator → Critic → Output.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 12 — Code: analyze_balance ═══ -->
+<section data-background="#FFFFFF">
+  <h2><code>analyze_balance</code> — the critic function</h2>
+  <p class="subline">Pure Python. No LLM. Deterministic. Testable. This is what a good tool looks like.</p>
+
+  <pre><code class="language-python">def analyze_balance(routine: dict) -> dict:
+    """
+    ALWAYS call after generating a routine, before presenting it.
+    Performs arithmetic and rule-checking the model should not do itself.
+    """
+    days = routine.get("days", [])
+    minutes_per_day, all_themes = [], []
+
+    for day in days:
+        activities = day.get("activities", [])
+        minutes_per_day.append(sum(a.get("duration_min", 0) for a in activities))
+        all_themes.extend(a.get("theme", "unknown") for a in activities)
+
+    total_minutes = sum(minutes_per_day)
+    theme_counts = {t: all_themes.count(t) for t in set(all_themes)}
+    diversity_score = round(len(set(all_themes)) / len(all_themes), 2) if all_themes else 0.0
+
+    warnings = []
+    for i in range(len(days) - 1):            # Rule: consecutive same-dominant-theme days
+        if dominant_theme(days[i]) == dominant_theme(days[i+1]):
+            warnings.append(f"Day {i+1} and Day {i+2} share dominant theme")
+    for i, total in enumerate(minutes_per_day): # Rule: day exceeds 90 min
+        if total > 90:
+            warnings.append(f"Day {i+1} exceeds 90 minutes ({total} min)")
+    if diversity_score < 0.4:                  # Rule: low diversity
+        warnings.append(f"Low diversity score: {diversity_score} (target ≥ 0.4)")
+
+    return {                                   # ← typed return, not free text
+        "total_minutes": total_minutes,        # int
+        "minutes_per_day": minutes_per_day,    # list[int]
+        "theme_counts": theme_counts,          # dict[str, int]
+        "theme_diversity_score": diversity_score, # float 0.0–1.0
+        "warnings": warnings,                  # list[str]  ← not "looks repetitive"
+    }</code></pre>
+</section>
+
+<!-- ═══ SLIDE 13 — Demo Recap ═══ -->
+<section data-background="linear-gradient(150deg,#F8F9FA 0%,#E6F4EA 100%)">
+  <h2>Demo recap</h2>
+  <p class="subline">What you just watched — and what to look for in your own build.</p>
+
+  <div class="grid-2x2" style="margin-top:0.5em;">
+    <div class="glass" style="background:rgba(52,168,83,0.05);border-color:rgba(52,168,83,0.2);">
+      <h3 style="color:var(--g-green);">What worked</h3>
+      <ul style="font-size:0.68em;color:var(--g-mid);padding-left:1.1em;line-height:1.9;margin:0;">
+        <li><code>analyze_balance</code> called before final response</li>
+        <li>Warnings acknowledged, fix offered</li>
+        <li>30-day request refused cleanly</li>
+        <li>Alternatives pulled from catalog</li>
+      </ul>
+    </div>
+    <div class="glass">
+      <h3>Things to notice in traces</h3>
+      <ul style="font-size:0.68em;color:var(--g-mid);padding-left:1.1em;line-height:1.9;margin:0;">
+        <li>How many model calls per routine?</li>
+        <li>Did <code>analyze_balance</code> run post-generation?</li>
+        <li>What did <code>propose_alternatives</code> receive?</li>
+        <li>Where did the callback fire?</li>
+      </ul>
+    </div>
+    <div class="glass" style="background:rgba(234,67,53,0.04);border-color:rgba(234,67,53,0.18);">
+      <h3 style="color:var(--g-red);">Common failure modes</h3>
+      <ul style="font-size:0.68em;color:var(--g-mid);padding-left:1.1em;line-height:1.9;margin:0;">
+        <li>Tool not called → fix the docstring</li>
+        <li>Wrong args passed → check Args section</li>
+        <li>Spec not enforced → make INSTRUCTION more explicit</li>
+        <li>LLM inside a tool → refactor to pure Python</li>
+      </ul>
+    </div>
+    <div class="glass" style="background:rgba(66,133,244,0.05);border-color:rgba(66,133,244,0.18);">
+      <h3>Insight to take home</h3>
+      <p style="font-size:0.66em;color:var(--g-mid);margin:0;line-height:1.6;"><code>analyze_balance</code> is the first Critic you've written. <strong style="color:var(--g-blue);">Generator → Critic → Output.</strong> We'll name this pattern and automate it in Weeks 5–7. You already understand how it works.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 14 — Your Turn ═══ -->
+<section data-background="linear-gradient(145deg,#E8F0FE 0%,#F5F0FF 50%,#E6F4EA 100%)">
+  <h2>Your turn — 45 minutes</h2>
+  <p class="subline">Pick your on-ramp and go. Compare Notes starts at the bell.</p>
+
+  <div class="timeline">
+    <div class="tl tl-1"><span class="tl-t">5'</span>Read spec.md<div class="tl-label">plan first</div></div>
+    <div class="tl tl-2"><span class="tl-t">10'</span>Vibe agent.py<div class="tl-label">INSTRUCTION</div></div>
+    <div class="tl tl-3"><span class="tl-t">10'</span>analyze_balance<div class="tl-label">critic tool</div></div>
+    <div class="tl tl-3"><span class="tl-t">10'</span>propose_alternatives<div class="tl-label">catalog tool</div></div>
+    <div class="tl tl-4"><span class="tl-t">10'</span>Test + deploy<div class="tl-label">ship it</div></div>
+  </div>
+
+  <table class="onramp-t" style="margin-top:0.8em;">
+    <thead>
+      <tr><th>On-ramp</th><th>What you do</th><th>Stretch goal</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:var(--g-green);">🟢 Replicator</strong><br><span style="font-size:0.85em;color:var(--g-gray);">New or rusty? Start here.</span></td>
+        <td style="font-size:0.88em;">Follow INSTRUCTIONS.md step by step. Get a working URL.</td>
+        <td style="font-size:0.88em;">Personalize the activity catalog for your domain.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--g-yellow);">🟡 Riffer</strong></td>
+        <td style="font-size:0.88em;">Follow steps 1–3, then add your own domain + 10 activities.</td>
+        <td style="font-size:0.88em;">Add a <code>before_model_callback</code> logger.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--g-red);">🔴 Freestyle</strong></td>
+        <td style="font-size:0.88em;">Use spec.md + tool-design-principles.md only. Build yours.</td>
+        <td style="font-size:0.88em;">Add a third tool (your idea).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="glass" style="margin-top:12px;padding:10px 16px;background:rgba(52,168,83,0.07);border-color:rgba(52,168,83,0.22);">
+    <p style="margin:0;font-size:0.65em;color:#137333;text-align:center;">
+      ✅ Public URL &nbsp;·&nbsp; ✅ Personalized catalog &nbsp;·&nbsp; ✅ One routine you'll actually follow
+      &nbsp;&nbsp;·&nbsp;&nbsp; Don't forget the drift refusal test: ask for a 30-day routine.
+    </p>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    plugins: [RevealHighlight],
+    width: 1100,
+    height: 700,
+    margin: 0.05,
+  });
+</script>
+</body>
+</html>

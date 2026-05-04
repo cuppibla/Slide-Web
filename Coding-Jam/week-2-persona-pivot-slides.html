@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Week 2 — Multi-Agent Workflows | Vibe & Hack</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
+
+  <style>
+    /* ── Google color tokens ─────────────────────────────────── */
+    :root {
+      --g-blue:   #4285F4;
+      --g-red:    #EA4335;
+      --g-yellow: #FBBC05;
+      --g-green:  #34A853;
+
+      --g-blue-light:   #E8F0FE;
+      --g-red-light:    #FCE8E6;
+      --g-yellow-light: #FEF7E0;
+      --g-green-light:  #E6F4EA;
+
+      --g-blue-dark:   #1A73E8;
+      --g-text:        #202124;
+      --g-text-2:      #5f6368;
+      --g-text-3:      #80868b;
+      --g-surface:     #ffffff;
+      --g-bg:          #f8f9fa;
+      --g-border:      rgba(0,0,0,0.08);
+
+      /* Glass variables */
+      --glass-bg:      rgba(255,255,255,0.72);
+      --glass-border:  rgba(255,255,255,0.95);
+      --glass-shadow:  0 2px 32px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.9) inset;
+      --glass-blur:    blur(28px) saturate(180%);
+    }
+
+    /* ── Base overrides ──────────────────────────────────────── */
+    .reveal-viewport { background: var(--g-bg); }
+    .reveal { font-family: 'Google Sans', 'Segoe UI', system-ui, sans-serif; color: var(--g-text); }
+    .reveal h1, .reveal h2, .reveal h3 {
+      text-transform: none;
+      letter-spacing: -0.01em;
+      color: var(--g-text);
+    }
+    .reveal h2 { font-size: 1.45em; font-weight: 600; margin-bottom: 0.3em; }
+    .reveal h3 { font-size: 1.05em; font-weight: 500; }
+    .reveal p  { color: var(--g-text-2); }
+    .reveal pre { margin: 0; box-shadow: none; }
+    .reveal pre code { font-size: 0.66em; line-height: 1.6; border-radius: 12px; padding: 18px 20px; }
+    .reveal .slides section { padding: 0 28px; }
+    .reveal ul { list-style: none; padding: 0; }
+    .reveal ul li { padding-left: 1em; position: relative; }
+    .reveal ul li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 6px; height: 6px; border-radius: 50%; background: var(--g-blue); }
+
+    /* ── Liquid glass card ───────────────────────────────────── */
+    .glass {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-bottom-color: rgba(0,0,0,0.06);
+      border-right-color: rgba(0,0,0,0.04);
+      box-shadow: var(--glass-shadow);
+      border-radius: 18px;
+      padding: 20px 22px;
+    }
+    .glass-sm {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-bottom-color: rgba(0,0,0,0.05);
+      box-shadow: var(--glass-shadow);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    /* ── Google pill badges ──────────────────────────────────── */
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 100px;
+      font-size: 0.52em; font-weight: 600; letter-spacing: 0.04em;
+    }
+    .pill-blue   { background: var(--g-blue-light);   color: var(--g-blue-dark); border: 1px solid rgba(66,133,244,0.2); }
+    .pill-red    { background: var(--g-red-light);    color: #c5221f;            border: 1px solid rgba(234,67,53,0.2); }
+    .pill-yellow { background: var(--g-yellow-light); color: #a57600;            border: 1px solid rgba(251,188,5,0.3); }
+    .pill-green  { background: var(--g-green-light);  color: #1e7e34;            border: 1px solid rgba(52,168,83,0.2); }
+
+    /* ── Doctrine corner label ───────────────────────────────── */
+    .doctrine-corner {
+      position: fixed; bottom: 20px; right: 24px;
+      display: flex; gap: 6px; z-index: 999; pointer-events: none;
+    }
+    .doctrine-pill {
+      background: rgba(255,255,255,0.82);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-bottom-color: rgba(0,0,0,0.06);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+      border-radius: 100px;
+      padding: 4px 11px;
+      font-size: 0.48em;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Week label ──────────────────────────────────────────── */
+    .week-corner {
+      position: fixed; top: 18px; left: 24px;
+      font-size: 0.46em; color: var(--g-text-3);
+      letter-spacing: 0.08em; font-weight: 500;
+      z-index: 999; pointer-events: none;
+    }
+
+    /* ── Independence badge (top-right on title slide) ───────── */
+    .indie-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,0.85);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(52,168,83,0.35);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 0.6em; font-weight: 600; color: #1e7e34;
+      box-shadow: 0 2px 12px rgba(52,168,83,0.12);
+    }
+    .indie-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--g-green); display: inline-block; }
+
+    /* ── Google-colored dot accent ───────────────────────────── */
+    .g-dots { display: inline-flex; gap: 3px; align-items: center; margin-right: 4px; }
+    .gd { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .gd-b { background: var(--g-blue); }
+    .gd-r { background: var(--g-red); }
+    .gd-y { background: var(--g-yellow); }
+    .gd-g { background: var(--g-green); }
+
+    /* ── Grid helpers ─────────────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 14px; }
+
+    /* ── Color-tinted glass cards ────────────────────────────── */
+    .glass-blue   { background: rgba(232,240,254,0.75); border-color: rgba(66,133,244,0.25); }
+    .glass-red    { background: rgba(252,232,230,0.75); border-color: rgba(234,67,53,0.2); }
+    .glass-yellow { background: rgba(254,247,224,0.75); border-color: rgba(251,188,5,0.3); }
+    .glass-green  { background: rgba(230,244,234,0.75); border-color: rgba(52,168,83,0.25); }
+
+    .card-h { font-size: 0.85em; font-weight: 600; margin-bottom: 7px; }
+    .card-b { font-size: 0.72em; color: var(--g-text-2); line-height: 1.55; margin: 0; }
+
+    /* ── Trace / timeline ─────────────────────────────────────── */
+    .trace-row { display: flex; align-items: center; gap: 12px; margin: 5px 0; }
+    .trace-lbl { font-size: 0.58em; color: var(--g-text-3); width: 150px; text-align: right; flex-shrink: 0; font-family: monospace; }
+    .trace-wrap { flex: 1; height: 20px; position: relative; }
+    .trace-bar { position: absolute; top: 0; height: 100%; border-radius: 5px; opacity: 0.85; }
+    .tb-blue   { background: linear-gradient(90deg, var(--g-blue), rgba(66,133,244,0.55)); }
+    .tb-yellow { background: linear-gradient(90deg, var(--g-yellow), rgba(251,188,5,0.55)); }
+    .tb-green  { background: linear-gradient(90deg, var(--g-green), rgba(52,168,83,0.55)); }
+    .tb-red    { background: linear-gradient(90deg, var(--g-red), rgba(234,67,53,0.55)); }
+
+    /* ── Arch diagram (monospace) ─────────────────────────────── */
+    .arch {
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+      font-size: 0.56em; line-height: 1.8;
+      background: rgba(255,255,255,0.6);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-bottom-color: rgba(0,0,0,0.05);
+      border-radius: 14px;
+      padding: 16px 20px;
+      color: var(--g-text);
+      white-space: pre;
+    }
+    .ab { color: var(--g-blue); font-weight: 600; }
+    .ay { color: #a57600; font-weight: 600; }
+    .ar { color: #c5221f; font-weight: 600; }
+    .ag { color: #1e7e34; font-weight: 600; }
+
+    /* ── On-ramp badges ───────────────────────────────────────── */
+    .onramp { display: flex; flex-direction: column; gap: 8px; }
+    .onramp-card {
+      background: rgba(255,255,255,0.76);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.95);
+      border-bottom-color: rgba(0,0,0,0.05);
+      box-shadow: var(--glass-shadow);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .onramp-icon { font-size: 1.1em; margin-top: 1px; flex-shrink: 0; }
+    .muted { color: var(--g-text-3); font-size: 0.68em; }
+
+    /* ── Slide bg decorations ─────────────────────────────────── */
+    .reveal .slides section { overflow: hidden; }
+    .bg-blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: 0.18; pointer-events: none; z-index: -1;
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
+
+
+
+</head>
+<body>
+
+<!-- Fixed chrome on all slides -->
+<div class="doctrine-corner">
+  <span class="doctrine-pill" style="color: #1a73e8;">📐 Spec</span>
+  <span class="doctrine-pill" style="color: #a57600;">📦 Context</span>
+  <span class="doctrine-pill" style="color: #c5221f;">🔍 Critic</span>
+</div>
+<div class="week-corner">VIBE &amp; HACK · WEEK 2 OF 8</div>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ══ SLIDE 1 — Title ══════════════════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <!-- soft color blobs -->
+  <div class="bg-blob" style="width:400px;height:400px;background:var(--g-blue);top:-120px;right:-80px;"></div>
+  <div class="bg-blob" style="width:300px;height:300px;background:var(--g-green);bottom:-100px;left:-60px;"></div>
+
+  <div style="padding-top: 30px; text-align: left;">
+    <!-- independence badge — the BIG message -->
+    <div style="margin-bottom: 24px;">
+      <span class="indie-badge">
+        <span class="indie-dot"></span>
+        No prerequisites — this week stands alone. Join any week, start fresh.
+      </span>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+      <div class="g-dots">
+        <span class="gd gd-b"></span><span class="gd gd-r"></span>
+        <span class="gd gd-y"></span><span class="gd gd-g"></span>
+      </div>
+      <span style="font-size:0.5em; font-weight:600; color:var(--g-text-3); letter-spacing:0.1em;">WEEK 2 · MULTI-AGENT WORKFLOWS</span>
+    </div>
+
+    <h1 style="font-size: 2.5em; font-weight: 700; line-height: 1.08; color: var(--g-text); margin: 0 0 10px;">
+      Persona Pivot
+    </h1>
+    <p style="font-size: 1em; color: var(--g-text-2); margin-bottom: 36px; max-width: 520px;">
+      One idea. Three audiences. Three parallel AI agents. One synthesis that finds the tensions they couldn't.
+    </p>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <span class="pill pill-blue">ParallelAgent</span>
+      <span class="pill pill-yellow">SequentialAgent</span>
+      <span class="pill pill-red">Custom BaseAgent</span>
+      <span class="pill pill-green">adk web · Cloud Run</span>
+    </div>
+
+    <div class="glass" style="margin-top: 32px; max-width: 500px; display:flex; gap:20px; align-items:center;">
+      <div style="text-align:center; padding-right:18px; border-right: 1px solid rgba(0,0,0,0.08);">
+        <p style="font-size:0.55em; color:var(--g-text-3); margin:0 0 2px;">Today's build</p>
+        <p style="font-size:0.85em; font-weight:600; color:var(--g-blue); margin:0;">~45 min</p>
+      </div>
+      <div>
+        <p style="font-size:0.6em; color:var(--g-text-2); margin:0;">
+          You leave with a <strong>deployed public URL</strong>, a trace screenshot of 3 parallel agents, and one real decision you ran through the system.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 2 — You belong here ════════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:360px;height:360px;background:var(--g-green);top:-80px;right:-60px;"></div>
+
+  <h2>You belong here — even if you missed Week 1</h2>
+  <p style="margin-bottom: 20px;">Each week of this workshop is <strong style="color:var(--g-blue);">fully independent</strong>. No homework. No prerequisite code. Just show up.</p>
+
+  <div class="grid-2">
+    <div class="glass glass-green">
+      <p class="card-h" style="color:#1e7e34;">✓ What you bring</p>
+      <ul style="font-size:0.7em; color:var(--g-text-2);">
+        <li>Laptop with Python 3.11+</li>
+        <li>Any AI IDE (Cursor, VS Code + Copilot…)</li>
+        <li>A Google API key (or GCP project)</li>
+        <li>An idea you want to pressure-test</li>
+      </ul>
+    </div>
+    <div class="glass glass-blue">
+      <p class="card-h" style="color:var(--g-blue-dark);">✓ What we provide</p>
+      <ul style="font-size:0.7em; color:var(--g-text-2);">
+        <li>Starter repo with full INSTRUCTIONS.md</li>
+        <li>Copy-paste IDE prompts for every step</li>
+        <li>Context reference files to paste into your IDE</li>
+        <li>Three on-ramps to match any skill level</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:16px; display:flex; gap:18px; align-items:center;">
+    <div style="font-size:1.6em; flex-shrink:0;">💡</div>
+    <div>
+      <p style="font-size:0.65em; color:var(--g-text-2); margin:0;">
+        <strong style="color:var(--g-text);">Missed Week 1?</strong> The doctrine recap is on the next slide — one minute and you're caught up. This week's project, Persona Pivot, uses <em>zero</em> code from Week 1. You'll vibe-code everything fresh today with your AI IDE.
+      </p>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top: 14px; background: rgba(230,244,234,0.65); border-color:rgba(52,168,83,0.2);">
+    <p style="font-size:0.62em; color:#1e7e34; margin:0; font-weight:500;">
+      Every week: Demo (15 min) → Concept Frame (7 min) → Hands-on (45 min) → Compare Notes (20 min). Same rhythm, new pattern.
+    </p>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 3 — Doctrine recap ═════════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:300px;height:300px;background:var(--g-yellow);top:-60px;right:-40px;"></div>
+
+  <h2>The doctrine — 60-second recap</h2>
+  <p class="muted" style="margin-bottom:18px;">Three moves. Every project, every week.</p>
+
+  <div class="grid-3">
+    <div class="glass glass-blue" style="border-radius:18px;">
+      <div style="font-size:0.55em; font-weight:700; letter-spacing:0.06em; color:var(--g-blue-dark); margin-bottom:6px;">📐 SPEC</div>
+      <p class="card-h" style="color:var(--g-text); font-size:0.88em;">Write before you code</p>
+      <p class="card-b">A slim <code>spec.md</code>: out-of-scope list, behavioral rules, acceptance criteria. Hand it to your AI IDE. It holds what the spec holds.</p>
+    </div>
+    <div class="glass glass-yellow">
+      <div style="font-size:0.55em; font-weight:700; letter-spacing:0.06em; color:#a57600; margin-bottom:6px;">📦 CONTEXT</div>
+      <p class="card-h" style="color:var(--g-text); font-size:0.88em;">Curate what AI reads</p>
+      <p class="card-b">Everything the AI sees shapes its output. Give it the right context for the right task. Bad context = bad output, not a bad model.</p>
+    </div>
+    <div class="glass glass-red">
+      <div style="font-size:0.55em; font-weight:700; letter-spacing:0.06em; color:#c5221f; margin-bottom:6px;">🔍 CRITIC</div>
+      <p class="card-h" style="color:var(--g-text); font-size:0.88em;">Agents check agents</p>
+      <p class="card-b">A second LLM (or process) checks the first. Today: the Synthesizer is your first soft critic. Week 4 builds the hard one.</p>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:16px; text-align:center;">
+    <p style="font-size:0.65em; color:var(--g-text-2); margin:0; font-style:italic;">
+      "Spec is a lever. Context is fuel. The Critic finds the truth."
+    </p>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 4 — Why one agent isn't enough ═════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:350px;height:350px;background:var(--g-red);bottom:-100px;left:-80px;"></div>
+
+  <h2>Why one agent isn't enough</h2>
+
+  <div class="grid-2" style="align-items:start;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="glass glass-red">
+        <p class="card-h" style="color:#c5221f;">Context contamination</p>
+        <p class="card-b">"Think like 3 audiences" → the agent reads all 3 roles at once and quietly negotiates between them before generating. You get compromise, not independence.</p>
+      </div>
+      <div class="glass glass-red">
+        <p class="card-h" style="color:#c5221f;">Sequential bottleneck</p>
+        <p class="card-b">Independent tasks forced to wait on each other. 3 parallel-able perspectives run in series = 3× unnecessary latency.</p>
+      </div>
+      <div class="glass glass-red">
+        <p class="card-h" style="color:#c5221f;">Single-lens anchoring</p>
+        <p class="card-b">One agent with one instruction inevitably anchors on one frame. Complex decisions need genuinely different lenses.</p>
+      </div>
+    </div>
+    <div>
+      <div class="glass glass-green" style="margin-bottom:12px;">
+        <p class="card-h" style="color:#1e7e34;">Multi-agent solves this</p>
+        <ul style="font-size:0.7em; color:var(--g-text-2); margin:6px 0 0;">
+          <li style="margin-bottom:5px;">Isolated contexts — no perspective contaminates another</li>
+          <li style="margin-bottom:5px;">Simultaneous execution — 3 agents at once, not in series</li>
+          <li style="margin-bottom:5px;">Single focused role per agent — specialization > generalism</li>
+          <li>Synthesizer finds structure across all outputs</li>
+        </ul>
+      </div>
+      <div class="glass" style="text-align:center; padding:18px;">
+        <p style="font-size:0.58em; color:var(--g-text-3); margin:0 0 6px;">The key insight</p>
+        <p style="font-size:0.75em; font-weight:600; color:var(--g-text); margin:0; line-height:1.4;">
+          "Orchestration is a <span style="color:var(--g-blue);">design decision</span>,<br>not a technical detail."
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 5 — Three workflow patterns ════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:320px;height:320px;background:var(--g-blue);top:-80px;right:-60px;"></div>
+
+  <h2>Three workflow patterns in ADK</h2>
+  <p class="muted" style="margin-bottom:16px;">Pick based on dependency structure.</p>
+
+  <div class="grid-3">
+    <div class="glass glass-blue">
+      <span class="pill pill-blue" style="margin-bottom:10px; display:inline-block;">SequentialAgent</span>
+      <p class="card-b" style="margin-bottom:8px;">A → B → C. Each waits for the previous to finish.</p>
+      <p style="font-size:0.65em; color:var(--g-text-3);"><strong style="color:var(--g-text-2);">Use when:</strong> Step N needs step N-1's output.</p>
+      <p style="font-size:0.62em; color:var(--g-blue-dark); margin-top:6px;"><strong>Example:</strong> Search → Summarize → Rank</p>
+    </div>
+    <div class="glass glass-yellow">
+      <span class="pill pill-yellow" style="margin-bottom:10px; display:inline-block;">ParallelAgent</span>
+      <p class="card-b" style="margin-bottom:8px;">A, B, C run simultaneously. All finish before next stage.</p>
+      <p style="font-size:0.65em; color:var(--g-text-3);"><strong style="color:var(--g-text-2);">Use when:</strong> Agents are independent — no runtime dependency.</p>
+      <p style="font-size:0.62em; color:#a57600; margin-top:6px;"><strong>Critical:</strong> Each sub-agent needs a unique <code>output_key</code>.</p>
+    </div>
+    <div class="glass glass-red">
+      <span class="pill pill-red" style="margin-bottom:10px; display:inline-block;">Custom BaseAgent</span>
+      <p class="card-b" style="margin-bottom:8px;">You write Python logic + call LLM directly. Full control.</p>
+      <p style="font-size:0.65em; color:var(--g-text-3);"><strong style="color:var(--g-text-2);">Use when:</strong> You need Python to bridge agents or build dynamic prompts.</p>
+      <p style="font-size:0.62em; color:#c5221f; margin-top:6px;"><strong>Example:</strong> Synthesizer — reads 3 keys, builds prompt</p>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:14px;">
+    <p style="font-size:0.63em; color:var(--g-text-2); margin:0;">
+      <strong style="color:var(--g-text);">Most real workflows are hybrids.</strong>
+      Persona Pivot: <code style="color:var(--g-blue);">SequentialAgent</code> wraps <code style="color:var(--g-yellow-light); background:var(--g-text); border-radius:4px; padding:1px 4px;">ParallelAgent</code> → <code>SynthesizerAgent</code>.
+      Sequential for ordering, Parallel for independence, Custom to bridge them.
+    </p>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 6 — ParallelAgent deep dive ════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <h2>ParallelAgent deep dive <span class="pill pill-yellow" style="vertical-align:middle;">📦 Context</span></h2>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <pre><code class="python">from google.adk.agents import LlmAgent, ParallelAgent
+
+# Each sub-agent writes to its OWN unique key
+skeptic = LlmAgent(
+    name="skeptic_agent",
+    model="gemini-2.0-flash",
+    instruction="You are a skeptic...",
+    output_key="skeptic_perspective", # unique
+    tools=[],
+)
+enthusiast = LlmAgent(
+    name="enthusiast_agent",
+    model="gemini-2.0-flash",
+    instruction="You are an enthusiast...",
+    output_key="enthusiast_perspective",
+    tools=[],
+)
+
+# All 3 run at the same time
+parallel = ParallelAgent(
+    name="parallel_perspectives",
+    sub_agents=[
+        skeptic, enthusiast, pragmatist
+    ],
+)
+# After: session.state has all 3 keys</code></pre>
+    </div>
+    <div>
+      <div class="glass" style="margin-bottom:12px;">
+        <p style="font-size:0.58em; color:var(--g-text-3); margin:0 0 10px; letter-spacing:0.07em; font-weight:600;">ADK TRACE VIEW — TIME →</p>
+        <div class="trace-row">
+          <span class="trace-lbl">skeptic_agent</span>
+          <div class="trace-wrap">
+            <div class="trace-bar tb-blue" style="left:0%; width:52%;"></div>
+          </div>
+        </div>
+        <div class="trace-row">
+          <span class="trace-lbl">enthusiast_agent</span>
+          <div class="trace-wrap">
+            <div class="trace-bar tb-yellow" style="left:2%; width:58%;"></div>
+          </div>
+        </div>
+        <div class="trace-row">
+          <span class="trace-lbl">pragmatist_agent</span>
+          <div class="trace-wrap">
+            <div class="trace-bar tb-green" style="left:1%; width:54%;"></div>
+          </div>
+        </div>
+        <div style="border-top:1px solid rgba(0,0,0,0.06); margin:8px 0;"></div>
+        <div class="trace-row">
+          <span class="trace-lbl">synthesizer_agent</span>
+          <div class="trace-wrap">
+            <div class="trace-bar tb-red" style="left:62%; width:38%;"></div>
+          </div>
+        </div>
+        <p style="font-size:0.55em; color:var(--g-text-3); margin:8px 0 0;">Overlapping = parallel. Gap = SequentialAgent ensures all finish first.</p>
+      </div>
+      <div class="glass glass-yellow">
+        <p class="card-h" style="color:#a57600;">Key isolation insight</p>
+        <p class="card-b">Sub-agents see state <em>as it was when ParallelAgent started</em>. They cannot read sibling outputs — they're already running. Isolation by architecture, not convention.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 7 — The Synthesizer pattern ════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:320px;height:320px;background:var(--g-red);top:-80px;right:-60px;"></div>
+  <h2>The Synthesizer pattern <span class="pill pill-red" style="vertical-align:middle;">🔍 Critic</span></h2>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <pre><code class="python">from google.adk.agents.base_agent import BaseAgent
+from google.adk.agents.invocation_context import (
+    InvocationContext)
+from google.adk.events import Event
+from typing import AsyncGenerator
+from google import genai
+from google.genai import types
+
+class SynthesizerAgent(BaseAgent):
+    model_name: str = "gemini-2.0-flash"
+
+    async def _run_async_impl(
+        self, ctx: InvocationContext
+    ) -> AsyncGenerator[Event, None]:
+
+        # 1. Read all 3 perspectives from state
+        skeptic  = ctx.session.state.get(
+            "skeptic_perspective", "")
+        enthusiast = ctx.session.state.get(
+            "enthusiast_perspective", "")
+        pragmatist = ctx.session.state.get(
+            "pragmatist_perspective", "")
+
+        # 2. Build synthesis prompt dynamically
+        prompt = (f"SKEPTIC: {skeptic}\n"
+                  f"ENTHUSIAST: {enthusiast}\n"
+                  f"PRAGMATIST: {pragmatist}\n\n"
+                  "Find tensions and agreements.")
+
+        # 3. Call LLM directly
+        client = genai.Client()
+        resp = client.models.generate_content(
+            model=self.model_name, contents=prompt)
+
+        # 4. Yield the Event
+        yield Event(
+            invocation_id=ctx.invocation_id,
+            author=self.name,
+            content=types.Content(role="model",
+                parts=[types.Part(text=resp.text)]),
+        )</code></pre>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="glass glass-red">
+        <p class="card-h" style="color:#c5221f;">Why custom, not LlmAgent?</p>
+        <ul style="font-size:0.68em; color:var(--g-text-2);">
+          <li>Pull specific state keys in Python</li>
+          <li>Validate all 3 exist before calling LLM</li>
+          <li>Build prompts using actual audience labels</li>
+          <li>LlmAgent = static instruction. Custom = Python + LLM.</li>
+        </ul>
+      </div>
+      <div class="glass glass-red">
+        <p class="card-h" style="color:#c5221f;">This IS a critic</p>
+        <p class="card-b">Synthesizer reviews other agents' outputs and finds structure. Soft critic = finds tensions. Hard critic (Week 4) = validates correctness. Same pattern, different purpose.</p>
+        <p style="font-size:0.62em; color:#c5221f; font-style:italic; margin-top:6px;">"An agent reviewing agents is a critic."</p>
+      </div>
+      <div class="glass glass-blue">
+        <p class="card-h" style="color:var(--g-blue-dark);">Required output</p>
+        <p class="card-b">Per spec.md: ≥1 tension + ≥1 agreement + synthesis + key question. Structured, not just a summary.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 8 — ADK architecture ══════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <h2>ADK sub-agent architecture</h2>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <pre><code class="python">from google.adk.agents import SequentialAgent
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
+
+# SequentialAgent wraps: [Parallel → Synthesizer]
+root_agent = SequentialAgent(
+    name="persona_pivot",       # adk web looks for this
+    sub_agents=[
+        parallel_perspectives,  # stage 1
+        synthesizer_agent,      # stage 2
+    ],
+)
+
+# Session — no persistence (per spec.md)
+session_service = InMemorySessionService()
+
+runner = Runner(
+    agent=root_agent,
+    session_service=session_service,
+    app_name="persona_pivot",
+)
+
+# Create session + run
+session = session_service.create_session(
+    app_name="persona_pivot", user_id="user_1")
+
+async for event in runner.run_async(
+    user_id="user_1",
+    session_id=session.id,
+    new_message=types.Content(
+        role="user",
+        parts=[types.Part(text="Idea: ...")],
+    ),
+):
+    print(event.author, event.content)</code></pre>
+    </div>
+    <div>
+      <p style="font-size:0.65em; color:var(--g-text-3); margin-bottom:10px; font-weight:500;">PERSONA PIVOT AGENT GRAPH</p>
+      <div class="arch">
+<span class="ab">root_agent</span> (SequentialAgent)
+│
+├── <span class="ay">parallel_perspectives</span> (ParallelAgent)
+│   ├── <span class="ab">skeptic_agent</span>
+│   │     └─ writes: "skeptic_perspective"
+│   ├── <span class="ay">enthusiast_agent</span>
+│   │     └─ writes: "enthusiast_perspective"
+│   └── <span class="ag">pragmatist_agent</span>
+│         └─ writes: "pragmatist_perspective"
+│
+└── <span class="ar">synthesizer_agent</span> (Custom)
+      ├─ reads: all 3 keys from state
+      └─ yields: synthesis Event</div>
+      <div class="glass" style="margin-top:12px;">
+        <p style="font-size:0.62em; color:var(--g-text-2); margin:0;">
+          <strong style="color:var(--g-blue);">adk web</strong> looks for a variable named exactly <code>root_agent</code> in your <code>agent.py</code>. Name it this precisely.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 9 — Context isolation ═════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:300px;height:300px;background:var(--g-yellow);bottom:-80px;right:-60px;"></div>
+  <h2>Context isolation principle <span class="pill pill-yellow" style="vertical-align:middle;">📦 Context</span></h2>
+
+  <div class="grid-2">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="glass glass-red">
+        <p class="card-h" style="color:#c5221f;">Without isolation</p>
+        <p class="card-b">Skeptic runs first. Enthusiast reads Skeptic's output and softens. Pragmatist reads both and plays it safe. Three voices that quietly negotiated toward the center. The independence you wanted never existed.</p>
+        <p style="font-size:0.6em; color:#c5221f; font-style:italic; margin-top:6px;">"Sequential perspectives are secretly correlated."</p>
+      </div>
+      <div class="glass glass-green">
+        <p class="card-h" style="color:#1e7e34;">With ParallelAgent isolation</p>
+        <p class="card-b">All 3 agents start simultaneously from the same state. None can read what the others are writing — they're already running. Genuine independence enforced by timing.</p>
+        <p style="font-size:0.6em; color:#1e7e34; font-style:italic; margin-top:6px;">"Architecture as policy."</p>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:0.62em; color:var(--g-text-3); margin:0 0 10px; font-weight:500;">WHAT EACH AGENT SEES</p>
+      <div class="arch" style="font-size:0.52em; line-height:2.1;">
+<span class="ab">skeptic_agent sees:</span>
+  • Its own instruction (role contract)
+  • User's original message
+  • session.state at start (empty)
+  • ✗ Does NOT see enthusiast/pragmatist
+
+<span class="ay">enthusiast_agent sees:</span>
+  • Its own instruction (different contract)
+  • Same user message
+  • Same empty starting state
+  • ✗ Does NOT see skeptic/pragmatist
+
+<span class="ag">pragmatist_agent sees:</span>
+  • Its own instruction
+  • Same user message, same empty state
+  • ✗ Does NOT see skeptic/enthusiast
+
+<span class="ar">synthesizer_agent</span> (runs after all 3):
+  • All 3 keys now in session.state
+  • ✓ ONLY agent that sees everything</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 10 — Role contracts as specs ══════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:320px;height:320px;background:var(--g-blue);bottom:-80px;left:-60px;"></div>
+  <h2>Role contracts as specs <span class="pill pill-blue" style="vertical-align:middle;">📐 Spec</span></h2>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <pre><code class="python"># The Skeptic's role contract
+skeptic = LlmAgent(
+    name="skeptic_agent",
+    instruction="""
+You are a seasoned professional calibrated
+by watching promising ideas fail.
+
+Focus ONLY on:
+  risks, failure modes, unproven assumptions,
+  resource obstacles, historical failures.
+
+DO NOT discuss:
+  upside, opportunity, emotional appeal.
+  That is not your role.
+
+End with:
+  "Change my mind: [one condition]"
+
+Format: 3-5 direct sentences.
+Lead with your biggest concern.
+    """,
+    output_key="skeptic_perspective",
+)
+
+# Change this instruction →
+#   Only the Skeptic changes.
+#   Enthusiast: unchanged.
+#   Pragmatist: unchanged.
+#   Synthesizer: unchanged.
+# Each role contract is an isolated lever.</code></pre>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="glass glass-blue">
+        <p class="card-h" style="color:var(--g-blue-dark);">What a good role contract includes</p>
+        <ul style="font-size:0.68em; color:var(--g-text-2);">
+          <li>Who the agent IS — worldview, biases</li>
+          <li>What they consider (scope)</li>
+          <li>What they DON'T consider (explicit out-of-scope)</li>
+          <li>Tone and format</li>
+          <li>Ending convention (creates consistency)</li>
+        </ul>
+      </div>
+      <div class="glass glass-blue">
+        <p class="card-h" style="color:var(--g-blue-dark);">Why the out-of-scope list matters</p>
+        <p class="card-b">LLMs default to balance. Without explicit prohibition, the Skeptic quietly mentions "but there's potential here." The out-of-scope list is the spec that prevents drift.</p>
+        <p style="font-size:0.62em; color:var(--g-blue-dark); font-style:italic; margin-top:6px;">"Spec prevents drift. Drift corrupts perspective."</p>
+      </div>
+      <div class="glass">
+        <p style="font-size:0.62em; color:var(--g-text-2); margin:0;">
+          Use <code>context/role-spec-template.md</code> in the starter repo to draft each agent's role before writing code.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 11 — Today's project ══════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <h2>Today's project: Persona Pivot</h2>
+
+  <div class="grid-2" style="align-items:start; gap:20px;">
+    <div>
+      <div class="arch" style="font-size:0.52em; line-height:1.9;">
+User Input
+  ├─ idea: "Replace weekly standup
+  │         with async video updates"
+  └─ audiences: Engineering | Exec | Sales
+          │
+          ▼
+<span class="ay">SequentialAgent: persona_pivot</span>
+          │
+  stage 1 ┼──────────────────────────┐
+          ▼                          ▼
+<span class="ab">ParallelAgent</span>         (then stage 2)
+  ┌───────────────┐    <span class="ar">SynthesizerAgent</span>
+  │ <span class="ab">skeptic</span>        │      reads all 3 keys
+  │  → "skeptic…" │      yields synthesis:
+  │ <span class="ay">enthusiast</span>     │      • TENSIONS
+  │  → "enthusiast│      • AGREEMENTS
+  │ <span class="ag">pragmatist</span>     │      • SYNTHESIS
+  │  → "pragmatist│      • KEY QUESTION
+  └───────────────┘</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="glass glass-blue">
+        <p class="card-h" style="color:var(--g-blue-dark);">Input — any idea, any audiences</p>
+        <p class="card-b">No domain restriction. Works on workplace decisions, product features, city policy, personal choices. Universal input was a spec requirement.</p>
+      </div>
+      <div class="glass glass-yellow">
+        <p class="card-h" style="color:#a57600;">Success looks like...</p>
+        <ul style="font-size:0.68em; color:var(--g-text-2);">
+          <li>3 genuinely different perspectives (not 3 variants of the same view)</li>
+          <li>At least 1 named tension in the synthesis</li>
+          <li>At least 1 named agreement</li>
+          <li>A key question that unlocks the decision</li>
+        </ul>
+      </div>
+      <div class="glass glass-green">
+        <p class="card-h" style="color:#1e7e34;">Deliverables you leave with</p>
+        <ul style="font-size:0.68em; color:var(--g-text-2);">
+          <li>✅ Public Cloud Run URL</li>
+          <li>📸 Trace screenshot: 3 parallel agents</li>
+          <li>💡 One real decision you ran through it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 12 — Demo recap ════════════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:350px;height:350px;background:var(--g-green);top:-80px;right:-60px;"></div>
+  <h2>Demo recap — the dramatic moment</h2>
+  <p class="muted" style="margin-bottom:16px;">What the Synthesizer surfaced — and why it couldn't come from a single agent.</p>
+
+  <div class="glass" style="margin-bottom:14px; display:flex; gap:16px; align-items:center;">
+    <div style="font-size:0.65em; color:var(--g-text-3); flex-shrink:0; width:80px; text-align:center;">The idea</div>
+    <div style="border-left:2px solid rgba(0,0,0,0.08); padding-left:16px;">
+      <p style="font-size:0.7em; color:var(--g-text); margin:0; font-weight:500;">"Replace the weekly all-hands with a 5-minute async video update tool"</p>
+      <p style="font-size:0.6em; color:var(--g-text-3); margin:4px 0 0;">Audiences: Engineering team · Executive leadership · Customer sales</p>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:0;">
+    <div class="glass glass-red">
+      <p class="card-h" style="color:#c5221f;">Tension found</p>
+      <p class="card-b">Executives need real-time morale signals. Engineering wants async autonomy. A recorded video cannot replace a live read of the room. These are in genuine conflict.</p>
+    </div>
+    <div class="glass glass-green">
+      <p class="card-h" style="color:#1e7e34;">Agreement found</p>
+      <p class="card-b">All three perspectives agreed: the 9am Monday slot is the real problem, not the format. Async solves the time constraint — not the information-flow constraint.</p>
+    </div>
+    <div class="glass glass-blue">
+      <p class="card-h" style="color:var(--g-blue-dark);">Key question surfaced</p>
+      <p class="card-b" style="font-style:italic;">"Can a video update include a required flag/reaction mechanism that gives executives early-warning capability?"</p>
+      <p style="font-size:0.6em; color:var(--g-text-3); margin-top:6px;">Not visible before the parallel run.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 13 — Doctrine moments ═════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <h2>Doctrine moments in today's build</h2>
+
+  <div class="grid-3">
+    <div class="glass glass-blue">
+      <span class="pill pill-blue" style="margin-bottom:10px; display:inline-block;">📐 Spec moment</span>
+      <p class="card-b" style="margin-bottom:8px;">Each sub-agent has its own role contract. Edit the Skeptic's instruction → only the Skeptic changes. Others unaffected.</p>
+      <p style="font-size:0.62em; color:var(--g-blue-dark); font-style:italic;">"Spec is a lever. Each instruction is a control surface."</p>
+      <div style="border-top:1px solid rgba(66,133,244,0.15); margin-top:10px; padding-top:8px;">
+        <p style="font-size:0.6em; color:var(--g-text-3);">Try: ask your IDE to add memory. Watch spec.md stop it.</p>
+      </div>
+    </div>
+    <div class="glass glass-yellow">
+      <span class="pill pill-yellow" style="margin-bottom:10px; display:inline-block;">📦 Context moment</span>
+      <p class="card-b" style="margin-bottom:8px;">Each sub-agent gets only its own instruction + user input. Context isolation is enforced by architecture, not by telling agents to "ignore" each other.</p>
+      <p style="font-size:0.62em; color:#a57600; font-style:italic;">"What the agent doesn't see matters as much as what it does."</p>
+      <div style="border-top:1px solid rgba(251,188,5,0.2); margin-top:10px; padding-top:8px;">
+        <p style="font-size:0.6em; color:var(--g-text-3);">Compare: run perspectives sequentially. Notice convergence.</p>
+      </div>
+    </div>
+    <div class="glass glass-red">
+      <span class="pill pill-red" style="margin-bottom:10px; display:inline-block;">🔍 Critic moment</span>
+      <p class="card-b" style="margin-bottom:8px;">The Synthesizer reviews all 3 agents' outputs. Soft critic = finds structure and tensions. The Critic pattern seed is planted here.</p>
+      <p style="font-size:0.62em; color:#c5221f; font-style:italic;">"An agent reviewing agents is a critic. Plant the seed."</p>
+      <div style="border-top:1px solid rgba(234,67,53,0.15); margin-top:10px; padding-top:8px;">
+        <p style="font-size:0.6em; color:var(--g-text-3);">Week 4: build the hard critic that validates correctness.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 14 — Your turn ══════════════════════════════════════ -->
+<section data-background-color="#f8f9fa">
+  <div class="bg-blob" style="width:350px;height:350px;background:var(--g-blue);top:-80px;right:-60px;"></div>
+  <div class="bg-blob" style="width:280px;height:280px;background:var(--g-green);bottom:-60px;left:-60px;"></div>
+
+  <h2>Your turn — 45 minutes</h2>
+  <p class="muted" style="margin-bottom:16px;">Pick your entry point. All three end at the same place: a deployed public URL.</p>
+
+  <div class="onramp">
+    <div class="onramp-card">
+      <span class="onramp-icon">🟢</span>
+      <div>
+        <p style="font-size:0.72em; font-weight:600; color:var(--g-text); margin:0 0 3px;">Replicator — build the canonical Persona Pivot</p>
+        <p style="font-size:0.65em; color:var(--g-text-2); margin:0;">Follow INSTRUCTIONS.md step by step. Skeptic, Enthusiast, Pragmatist. Copy-paste IDE prompts provided for every step.</p>
+      </div>
+      <span class="pill pill-green" style="flex-shrink:0;">recommended</span>
+    </div>
+    <div class="onramp-card">
+      <span class="onramp-icon">🟡</span>
+      <div>
+        <p style="font-size:0.72em; font-weight:600; color:var(--g-text); margin:0 0 3px;">Riffer — change the 3 personas to your domain</p>
+        <p style="font-size:0.65em; color:var(--g-text-2); margin:0;">Investor / User / Regulator · Developer / Designer / PM · Parent / Teen / Teacher. Use <code>context/role-spec-template.md</code> before coding.</p>
+      </div>
+    </div>
+    <div class="onramp-card">
+      <span class="onramp-icon">🔴</span>
+      <div>
+        <p style="font-size:0.72em; font-weight:600; color:var(--g-text); margin:0 0 3px;">Freestyle — apply the pattern to any problem</p>
+        <p style="font-size:0.65em; color:var(--g-text-2); margin:0;">Research synthesis, competitive analysis, multi-stakeholder proposals. Write your own <code>spec.md</code> first.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:14px; display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap;">
+    <span style="font-size:0.6em; color:var(--g-text-3);">⏱ 5 min setup</span>
+    <span style="color:rgba(0,0,0,0.15);">|</span>
+    <span style="font-size:0.6em; color:var(--g-text-3);">10 min plan</span>
+    <span style="color:rgba(0,0,0,0.15);">|</span>
+    <span style="font-size:0.6em; color:var(--g-text-3);">15 min code</span>
+    <span style="color:rgba(0,0,0,0.15);">|</span>
+    <span style="font-size:0.6em; color:var(--g-text-3);">5 min test</span>
+    <span style="color:rgba(0,0,0,0.15);">|</span>
+    <span style="font-size:0.6em; color:var(--g-text-3);">5 min drift refusal</span>
+    <span style="color:rgba(0,0,0,0.15);">|</span>
+    <span style="font-size:0.6em; color:var(--g-text-3);">5 min deploy</span>
+  </div>
+</section>
+
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    center: false,
+    margin: 0.05,
+    plugins: [ RevealHighlight, RevealNotes ],
+  });
+</script>
+</body>
+</html>

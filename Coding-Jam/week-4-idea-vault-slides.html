@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Week 4 — MCP Integration | Vibe &amp; Hack</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reset.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css" />
+
+  <style>
+    /* ── Google colors ─────────────────────────────────────────────── */
+    :root {
+      --g-blue:   #4285F4;
+      --g-red:    #EA4335;
+      --g-yellow: #F9AB00;
+      --g-green:  #34A853;
+      --g-blue-lt:   #e8f0fe;
+      --g-red-lt:    #fce8e6;
+      --g-yellow-lt: #fef7e0;
+      --g-green-lt:  #e6f4ea;
+      --text-primary:   #202124;
+      --text-secondary: #5f6368;
+      --text-tertiary:  #9aa0a6;
+      --surface:        rgba(255,255,255,0.72);
+      --surface-strong: rgba(255,255,255,0.88);
+      --border:         rgba(255,255,255,0.70);
+      --border-gray:    rgba(32,33,36,0.10);
+      --shadow-sm:      0 2px 12px rgba(60,64,67,0.08), 0 0 0 0.5px rgba(255,255,255,0.6);
+      --shadow-md:      0 4px 28px rgba(60,64,67,0.12), 0 0 0 0.5px rgba(255,255,255,0.7);
+      --shadow-lg:      0 8px 48px rgba(60,64,67,0.14), 0 0 0 0.5px rgba(255,255,255,0.8);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-xl: 32px;
+    }
+
+    /* ── Slide backgrounds — light gradient sky ────────────────────── */
+    .reveal .slides { color: var(--text-primary); }
+
+    .reveal .slide-background {
+      background: linear-gradient(145deg, #eaf3fe 0%, #f1faf4 45%, #fffbf0 100%) !important;
+    }
+
+    /* ── Liquid glass mixin ────────────────────────────────────────── */
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      border-radius: var(--radius-lg);
+    }
+    .glass-strong {
+      background: var(--surface-strong);
+      backdrop-filter: blur(60px) saturate(200%);
+      -webkit-backdrop-filter: blur(60px) saturate(200%);
+      border: 1px solid rgba(255,255,255,0.85);
+      box-shadow: var(--shadow-lg);
+      border-radius: var(--radius-lg);
+    }
+
+    /* ── Typography ───────────────────────────────────────────────── */
+    .reveal { font-family: 'Google Sans', 'Segoe UI', system-ui, sans-serif; }
+    .reveal h1, .reveal h2, .reveal h3 { font-weight: 500; color: var(--text-primary); }
+    .reveal h2 { font-size: 1.85em; letter-spacing: -0.025em; line-height: 1.2; }
+    .reveal h3 { font-size: 1.15em; font-weight: 400; color: var(--text-secondary); margin-top: 4px; }
+    .reveal p, .reveal li { font-size: 0.86em; line-height: 1.7; color: var(--text-secondary); }
+    .reveal code { font-family: 'Google Sans Mono', 'JetBrains Mono', monospace; font-size: 0.82em; }
+    .reveal pre {
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-gray);
+      background: rgba(255,255,255,0.9);
+    }
+    .reveal pre code { background: transparent; color: var(--text-primary); }
+    .reveal section { padding: 0 32px; }
+
+    /* ── Doctrine pill — corner badge ─────────────────────────────── */
+    .doctrine-pill {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      box-shadow: 0 2px 12px rgba(60,64,67,0.10);
+      z-index: 100;
+      letter-spacing: 0.01em;
+    }
+    .doctrine-pill .dot { width: 6px; height: 6px; border-radius: 50%; margin: 0 5px; }
+
+    /* ── Google color pills / tags ─────────────────────────────────── */
+    .chip {
+      display: inline-flex; align-items: center;
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: 0.72em; font-weight: 500;
+      border: 1.5px solid;
+    }
+    .chip-blue   { background: var(--g-blue-lt);   color: #1a56c4; border-color: rgba(66,133,244,0.25); }
+    .chip-green  { background: var(--g-green-lt);  color: #1e7e34; border-color: rgba(52,168,83,0.25); }
+    .chip-yellow { background: var(--g-yellow-lt); color: #8a6000; border-color: rgba(249,171,0,0.3); }
+    .chip-red    { background: var(--g-red-lt);    color: #c5221f; border-color: rgba(234,67,53,0.25); }
+
+    /* ── Glass cards ───────────────────────────────────────────────── */
+    .card {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(30px) saturate(160%);
+      -webkit-backdrop-filter: blur(30px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.7);
+      box-shadow: 0 2px 16px rgba(60,64,67,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+    }
+    .card-blue   { border-top: 3px solid var(--g-blue);   background: rgba(232,240,254,0.55); }
+    .card-green  { border-top: 3px solid var(--g-green);  background: rgba(230,244,234,0.55); }
+    .card-yellow { border-top: 3px solid var(--g-yellow); background: rgba(254,247,224,0.55); }
+    .card-red    { border-top: 3px solid var(--g-red);    background: rgba(252,232,230,0.55); }
+
+    /* ── Accented callout ─────────────────────────────────────────── */
+    .note {
+      background: var(--g-blue-lt);
+      border-left: 3px solid var(--g-blue);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 12px 16px;
+      font-size: 0.82em;
+      color: #1a56c4;
+      margin: 14px 0;
+    }
+    .note.green  { background: var(--g-green-lt);  border-color: var(--g-green);  color: #1e7e34; }
+    .note.yellow { background: var(--g-yellow-lt); border-color: var(--g-yellow); color: #7a5400; }
+    .note.red    { background: var(--g-red-lt);    border-color: var(--g-red);    color: #c5221f; }
+
+    /* ── Grid helpers ──────────────────────────────────────────────── */
+    .cols { display: grid; gap: 20px; align-items: start; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    /* ── Week badge ───────────────────────────────────────────────── */
+    .wk-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.80);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 0.68em; font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      box-shadow: 0 1px 6px rgba(60,64,67,0.08);
+    }
+    .wk-badge .g-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--g-blue), var(--g-green));
+    }
+
+    /* ── M×N diagram ──────────────────────────────────────────────── */
+    .mn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .mn-cell {
+      background: rgba(234,67,53,0.08);
+      border: 1px solid rgba(234,67,53,0.18);
+      border-radius: 8px; padding: 7px 6px;
+      font-size: 0.62em; text-align: center; color: #c5221f;
+    }
+    .mn-head { background: rgba(234,67,53,0.14); font-weight: 600; color: #a50e0e; }
+    .mn-total {
+      grid-column: 1 / -1;
+      background: rgba(234,67,53,0.12);
+      border: 1px solid rgba(234,67,53,0.25);
+      color: #c5221f; font-weight: 600;
+      padding: 9px; font-size: 0.72em; text-align: center;
+      border-radius: 8px;
+    }
+
+    /* ── Step circle ──────────────────────────────────────────────── */
+    .step-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.8em; font-weight: 600; flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(60,64,67,0.12);
+    }
+
+    /* ── On-ramp cards ────────────────────────────────────────────── */
+    .onramp {
+      border-radius: var(--radius-md); padding: 18px 16px;
+      backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+      border: 1px solid;
+    }
+    .onramp-g { background: rgba(230,244,234,0.65); border-color: rgba(52,168,83,0.3); }
+    .onramp-y { background: rgba(254,247,224,0.65); border-color: rgba(249,171,0,0.35); }
+    .onramp-r { background: rgba(252,232,230,0.65); border-color: rgba(234,67,53,0.3); }
+
+    /* ── Slide-number override ────────────────────────────────────── */
+    .reveal .slide-number { background: rgba(255,255,255,0.7); color: var(--text-tertiary); border-radius: 8px; }
+
+    /* ── Independence hero banner ─────────────────────────────────── */
+    .indie-banner {
+      background: linear-gradient(135deg, rgba(232,240,254,0.85) 0%, rgba(230,244,234,0.85) 100%);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      box-shadow: 0 2px 16px rgba(66,133,244,0.10);
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
+
+
+
+</head>
+<body style="background: linear-gradient(145deg,#eaf3fe 0%,#f1faf4 45%,#fffbf0 100%); min-height: 100vh;">
+
+<!-- Doctrine corner pill -->
+<div class="doctrine-pill">
+  <span style="color:var(--g-blue); font-weight:600">Spec</span>
+  <div class="dot" style="background:var(--g-blue)"></div>
+  <span style="color:var(--g-green); font-weight:600">Context</span>
+  <div class="dot" style="background:var(--g-green)"></div>
+  <span style="color:var(--g-red); font-weight:600">Critic</span>
+</div>
+
+<div class="reveal">
+<div class="slides">
+
+
+<!-- ══ SLIDE 1 — TITLE ════════════════════════════════════════════ -->
+<section>
+  <div style="text-align:center; padding-top: 10px">
+    <div class="wk-badge" style="margin: 0 auto 18px; display:inline-flex">
+      <div class="g-dot"></div>
+      Week 4 of 8 &nbsp;·&nbsp; MCP Integration
+    </div>
+
+    <h1 style="font-size:2.8em; font-weight:500; letter-spacing:-0.03em; color:var(--text-primary); margin-bottom:8px; line-height:1.05">
+      Idea Vault MCP
+    </h1>
+    <p style="font-size:1em; color:var(--text-secondary); margin-bottom:28px">
+      Your personal context layer — one server, every AI client
+    </p>
+
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:28px">
+      <span class="chip chip-blue">Model Context Protocol</span>
+      <span class="chip chip-green">FastMCP Python</span>
+      <span class="chip chip-yellow">Cloud Run</span>
+      <span class="chip chip-red">GitHub Actions</span>
+    </div>
+
+    <!-- Independence banner — prominent -->
+    <div class="indie-banner" style="max-width:620px; margin:0 auto; text-align:left">
+      <div style="display:flex; align-items:flex-start; gap:14px">
+        <div style="font-size:22px; flex-shrink:0; margin-top:1px">👋</div>
+        <div>
+          <div style="font-weight:600; font-size:0.85em; color:var(--text-primary); margin-bottom:4px">This session stands on its own — walk in anytime</div>
+          <div style="font-size:0.76em; color:var(--text-secondary); line-height:1.6">
+            You don't need Weeks 1–3. Everything you need is in this folder.
+            Missed a week? No problem — each session is designed to be independent.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 2 — WEEK 4 STANDALONE ════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> Just joined? Start here.</div>
+  <h2>Week 4 is self-contained</h2>
+  <h3>You need zero prior context to build today</h3>
+
+  <div class="cols cols-2" style="margin-top:20px; gap:18px">
+    <div>
+      <div class="card card-green" style="margin-bottom:14px">
+        <div style="font-weight:600; font-size:0.83em; color:#1e7e34; margin-bottom:10px">✓ What you need today</div>
+        <div style="font-size:0.78em; color:var(--text-secondary); line-height:2">
+          <div>• A Google Cloud account (free tier works)</div>
+          <div>• Python 3.10+ installed</div>
+          <div>• Antigravity (or any MCP-compatible IDE)</div>
+          <div>• ~45 minutes of focus</div>
+        </div>
+      </div>
+      <div class="note green" style="font-size:0.8em">
+        <strong>No Week 1–3 required.</strong> Each week teaches a complete, usable skill. Today's skill: give your AI a personal memory layer.
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-weight:600; font-size:0.83em; color:var(--text-primary); margin-bottom:10px">⚡ What this week teaches</div>
+        <div style="font-size:0.78em; color:var(--text-secondary); line-height:2">
+          <div>• What Model Context Protocol (MCP) is</div>
+          <div>• Why you need <em>your own</em> server vs. existing ones</div>
+          <div>• How to deploy a Python server to Cloud Run</div>
+          <div>• How to connect Antigravity to your server</div>
+          <div>• Why CI/CD exists (by feeling the pain first)</div>
+        </div>
+      </div>
+      <div style="font-size:0.75em; color:var(--text-tertiary); font-style:italic">
+        Useful background (not required): basic Python, basic terminal commands.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 3 — DOCTRINE (BRIEF) ═════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> The approach</div>
+  <h2>Three things that always apply</h2>
+  <h3>This session uses the same doctrine as every week</h3>
+
+  <div class="cols cols-3" style="margin-top:22px">
+    <div class="card card-blue" style="text-align:center; padding:22px 16px">
+      <div style="font-size:1.6em; margin-bottom:10px">📋</div>
+      <div style="font-size:0.88em; font-weight:600; color:var(--g-blue); margin-bottom:8px">Spec</div>
+      <p style="font-size:0.76em; color:var(--text-secondary); margin:0">Write <code>spec.md</code> before any code. Out-of-scope list. Rules. Acceptance criteria. The spec stops bad ideas before they ship.</p>
+    </div>
+    <div class="card card-green" style="text-align:center; padding:22px 16px">
+      <div style="font-size:1.6em; margin-bottom:10px">🧠</div>
+      <div style="font-size:0.88em; font-weight:600; color:var(--g-green); margin-bottom:8px">Context</div>
+      <p style="font-size:0.76em; color:var(--text-secondary); margin:0">Everything the AI reads determines output quality. Good context in, good code out. Bad context in, plausible-sounding nonsense out.</p>
+    </div>
+    <div class="card card-red" style="text-align:center; padding:22px 16px">
+      <div style="font-size:1.6em; margin-bottom:10px">🔍</div>
+      <div style="font-size:0.88em; font-weight:600; color:var(--g-red); margin-bottom:8px">Critic</div>
+      <p style="font-size:0.76em; color:var(--text-secondary); margin:0">A second process checks the first. Today: the admin URL shows exactly what the server holds. Invisible bugs become visible.</p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:18px; font-size:0.82em">
+    <strong>First time here?</strong> These three ideas are the whole workshop in 6 words. Every week applies them at a new layer of the stack.
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 4 — M×N PROBLEM ══════════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> The integration problem</div>
+  <h2>M × N — combinatorial chaos</h2>
+  <h3>Without a protocol, every connection needs custom code</h3>
+
+  <div class="cols cols-2" style="margin-top:20px; align-items:center">
+    <div>
+      <div class="mn-grid">
+        <div class="mn-cell mn-head" style="background:rgba(234,67,53,0.0)"></div>
+        <div class="mn-cell mn-head">GitHub</div>
+        <div class="mn-cell mn-head">Notion</div>
+        <div class="mn-cell mn-head">Your server</div>
+        <div class="mn-cell mn-head">Antigravity</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell mn-head">Gemini CLI</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell mn-head">Claude</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-cell">✎ custom</div>
+        <div class="mn-total">3 clients × 3 tools = <strong>9 custom integrations</strong></div>
+      </div>
+    </div>
+    <div>
+      <p style="margin-bottom:14px">Each AI client that wants to use a tool needs a <strong style="color:var(--g-red)">separate custom integration</strong>.</p>
+      <div class="card card-red" style="margin-bottom:14px">
+        <div style="font-size:0.78em; color:var(--text-secondary); line-height:1.8">
+          New AI client arrives? <span style="color:var(--g-red)">Write N integrations.</span><br>
+          New tool/data source? <span style="color:var(--g-red)">Write M integrations.</span><br>
+          10 clients × 20 tools = <span style="color:var(--g-red); font-weight:600">200 integrations.</span>
+        </div>
+      </div>
+      <div class="note yellow">
+        Every integration drifts at its own pace. They go stale, break independently, and nobody owns the whole matrix.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 5 — MCP: M+N ═════════════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> The solution</div>
+  <h2>MCP turns M×N into M+N</h2>
+  <h3>A protocol decouples clients from servers</h3>
+
+  <div style="margin:22px 0">
+    <!-- Before row -->
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; opacity:0.55">
+      <div style="font-size:0.65em; color:var(--text-tertiary); width:60px; text-align:right; flex-shrink:0">before</div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <div class="chip chip-red" style="font-size:0.65em">Antigravity → GitHub</div>
+        <div class="chip chip-red" style="font-size:0.65em">Antigravity → Notion</div>
+        <div class="chip chip-red" style="font-size:0.65em">Gemini CLI → GitHub</div>
+        <div class="chip chip-red" style="font-size:0.65em">Gemini CLI → Notion</div>
+        <span style="font-size:0.68em; color:var(--g-red)">+5 more…</span>
+      </div>
+    </div>
+
+    <!-- After row -->
+    <div style="display:flex; align-items:center; gap:10px">
+      <div style="font-size:0.65em; color:var(--text-tertiary); width:60px; text-align:right; flex-shrink:0">with MCP</div>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+        <div style="display:flex; flex-direction:column; gap:6px">
+          <div class="chip chip-blue" style="font-size:0.68em; justify-content:center">Antigravity</div>
+          <div class="chip chip-blue" style="font-size:0.68em; justify-content:center">Gemini CLI</div>
+          <div class="chip chip-blue" style="font-size:0.68em; justify-content:center">Claude</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:0.62em; color:var(--g-blue); font-weight:600; letter-spacing:0.06em; margin-bottom:3px">MCP PROTOCOL</div>
+          <div style="font-size:1.4em; color:var(--g-blue)">⟺</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px">
+          <div class="chip chip-green" style="font-size:0.68em; justify-content:center">GitHub MCP</div>
+          <div class="chip chip-green" style="font-size:0.68em; justify-content:center">Notion MCP</div>
+          <div class="chip chip-green" style="font-size:0.68em; justify-content:center">Your Vault MCP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cols cols-2" style="gap:14px">
+    <div class="note green" style="font-size:0.8em">
+      <strong>3 clients + 3 servers = 6 protocol implementations.</strong><br>Not 9 custom integrations. At real scale: 10+20=30, not 200.
+    </div>
+    <div class="note" style="font-size:0.8em">
+      Each new client speaks the protocol once. Each new server implements the protocol once. They all interoperate automatically.
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 6 — WHAT IS MCP ══════════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> The protocol</div>
+  <h2>What is MCP?</h2>
+  <h3>Model Context Protocol — standardized AI tool calling</h3>
+
+  <div class="cols cols-2" style="margin-top:18px; gap:20px">
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="color:var(--g-blue); font-weight:600; font-size:0.82em; margin-bottom:8px">Tools</div>
+        <p style="font-size:0.76em; margin:0">Functions your server exposes. The AI decides when to call them. You define the name, description, and typed parameters.</p>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="color:var(--g-green); font-weight:600; font-size:0.82em; margin-bottom:8px">Protocol messages</div>
+        <p style="font-size:0.76em; margin:0; color:var(--text-secondary)"><code>initialize</code> → handshake · <code>tools/list</code> → discovery · <code>tools/call</code> → execution</p>
+      </div>
+      <div class="card">
+        <div style="color:var(--g-yellow); font-weight:600; font-size:0.82em; margin-bottom:8px">Transport: stdio vs HTTP</div>
+        <p style="font-size:0.76em; margin:0"><strong>stdio</strong> — local subprocess &nbsp; <strong>Streamable HTTP</strong> — cloud deployment ✓</p>
+      </div>
+    </div>
+    <div>
+      <pre style="font-size:0.58em; margin:0"><code class="language-python">from fastmcp import FastMCP
+
+mcp = FastMCP("idea-vault")
+
+@mcp.tool()
+def save_idea(
+    content: str,
+    tags: list[str] = [],
+) -> dict:
+    """
+    Save an idea to the vault.
+    This docstring is what the AI reads
+    to decide when to call this tool.
+    """
+    id_ = generate_id()
+    ideas[id_] = {"content": content, "tags": tags}
+    return {"saved": True, "id": id_}
+</code></pre>
+      <div style="font-size:0.68em; color:var(--text-tertiary); margin-top:8px; padding: 0 2px">
+        FastMCP auto-generates JSON Schema from type hints.<br>
+        Your docstring = the AI's understanding of the tool.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 7 — WHY YOUR OWN ═════════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> The architecture decision</div>
+  <h2>Why YOUR own MCP server?</h2>
+  <h3>Existing servers (Notion, GitHub) don't cover personal context</h3>
+
+  <div class="cols cols-2" style="margin-top:20px; gap:14px">
+    <div class="card card-blue">
+      <div style="font-weight:600; font-size:0.82em; color:var(--g-blue); margin-bottom:8px">1. Private personal data</div>
+      <p style="font-size:0.76em; margin:0">Your idea pool, decision history, style library. Doesn't live in any SaaS. Lives in your server.</p>
+    </div>
+    <div class="card card-green">
+      <div style="font-weight:600; font-size:0.82em; color:var(--g-green); margin-bottom:8px">2. Domain-specific reasoning</div>
+      <p style="font-size:0.76em; margin:0">Not just CRUD on existing data. Your server knows how your data is organized and what queries make sense.</p>
+    </div>
+    <div class="card card-yellow">
+      <div style="font-weight:600; font-size:0.82em; color:#7a5400; margin-bottom:8px">3. Cross-tool sharing</div>
+      <p style="font-size:0.76em; margin:0">Same vault accessible from Antigravity AND Gemini CLI. One server, every client. The M+N value made real.</p>
+    </div>
+    <div class="card card-red">
+      <div style="font-weight:600; font-size:0.82em; color:var(--g-red); margin-bottom:8px">4. Composition</div>
+      <p style="font-size:0.76em; margin:0">Your server can call multiple SaaS APIs and return one combined result. A personal integration hub.</p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:16px; font-size:0.8em">
+    Existing MCP servers wrap <em>shared organizational data</em>. You need your own for <em>private personal context</em>.
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 8 — WHY NOT JUST AI ══════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> The context layer</div>
+  <h2>"Can't I just tell the AI to remember?"</h2>
+  <h3>AI clients are stateless. MCP is the persistence layer.</h3>
+
+  <div class="cols cols-2" style="margin-top:18px; gap:20px">
+    <div>
+      <div class="note red" style="margin-bottom:10px">
+        <strong>Stateless.</strong> Every new conversation = zero memory. Yesterday's ideas are gone.
+      </div>
+      <div class="note red" style="margin-bottom:10px">
+        <strong>Context-window limited.</strong> Stuffing ideas into the prompt runs out at ~200K tokens.
+      </div>
+      <div class="note red">
+        <strong>General purpose.</strong> No awareness of your taxonomy, tags, or idea categories.
+      </div>
+    </div>
+    <div>
+      <div style="font-size:0.8em; color:var(--text-secondary); margin-bottom:12px">MCP addresses all three:</div>
+      <div style="font-size:0.78em; color:var(--text-secondary); line-height:2.1">
+        <div style="color:var(--g-green)">✓ <strong style="color:var(--text-primary)">Persistent</strong> — ideas survive conversation boundaries</div>
+        <div style="color:var(--g-green)">✓ <strong style="color:var(--text-primary)">Queryable</strong> — <code>find_ideas("python")</code> fetches only relevant ideas</div>
+        <div style="color:var(--g-green)">✓ <strong style="color:var(--text-primary)">Structured</strong> — typed fields, tags, timestamps, IDs</div>
+        <div style="color:var(--g-green)">✓ <strong style="color:var(--text-primary)">Scalable</strong> — 10K ideas, same query speed</div>
+        <div style="color:var(--g-green)">✓ <strong style="color:var(--text-primary)">Multi-client</strong> — Antigravity + Gemini CLI share one vault</div>
+      </div>
+      <div class="note green" style="margin-top:14px; font-size:0.8em">
+        MCP is the <strong>personal-context layer</strong> that makes a generic AI feel like it knows you.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 9 — ARCHITECTURE ═════════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> How it's built</div>
+  <h2>Server architecture</h2>
+  <h3>4 tools + admin endpoint on a single Cloud Run port</h3>
+
+  <div style="display:flex; justify-content:center; align-items:flex-start; gap:16px; margin:20px 0; flex-wrap:wrap">
+
+    <!-- Clients -->
+    <div style="text-align:center">
+      <div style="font-size:0.62em; color:var(--text-tertiary); letter-spacing:0.08em; margin-bottom:8px">AI CLIENTS</div>
+      <div class="chip chip-blue" style="display:block; margin-bottom:6px; font-size:0.72em">Antigravity</div>
+      <div class="chip chip-blue" style="display:block; font-size:0.72em">Gemini CLI</div>
+    </div>
+
+    <!-- Arrow -->
+    <div style="text-align:center; padding-top:26px">
+      <div style="font-size:0.6em; color:var(--g-blue); font-weight:600; letter-spacing:0.07em; margin-bottom:2px">MCP PROTOCOL</div>
+      <div style="font-size:0.58em; color:var(--text-tertiary); margin-bottom:2px">Streamable HTTP</div>
+      <div style="font-size:1.5em; color:var(--g-blue)">⟺</div>
+      <div style="font-size:0.56em; color:var(--text-tertiary); margin-top:2px">POST /mcp</div>
+    </div>
+
+    <!-- Server -->
+    <div class="card glass-strong" style="min-width:195px; padding:16px 18px">
+      <div style="font-size:0.62em; color:var(--text-tertiary); letter-spacing:0.08em; margin-bottom:10px; text-align:center">YOUR MCP SERVER · port 8080</div>
+      <div style="font-size:0.72em; color:var(--text-primary); line-height:2">
+        <div>🔧 <code style="color:var(--g-blue)">save_idea</code></div>
+        <div>🔧 <code style="color:var(--g-blue)">find_ideas</code></div>
+        <div>🔧 <code style="color:var(--g-blue)">list_my_ideas</code></div>
+        <div>🔧 <code style="color:var(--g-blue)">delete_idea</code></div>
+      </div>
+      <div style="border-top:1px solid var(--border-gray); margin-top:10px; padding-top:8px; text-align:center">
+        <div style="font-size:0.62em; color:var(--g-green); font-weight:600">GET /admin/ideas</div>
+        <div style="font-size:0.58em; color:var(--text-tertiary)">critic view — read-only</div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div style="padding-top:60px; font-size:1.4em; color:var(--text-tertiary)">→</div>
+
+    <!-- Storage -->
+    <div style="text-align:center; padding-top:26px">
+      <div style="font-size:0.62em; color:var(--text-tertiary); letter-spacing:0.08em; margin-bottom:8px">STORAGE</div>
+      <div class="chip chip-yellow" style="display:block; font-size:0.68em; margin-bottom:6px">ideas: dict</div>
+      <div style="font-size:0.58em; color:var(--g-red); margin-top:4px">⚠ lost on restart</div>
+      <div style="font-size:0.56em; color:var(--text-tertiary); margin-top:2px">Week 5 fixes this →</div>
+    </div>
+  </div>
+
+  <div class="note green" style="font-size:0.78em">
+    Admin URL = the <strong>Critic</strong>. If the AI is mis-saving, opening <code>/admin/ideas</code> exposes it immediately.
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 10 — CLOUD RUN + MAX INSTANCES ═══════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> The critical flag</div>
+  <h2>Cloud Run + in-memory state</h2>
+  <h3>One flag that must never be forgotten</h3>
+
+  <div class="cols cols-2" style="margin-top:20px; gap:20px">
+    <div>
+      <div class="note red" style="margin-bottom:14px">
+        <strong>Without <code>--max-instances=1</code></strong><br><br>
+        Cloud Run auto-scales under load → 2 instances → 2 separate Python processes → 2 separate <code>dict</code>s in RAM.<br><br>
+        Instance A saves idea. Instance B handles find. B's dict is empty. Ideas vanish randomly. Maddening to debug.
+      </div>
+      <div class="note green">
+        <strong>With <code>--max-instances=1</code></strong><br><br>
+        One process. One dict. Consistent state. Saved = findable.
+      </div>
+    </div>
+    <div>
+      <pre style="font-size:0.6em; margin:0"><code class="language-bash"># Required deploy command
+gcloud run deploy idea-vault \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --max-instances 1 \
+  --port 8080</code></pre>
+      <div style="margin-top:14px; font-size:0.76em; color:var(--text-secondary); line-height:1.9">
+        <div>This is a <strong style="color:var(--g-red)">constraint, not a solution</strong>.</div>
+        <div>Max-instances=1 → no horizontal scaling.</div>
+        <div>Fine for a personal vault. Not for production.</div>
+        <div style="color:var(--g-green); margin-top:6px">→ Week 5: database storage removes this constraint.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 11 — CI/CD THE NATURAL WAY ══════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> Stretch goal</div>
+  <h2>CI/CD: pain motivates solution</h2>
+  <h3>The best way to understand automation is to suffer without it</h3>
+
+  <div class="cols cols-2" style="margin-top:18px; gap:20px">
+    <div>
+      <div style="font-size:0.8em; color:var(--text-secondary); margin-bottom:14px">The journey every engineer takes:</div>
+      <div class="card" style="font-size:0.78em; line-height:2.2; color:var(--text-secondary)">
+        <div>1st deploy: <span style="color:var(--text-primary)">"cool, that worked"</span></div>
+        <div>2nd deploy: <span style="color:var(--text-primary)">"fine"</span></div>
+        <div>3rd deploy: <span style="color:var(--g-yellow)">"I keep forgetting those flags…"</span></div>
+        <div>4th deploy: <span style="color:var(--g-red)">"why 3 minutes every single time?"</span></div>
+        <div>5th deploy: <span style="color:var(--g-green)">"there has to be a better way"</span></div>
+      </div>
+      <div class="note" style="margin-top:12px; font-size:0.8em">That frustration is the correct motivation. Not "best practices."</div>
+    </div>
+    <div>
+      <pre style="font-size:0.54em; margin:0"><code class="language-yaml">name: Deploy to Cloud Run
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      - run: |
+          gcloud run deploy idea-vault \
+            --source . \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --max-instances 1 \
+            --port 8080</code></pre>
+      <p style="font-size:0.68em; color:var(--text-tertiary); margin-top:8px">
+        Push to main → auto-deploys. The friction is gone.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 12 — TODAY'S PROJECT ════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> What you're building</div>
+  <h2>Idea Vault MCP</h2>
+  <h3>A personal context server you'll actually use after today</h3>
+
+  <div class="cols cols-2" style="margin-top:18px; gap:20px">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:0.68em; color:var(--text-tertiary); letter-spacing:0.06em; margin-bottom:10px; text-transform:uppercase">4 MCP tools</div>
+        <div style="font-size:0.78em; line-height:2.1; color:var(--text-primary)">
+          <div>🔧 <code style="color:var(--g-blue)">save_idea</code> <span style="color:var(--text-tertiary)">— store with tags + source</span></div>
+          <div>🔧 <code style="color:var(--g-blue)">find_ideas</code> <span style="color:var(--text-tertiary)">— keyword search</span></div>
+          <div>🔧 <code style="color:var(--g-blue)">list_my_ideas</code> <span style="color:var(--text-tertiary)">— newest first</span></div>
+          <div>🔧 <code style="color:var(--g-blue)">delete_idea</code> <span style="color:var(--text-tertiary)">— remove by ID</span></div>
+        </div>
+      </div>
+      <div class="card card-green">
+        <div style="font-size:0.68em; color:var(--text-tertiary); letter-spacing:0.06em; margin-bottom:10px; text-transform:uppercase">Deliverables</div>
+        <div style="font-size:0.76em; line-height:2; color:var(--text-primary)">
+          <div style="color:var(--g-green)">✓ Deployed MCP server URL</div>
+          <div style="color:var(--g-green)">✓ Admin URL with live data</div>
+          <div style="color:var(--g-green)">✓ Antigravity connected</div>
+          <div style="color:var(--g-green)">✓ 5+ real ideas saved</div>
+          <div style="color:var(--text-tertiary)">⭐ GitHub Actions (stretch)</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:0.68em; color:var(--text-tertiary); letter-spacing:0.06em; margin-bottom:10px; text-transform:uppercase">45-min breakdown</div>
+        <div style="font-size:0.75em; line-height:2; color:var(--text-secondary)">
+          <div><span style="color:var(--g-blue); font-weight:600; display:inline-block; width:38px">5 min</span> Setup</div>
+          <div><span style="color:var(--g-blue); font-weight:600; display:inline-block; width:38px">10 min</span> Vibe-code server + 4 tools</div>
+          <div><span style="color:var(--g-blue); font-weight:600; display:inline-block; width:38px">10 min</span> Deploy to Cloud Run</div>
+          <div><span style="color:var(--g-blue); font-weight:600; display:inline-block; width:38px">5 min</span> Configure Antigravity</div>
+          <div><span style="color:var(--g-blue); font-weight:600; display:inline-block; width:38px">5 min</span> Save + find ideas</div>
+          <div><span style="color:var(--g-blue); font-weight:600; display:inline-block; width:38px">5 min</span> Modify + redeploy (feel the pain)</div>
+          <div><span style="color:var(--text-tertiary); display:inline-block; width:38px">5 min</span> GitHub Actions stretch</div>
+        </div>
+      </div>
+      <div class="note" style="font-size:0.78em">
+        <strong>Doctrine moment:</strong> AI suggests <code>summarize_all_ideas</code> with LLM call inside — <code>spec.md</code> stops it. Tools are data-only.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 13 — DEMO RECAP ══════════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> What you just saw</div>
+  <h2>Demo recap</h2>
+  <h3>Doctrine applied in 5 moves</h3>
+
+  <div style="max-width:660px; margin:22px auto 0">
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px">
+      <div class="step-num" style="background:var(--g-blue-lt); color:var(--g-blue)">1</div>
+      <div style="font-size:0.8em; color:var(--text-secondary); padding-top:4px">
+        <strong style="color:var(--text-primary)">spec.md first.</strong> Out-of-scope list written before any code. "No LLM calls inside MCP tools." This rule got tested in step 4.
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px">
+      <div class="step-num" style="background:var(--g-green-lt); color:var(--g-green)">2</div>
+      <div style="font-size:0.8em; color:var(--text-secondary); padding-top:4px">
+        <strong style="color:var(--text-primary)">Context-loaded generation.</strong> spec.md + mcp-quickref.md in context → correct FastMCP syntax on the first try.
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px">
+      <div class="step-num" style="background:var(--g-yellow-lt); color:#7a5400">3</div>
+      <div style="font-size:0.8em; color:var(--text-secondary); padding-top:4px">
+        <strong style="color:var(--text-primary)">Deployed with <code>--max-instances=1</code>.</strong> One flag, consistent in-memory state. Forget this flag and ideas vanish randomly.
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px">
+      <div class="step-num" style="background:var(--g-red-lt); color:var(--g-red)">4</div>
+      <div style="font-size:0.8em; color:var(--text-secondary); padding-top:4px">
+        <strong style="color:var(--text-primary)">Drift refusal.</strong> AI suggested <code>summarize_all_ideas</code> with an internal Gemini call. spec.md said "data tools only." We said no.
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start">
+      <div class="step-num" style="background:var(--g-blue-lt); color:var(--g-blue)">5</div>
+      <div style="font-size:0.8em; color:var(--text-secondary); padding-top:4px">
+        <strong style="color:var(--text-primary)">Admin as Critic.</strong> Opened <code>/admin/ideas</code> and confirmed the AI was saving real ideas — not chat snippets.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 14 — YOUR TURN ═══════════════════════════════════════ -->
+<section>
+  <div class="wk-badge"><div class="g-dot"></div> 45 minutes</div>
+  <h2>Your turn</h2>
+  <h3>Choose your on-ramp — all three reach the same deliverables</h3>
+
+  <div class="cols cols-3" style="margin:20px 0; gap:14px">
+    <div class="onramp onramp-g">
+      <div style="font-size:0.88em; margin-bottom:6px">🟢</div>
+      <div style="color:var(--g-green); font-weight:600; font-size:0.82em; margin-bottom:8px">Replicator</div>
+      <p style="font-size:0.74em; color:var(--text-secondary); margin:0">Follow INSTRUCTIONS.md step by step. All context docs included. Just execute. Great if you've never deployed to Cloud Run.</p>
+    </div>
+    <div class="onramp onramp-y">
+      <div style="font-size:0.88em; margin-bottom:6px">🟡</div>
+      <div style="color:#7a5400; font-weight:600; font-size:0.82em; margin-bottom:8px">Riffer</div>
+      <p style="font-size:0.74em; color:var(--text-secondary); margin:0">Follow the structure, but personalize. Different vault (decisions? bookmarks? code snippets?). Add a 5th tool. Modify the tags scheme.</p>
+    </div>
+    <div class="onramp onramp-r">
+      <div style="font-size:0.88em; margin-bottom:6px">🔴</div>
+      <div style="color:var(--g-red); font-weight:600; font-size:0.82em; margin-bottom:8px">Freestyle</div>
+      <p style="font-size:0.74em; color:var(--text-secondary); margin:0">Build a completely different MCP server for a real workflow need. Write your own spec.md from scratch. Skip the templates entirely.</p>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:18px">
+    <span class="chip chip-blue">45 min hands-on</span>
+    <span class="chip chip-green">20–30 min compare notes</span>
+    <span class="chip chip-yellow">Bring your admin URL</span>
+  </div>
+
+  <div class="note" style="max-width:560px; margin:0 auto; text-align:center; font-size:0.82em">
+    Compare Notes question: <br>
+    <strong>"What did your AI suggest that violated spec.md — and how did you stop it?"</strong>
+  </div>
+</section>
+
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/highlight/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'none',
+    controls: true,
+    progress: true,
+    center: false,
+    width: 1200,
+    height: 700,
+    margin: 0.05,
+    plugins: [ RevealHighlight, RevealNotes ]
+  });
+</script>
+</body>
+</html>

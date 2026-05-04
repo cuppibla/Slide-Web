@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Week 1 — Vibe &amp; Hack: Build Your AI Sidekick</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <!-- Using white theme as base, fully overridden below -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/github.css" />
+
+  <style>
+    /* ════════════════════════════════════════════
+       DESIGN TOKENS — Google Brand + Liquid Glass
+    ════════════════════════════════════════════ */
+    :root {
+      /* Google brand palette */
+      --g-blue:   #4285F4;
+      --g-red:    #EA4335;
+      --g-yellow: #F9AB00;
+      --g-green:  #34A853;
+
+      /* Light mode base */
+      --bg-page:       #F0F4FF;
+      --bg-slide:      rgba(255,255,255,0.72);
+      --surface-1:     rgba(255,255,255,0.60);
+      --surface-2:     rgba(255,255,255,0.40);
+      --surface-3:     rgba(255,255,255,0.25);
+
+      /* Text */
+      --text-primary:   #1A1A2E;
+      --text-secondary: #4A5568;
+      --text-muted:     #8896AA;
+
+      /* Glass borders */
+      --border-glass:   rgba(255,255,255,0.80);
+      --border-subtle:  rgba(0,0,0,0.06);
+
+      /* Shadows — layered for depth */
+      --shadow-card:    0 2px 8px rgba(66,133,244,0.06), 0 12px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+      --shadow-lifted:  0 4px 16px rgba(66,133,244,0.10), 0 24px 48px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.95);
+      --shadow-glow-blue:   0 0 32px rgba(66,133,244,0.18);
+      --shadow-glow-green:  0 0 32px rgba(52,168,83,0.18);
+
+      /* Radii */
+      --r-sm: 10px;
+      --r-md: 16px;
+      --r-lg: 24px;
+      --r-xl: 32px;
+    }
+
+    /* ── Page background — soft gradient ── */
+    body, .reveal-viewport {
+      background: linear-gradient(135deg, #EEF3FF 0%, #F5F0FF 40%, #EFF8FF 70%, #F0FFF4 100%) !important;
+    }
+
+    .reveal .slide-background { background: transparent !important; }
+
+    /* ── Slide wrapper — frosted glass card ── */
+    .reveal .slides section {
+      background: var(--bg-slide);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      border-radius: var(--r-xl);
+      border: 1.5px solid var(--border-glass);
+      box-shadow: var(--shadow-card);
+      padding: 2.2em 2.8em !important;
+      color: var(--text-primary);
+    }
+
+    /* ── Typography ── */
+    .reveal { font-family: 'Google Sans', 'Segoe UI', system-ui, sans-serif; }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 { color: var(--text-primary); font-weight: 700; letter-spacing: -0.02em; }
+    .reveal h1 { font-size: 2.1em; }
+    .reveal h2 { font-size: 1.55em; }
+    .reveal h3 { font-size: 0.68em; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2em; }
+    .reveal p, .reveal li { font-size: 0.80em; color: var(--text-secondary); line-height: 1.65; }
+    .reveal strong { color: var(--text-primary); }
+    .reveal code { font-size: 0.82em; color: var(--g-blue); background: rgba(66,133,244,0.08); padding: 0.1em 0.4em; border-radius: 5px; }
+
+    /* ── Slide number ── */
+    .reveal .slide-number { background: rgba(255,255,255,0.7); color: var(--text-muted); border-radius: 8px; border: 1px solid var(--border-subtle); font-size: 0.55em; padding: 3px 8px; backdrop-filter: blur(8px); }
+
+    /* ════════════════════════════════════════════
+       LIQUID GLASS COMPONENTS
+    ════════════════════════════════════════════ */
+
+    /* ── Glass card ── */
+    .glass {
+      background: var(--surface-1);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1.5px solid var(--border-glass);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-card);
+      padding: 0.9em 1.1em;
+      margin: 0.3em 0;
+    }
+
+    .glass-lifted {
+      background: var(--surface-1);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1.5px solid rgba(255,255,255,0.95);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-lifted);
+      padding: 1em 1.3em;
+      margin: 0.3em 0;
+    }
+
+    /* Tinted glass variants */
+    .glass-blue  { background: rgba(66,133,244,0.06);  border-color: rgba(66,133,244,0.25);  box-shadow: var(--shadow-glow-blue),  var(--shadow-card); }
+    .glass-green { background: rgba(52,168,83,0.06);   border-color: rgba(52,168,83,0.25);   box-shadow: var(--shadow-glow-green), var(--shadow-card); }
+    .glass-red   { background: rgba(234,67,53,0.05);   border-color: rgba(234,67,53,0.2);    box-shadow: var(--shadow-card); }
+    .glass-amber { background: rgba(249,171,0,0.06);   border-color: rgba(249,171,0,0.25);   box-shadow: var(--shadow-card); }
+
+    /* ── Pill badge ── */
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 11px;
+      border-radius: 99px;
+      font-size: 0.62em; font-weight: 600; letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid;
+    }
+    .pill-blue   { background: rgba(66,133,244,0.10); color: #2563EB; border-color: rgba(66,133,244,0.30); }
+    .pill-green  { background: rgba(52,168,83,0.10);  color: #166534; border-color: rgba(52,168,83,0.30);  }
+    .pill-red    { background: rgba(234,67,53,0.10);  color: #B91C1C; border-color: rgba(234,67,53,0.30);  }
+    .pill-amber  { background: rgba(249,171,0,0.12);  color: #92400E; border-color: rgba(249,171,0,0.35);  }
+    .pill-purple { background: rgba(139,92,246,0.10); color: #6D28D9; border-color: rgba(139,92,246,0.30); }
+
+    /* ── Doctrine badge (top-right) ── */
+    .doctrine-badge {
+      position: fixed; top: 16px; right: 20px;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      border: 1.5px solid rgba(66,133,244,0.3);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 0.50em; font-weight: 700; color: var(--g-blue);
+      letter-spacing: 0.07em; text-transform: uppercase;
+      box-shadow: 0 2px 12px rgba(66,133,244,0.12);
+      z-index: 100; pointer-events: none;
+    }
+
+    /* ════════════════════════════════════════════
+       LAYOUT HELPERS
+    ════════════════════════════════════════════ */
+    .cols   { display: flex; gap: 1.4em; align-items: flex-start; }
+    .col    { flex: 1; }
+    .col-40 { flex: 0 0 40%; }
+    .col-55 { flex: 0 0 55%; }
+    .center { text-align: center; }
+    .mt-sm  { margin-top: 0.5em; }
+    .mt-md  { margin-top: 0.9em; }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,0.08), transparent); margin: 0.7em 0; }
+
+    /* ════════════════════════════════════════════
+       SLIDE-SPECIFIC COMPONENTS
+    ════════════════════════════════════════════ */
+
+    /* ── Google wordmark colors ── */
+    .g-b { color: var(--g-blue); }
+    .g-r { color: var(--g-red); }
+    .g-y { color: var(--g-yellow); }
+    .g-g { color: var(--g-green); }
+
+    /* ── Model table ── */
+    .model-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+    .model-table th { font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); padding: 0 0.8em 0.2em; text-align: left; font-weight: 600; }
+    .model-table td { font-size: 0.72em; padding: 0.55em 0.8em; color: var(--text-secondary); background: var(--surface-2); }
+    .model-table td:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.70em; color: var(--text-primary); font-weight: 600; }
+    .model-table td:last-child  { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+    .model-table tr.highlight td { background: rgba(66,133,244,0.08); }
+    .model-table tr.highlight td:first-child { border-left: 3px solid var(--g-blue); border-radius: var(--r-sm) 0 0 var(--r-sm); }
+    .model-table tr.deprecated td { opacity: 0.45; text-decoration: line-through; }
+    .model-table tr.deprecated td:first-child { border-left: 3px solid var(--g-red); border-radius: var(--r-sm) 0 0 var(--r-sm); }
+
+    /* ── Doctrine chain ── */
+    .doctrine-chain { display: flex; align-items: center; gap: 0.5em; justify-content: center; }
+    .d-node {
+      background: var(--surface-1);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 2px solid rgba(66,133,244,0.25);
+      border-radius: var(--r-md);
+      padding: 0.55em 1.1em;
+      font-size: 0.85em; font-weight: 700; color: var(--g-blue);
+      box-shadow: var(--shadow-card);
+    }
+    .d-node.focus {
+      background: rgba(66,133,244,0.09);
+      border-color: var(--g-blue);
+      box-shadow: var(--shadow-glow-blue), var(--shadow-card);
+    }
+    .d-arrow { color: var(--text-muted); font-size: 1.1em; }
+
+    /* ── Onramp cards ── */
+    .onramp-grid { display: flex; gap: 0.9em; margin-top: 0.7em; }
+    .onramp-card {
+      flex: 1; border-radius: var(--r-lg); padding: 1.1em 1em;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card); text-align: center;
+    }
+    .onramp-card h4 { font-size: 0.82em; margin-bottom: 0.3em; }
+    .onramp-card p  { font-size: 0.63em; margin: 0; line-height: 1.55; }
+    .onramp-card .goal { margin-top: 0.7em; font-size: 0.60em; font-weight: 600; }
+    .card-green  { background: rgba(52,168,83,0.07);  border: 1.5px solid rgba(52,168,83,0.28);  }
+    .card-yellow { background: rgba(249,171,0,0.07);  border: 1.5px solid rgba(249,171,0,0.30);  }
+    .card-red    { background: rgba(234,67,53,0.07);  border: 1.5px solid rgba(234,67,53,0.28);  }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; gap: 0.2em; margin: 0.9em 0 0.5em; position: relative; }
+    .timeline::before {
+      content: ''; position: absolute; top: 15px; left: 15px; right: 15px; height: 2px;
+      background: linear-gradient(90deg, var(--g-blue), var(--g-green));
+      border-radius: 2px; opacity: 0.25; z-index: 0;
+    }
+    .week-dot { flex: 1; text-align: center; font-size: 0.56em; position: relative; z-index: 1; }
+    .week-dot .num {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,0.80); border: 2px solid rgba(0,0,0,0.10);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 6px; font-weight: 700; font-size: 1.05em; color: var(--text-muted);
+      backdrop-filter: blur(8px);
+    }
+    .week-dot.active .num {
+      background: var(--g-blue); border-color: var(--g-blue); color: white;
+      box-shadow: 0 0 0 4px rgba(66,133,244,0.2), var(--shadow-card);
+    }
+    .week-dot .label { color: var(--text-muted); line-height: 1.3; }
+    .week-dot.active .label { color: var(--g-blue); font-weight: 600; }
+
+    /* ── Agenda rows ── */
+    .agenda-row {
+      display: flex; align-items: center; gap: 0.9em;
+      padding: 0.32em 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 0.70em;
+    }
+    .agenda-time { color: var(--g-blue); font-weight: 700; min-width: 3.2em; }
+
+    /* ── Code block override ── */
+    .reveal pre {
+      background: rgba(248,250,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(66,133,244,0.12);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-card);
+      margin: 0.5em 0;
+    }
+    .reveal pre code { background: transparent; color: #1A1A2E; font-size: 0.76em; padding: 0; }
+
+    /* ── Drift example ── */
+    .drift-asked { color: #166534; font-size: 0.76em; padding: 0.5em 0.8em; }
+    .drift-got   { color: #991B1B; font-size: 0.76em; padding: 0.5em 0.8em; }
+
+    /* ── Toolkit preview ── */
+    .toolkit-preview {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1.5px solid rgba(255,255,255,0.90);
+      border-radius: var(--r-md);
+      padding: 0.9em 1.1em;
+      font-size: 0.68em;
+      color: var(--text-secondary);
+      font-style: italic; line-height: 1.85;
+      box-shadow: var(--shadow-card);
+    }
+    .toolkit-preview .label {
+      font-style: normal; font-size: 0.80em; color: var(--g-blue);
+      font-weight: 600; display: block; margin-bottom: 0.4em;
+    }
+
+    /* ── Title slide hero ── */
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.70);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(66,133,244,0.25);
+      border-radius: 99px; padding: 5px 16px;
+      font-size: 0.60em; font-weight: 600; color: var(--g-blue);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      box-shadow: var(--shadow-card);
+    }
+    .google-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ── Specmoji icons ── */
+    .spec-row { display: flex; align-items: flex-start; gap: 0.6em; margin: 0.4em 0; font-size: 0.75em; }
+    .spec-icon { font-size: 1.1em; line-height: 1.5; flex-shrink: 0; }
+
+    /* ── Warning chip ── */
+    .warn-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(249,171,0,0.10); border: 1px solid rgba(249,171,0,0.40);
+      border-radius: 8px; padding: 4px 10px;
+      font-size: 0.63em; font-weight: 600; color: #92400E;
+    }
+
+    /* ── Deprecated tag ── */
+    .dep-tag {
+      display: inline-block;
+      background: rgba(234,67,53,0.10); border: 1px solid rgba(234,67,53,0.30);
+      border-radius: 4px; padding: 1px 6px;
+      font-size: 0.78em; font-weight: 600; color: var(--g-red); letter-spacing: 0.03em;
+    }
+
+    /* Transition */
+    .reveal .slides section { transition: none; }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
+
+
+
+</head>
+
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ══════════════════════════════════════
+     SLIDE 1 — TITLE
+══════════════════════════════════════ -->
+<section>
+  <div style="margin-bottom:1.4em;">
+    <div class="hero-badge">
+      <svg width="56" height="20" viewBox="0 0 56 20" fill="none">
+        <circle cx="5"  cy="10" r="4.5" fill="#4285F4"/>
+        <circle cx="19" cy="10" r="4.5" fill="#EA4335"/>
+        <circle cx="33" cy="10" r="4.5" fill="#F9AB00"/>
+        <circle cx="47" cy="10" r="4.5" fill="#34A853"/>
+      </svg>
+      <span>Vibe &amp; Hack: Build Your AI Sidekick</span>
+    </div>
+  </div>
+
+  <h1 style="font-size:2.4em; margin:0.05em 0 0.1em; background: linear-gradient(135deg, #4285F4 0%, #1A73E8 60%, #34A853 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Week 1</h1>
+  <h2 style="font-size:1.4em; font-weight:500; color: var(--text-secondary); margin-top:0.1em;">The Vibe Coding Loop</h2>
+
+  <div style="margin: 1.4em 0 1em;">
+    <div class="doctrine-chain">
+      <div class="d-node focus">Spec</div>
+      <div class="d-arrow">→</div>
+      <div class="d-node">Context</div>
+      <div class="d-arrow">→</div>
+      <div class="d-node">Critic</div>
+    </div>
+  </div>
+
+  <div class="cols" style="gap:0.7em; justify-content:center; flex-wrap:wrap;">
+    <span class="pill pill-blue">Google ADK v1.32</span>
+    <span class="pill pill-amber">Gemini 2.5 Flash</span>
+    <span class="pill pill-green">Cloud Run</span>
+    <span class="pill pill-purple">🎧 Mood Toolkit</span>
+  </div>
+
+  <p style="font-size:0.58em; color:var(--text-muted); margin-top:1.4em;">
+    Demo 15 min &nbsp;·&nbsp; Concepts 7 min &nbsp;·&nbsp; Hands-on 45 min &nbsp;·&nbsp; Compare Notes 25 min
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 2 — WHAT IS VIBE CODING?
+══════════════════════════════════════ -->
+<section>
+  <h3>The new baseline</h3>
+  <h2>What is <span class="g-b">Vibe Coding</span>?</h2>
+
+  <div class="cols mt-md">
+    <div class="col">
+      <div class="glass glass-blue" style="margin-bottom:0.7em;">
+        <strong>Definition</strong>
+        <p style="margin:0.3em 0 0;">Building software by describing intent to an AI IDE. You direct; it writes, runs, and debugs the code. No boilerplate. No syntax lookup.</p>
+      </div>
+      <div class="glass glass-green">
+        <strong>The 2026 upside</strong>
+        <p style="margin:0.3em 0 0;">10× output for solo builders. Functional prototypes in hours. Code your non-coding teammates can actually read.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="glass glass-amber" style="margin-bottom:0.5em;">
+        <strong style="color: #92400E;">⚠ New failure modes</strong>
+      </div>
+      <div class="spec-row">
+        <span class="spec-icon">🌀</span>
+        <span><strong>Drift</strong> — AI builds more than asked, or the wrong version of what was asked.</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-icon">🪣</span>
+        <span><strong>Bloat</strong> — AI adds dependencies, abstractions, and features you'll never use.</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-icon">🤝</span>
+        <span><strong>Trust collapse</strong> — You can't maintain what you don't understand.</span>
+      </div>
+      <div class="glass glass-red mt-sm" style="font-size:0.75em;">
+        The question isn't <em>"can I vibe code?"</em><br>It's <em>"can I vibe code <strong>reliably</strong>?"</em>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 3 — THE DOCTRINE
+══════════════════════════════════════ -->
+<section>
+  <div class="doctrine-badge">Spec → Context → Critic</div>
+  <h3>The answer to drift</h3>
+  <h2>The Three Pillars</h2>
+
+  <div class="doctrine-chain mt-md" style="margin-bottom:1em;">
+    <div class="d-node focus">Spec</div>
+    <div class="d-arrow">→</div>
+    <div class="d-node">Context</div>
+    <div class="d-arrow">→</div>
+    <div class="d-node">Critic</div>
+  </div>
+
+  <div class="cols" style="gap:0.9em;">
+    <div class="col glass glass-blue" style="font-size:0.76em;">
+      <strong class="g-b">📋 Spec — today's focus</strong>
+      <p style="margin:0.3em 0 0;">Write <code>spec.md</code> <em>before</em> coding. Contains: out-of-scope list, behavioral rules, acceptance criteria. This is the AI's contract — it can only refuse features it knows are excluded.</p>
+    </div>
+    <div class="col glass" style="font-size:0.76em;">
+      <strong style="color:#7C3AED;">🎯 Context</strong>
+      <p style="margin:0.3em 0 0;">Everything the AI reads determines output quality. Curate what the AI sees: quickrefs, examples, voice specs. Better context = less hallucination.</p>
+    </div>
+    <div class="col glass glass-green" style="font-size:0.76em;">
+      <strong class="g-g">🔍 Critic</strong>
+      <p style="margin:0.3em 0 0;">A second LLM checks the first one's output before it ships. Fast first-pass compliance, not a replacement for tests.</p>
+    </div>
+  </div>
+
+  <p style="font-size:0.62em; color:var(--text-muted); text-align:center; margin-top:0.8em;">All 3 pillars active by Week 4 &nbsp;·&nbsp; Today: Spec deep dive</p>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 4 — WHY DRIFT HAPPENS
+══════════════════════════════════════ -->
+<section>
+  <div class="doctrine-badge">Spec → Context → Critic</div>
+  <h3>Failure mode #1</h3>
+  <h2>Why <span class="g-r">Drift</span> Happens</h2>
+
+  <p style="font-size:0.78em; margin-bottom:0.7em;">LLMs complete patterns. If your prompt implies a larger system, the model builds the larger system.</p>
+
+  <div class="glass" style="margin-bottom:0.8em;">
+    <div class="drift-asked">✅ <strong>You asked:</strong> "Build me a simple email reply agent."</div>
+    <div class="divider"></div>
+    <div class="drift-got">⚠ <strong>You got:</strong> Full inbox triage system with labels, auto-archive, priority scoring, and an unsubscribe scanner — 4× what was needed.</div>
+  </div>
+
+  <div class="cols" style="gap:0.9em;">
+    <div class="col glass glass-red" style="font-size:0.73em;">
+      <strong>Why it happens</strong>
+      <p style="margin:0.3em 0 0;">"Reply agent" → the model's training contains many reply agents that <em>also</em> manage inboxes. Pattern completion kicks in silently.</p>
+    </div>
+    <div class="col glass glass-green" style="font-size:0.73em;">
+      <strong>How spec prevents it</strong>
+      <p style="margin:0.3em 0 0;"><code>spec.md</code> out-of-scope list explicitly says "no inbox triage, no labels, no auto-archive." The AI can only refuse what it knows is excluded.</p>
+    </div>
+  </div>
+
+  <p style="font-size:0.63em; color:var(--text-muted); margin-top:0.7em; text-align:center;">Rule: if the AI added something you didn't ask for, your spec didn't say "no" loud enough.</p>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 5 — SPEC IN PRACTICE
+══════════════════════════════════════ -->
+<section>
+  <div class="doctrine-badge">Spec → Context → Critic</div>
+  <h3>Pillar 1 deep dive</h3>
+  <h2><code>spec.md</code> in Practice</h2>
+
+  <div class="cols mt-md" style="gap:1.3em; align-items:flex-start;">
+    <div class="col-40">
+      <p style="font-size:0.72em; color:var(--g-blue); font-weight:600; margin-bottom:0.4em;">spec.md contains</p>
+      <div class="spec-row"><span class="spec-icon">❌</span><span><strong>Out-of-scope list</strong> — explicit "no X" items the IDE must refuse</span></div>
+      <div class="spec-row"><span class="spec-icon">📏</span><span><strong>Behavioral rules</strong> — tone, format, hard constraints</span></div>
+      <div class="spec-row"><span class="spec-icon">✅</span><span><strong>Acceptance criteria</strong> — falsifiable: "returns 4 items," "response &lt;5s"</span></div>
+      <div class="divider mt-sm"></div>
+      <p style="font-size:0.68em; color:var(--text-muted); margin-top:0.4em;">Does <em>not</em> contain: architecture, library choices, database schema — those go in <code>plan.md</code></p>
+    </div>
+    <div class="col-55">
+      <pre><code class="language-markdown" data-trim>## Out of Scope
+- ❌ Auto-send: no email/SMS of toolkit
+- ❌ Multi-agent: one LlmAgent only
+- ❌ Persistent memory: no database
+- ❌ No SendGrid / Twilio / smtplib
+
+## Behavioral Rules
+- MUST return song + movie + action every time
+- NEVER fabricate Spotify or event URLs
+- Tone: warm and cozy, never clinical
+
+## Acceptance Criteria
+- AC-1: Deploy URL returns HTTP 200
+- AC-2: Complete toolkit for any mood input
+- AC-6: Response time under 5 seconds</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 6 — AI-NATIVE IDE WORKFLOW
+══════════════════════════════════════ -->
+<section>
+  <h3>How we work</h3>
+  <h2>The AI-Native IDE Workflow</h2>
+
+  <div class="cols mt-md" style="gap:1.2em; align-items:center; margin-bottom:0.8em;">
+    <div class="col glass glass-blue center" style="font-size:0.76em;">
+      <div style="font-size:1.4em;">📋</div>
+      <strong>spec.md</strong>
+      <p style="margin:0.2em 0 0; font-size:0.9em;">You write<br><em>What to build</em></p>
+    </div>
+    <div style="font-size:1.5em; color:var(--text-muted); flex-shrink:0;">→</div>
+    <div class="col glass center" style="font-size:0.76em;">
+      <div style="font-size:1.4em;">📐</div>
+      <strong>plan.md</strong>
+      <p style="margin:0.2em 0 0; font-size:0.9em;">IDE generates<br><em>How to build it</em></p>
+    </div>
+    <div style="font-size:1.5em; color:var(--text-muted); flex-shrink:0;">→</div>
+    <div class="col glass glass-green center" style="font-size:0.76em;">
+      <div style="font-size:1.4em;">⚙️</div>
+      <strong>code</strong>
+      <p style="margin:0.2em 0 0; font-size:0.9em;">IDE writes<br><em>You review</em></p>
+    </div>
+  </div>
+
+  <div class="cols" style="gap:0.9em;">
+    <div class="col glass glass-amber" style="font-size:0.73em;">
+      <strong>Key habit</strong>
+      <p style="margin:0.3em 0 0;">When the agent misbehaves, edit <code>spec.md</code> or the <code>INSTRUCTION</code> string — not by re-prompting. <em>"I changed a contract; the agent changed behavior."</em></p>
+    </div>
+    <div class="col glass" style="font-size:0.73em;">
+      <strong>Supported IDEs</strong>
+      <div style="margin-top:0.4em; display:flex; gap:0.4em; flex-wrap:wrap;">
+        <span class="pill pill-blue">Antigravity</span>
+        <span class="pill pill-blue">Claude Code</span>
+        <span class="pill pill-blue">Cursor</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 7 — GOOGLE ADK
+══════════════════════════════════════ -->
+<section>
+  <h3>The framework</h3>
+  <h2>
+    <span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span>
+    <span style="margin-left:0.15em;">ADK</span>
+  </h2>
+
+  <div class="cols mt-md" style="gap:1.3em;">
+    <div class="col">
+      <p style="font-size:0.75em; margin-bottom:0.6em; color:var(--text-secondary);">Agent Development Kit — open-source Python framework for building, evaluating, and deploying AI agents. <span class="pill pill-blue">v1.32.0 · May 2026</span></p>
+      <div class="glass glass-blue" style="font-size:0.73em; margin-bottom:0.5em;">
+        <strong>LlmAgent</strong> — the core building block. Wraps a Gemini model with an instruction string + optional tools.
+      </div>
+      <div class="glass" style="font-size:0.73em; margin-bottom:0.5em;">
+        <strong>Built-in tools</strong> — <code>google_search</code>, code execution, and more. Import, don't write.
+      </div>
+      <div class="glass glass-green" style="font-size:0.73em;">
+        <strong>Runner + Sessions</strong> — manages turns, state, multi-turn context.
+      </div>
+    </div>
+    <div class="col">
+      <pre><code class="language-python" data-trim>from google.adk.agents import LlmAgent
+from google.adk.tools import google_search
+
+root_agent = LlmAgent(
+    name="mood_toolkit_agent",
+    model="gemini-2.5-flash",
+    instruction=INSTRUCTION,
+    tools=[google_search],
+)</code></pre>
+      <p style="font-size:0.60em; color:var(--text-muted); text-align:center; margin-top:0.4em;">That's the entire agent. Really.</p>
+      <p style="font-size:0.60em; color:var(--text-muted); text-align:center;"><code>pip install google-adk</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 8 — GEMINI MODELS (UPDATED)
+══════════════════════════════════════ -->
+<section>
+  <h3>The brain — updated May 2026</h3>
+  <h2>
+    <span class="g-b">G</span><span class="g-r">e</span><span class="g-y">m</span><span class="g-g">i</span><span class="g-b">n</span><span class="g-r">i</span>
+    <span style="margin-left:0.15em;">Model Selection</span>
+  </h2>
+
+  <div class="mt-md">
+    <table class="model-table">
+      <thead>
+        <tr>
+          <th>Model string</th>
+          <th>Series</th>
+          <th>Best for</th>
+          <th>Speed</th>
+          <th>Cost</th>
+          <th>ADK default?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="deprecated">
+          <td>gemini-2.0-flash</td>
+          <td>2.0</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="dep-tag">⚠ EOL Jun 1</span></td>
+        </tr>
+        <tr class="highlight">
+          <td>gemini-2.5-flash</td>
+          <td>2.5 <span class="pill pill-green" style="font-size:0.80em;">stable</span></td>
+          <td>Most tasks · instruction-following</td>
+          <td>⚡ Fast</td>
+          <td>💚 Low</td>
+          <td><strong class="g-b">✅ Use this</strong></td>
+        </tr>
+        <tr>
+          <td>gemini-2.5-pro</td>
+          <td>2.5 <span class="pill pill-green" style="font-size:0.80em;">stable</span></td>
+          <td>Complex reasoning · large context</td>
+          <td>🐢 Slower</td>
+          <td>🔴 Higher</td>
+          <td>Upgrade path</td>
+        </tr>
+        <tr>
+          <td>gemini-3.1-flash-lite-preview</td>
+          <td>3.1 <span class="pill pill-purple" style="font-size:0.80em;">preview</span></td>
+          <td>High-volume · speed-first · 1M ctx</td>
+          <td>⚡⚡ Fastest</td>
+          <td>💚 Low</td>
+          <td>Experimental</td>
+        </tr>
+        <tr>
+          <td>gemini-3.1-pro-preview</td>
+          <td>3.1 <span class="pill pill-purple" style="font-size:0.80em;">preview</span></td>
+          <td>Frontier · agentic workflows · coding</td>
+          <td>🐢 Slower</td>
+          <td>🔴 Highest</td>
+          <td>Stretch goal</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cols mt-sm" style="gap:0.8em;">
+    <div class="glass glass-amber" style="font-size:0.68em; flex:1;">
+      <strong>⚠ Deprecation alert</strong> — <code>gemini-2.0-flash</code> shuts down <strong>June 1, 2026</strong>. All Week 1 code uses <code>gemini-2.5-flash</code> as the stable default.
+    </div>
+    <div class="glass glass-blue" style="font-size:0.68em; flex:1;">
+      <strong>Tip:</strong> Start with <code>gemini-2.5-flash</code>. Upgrade to <code>gemini-3.1-pro-preview</code> only when you hit a reasoning ceiling.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 9 — GOOGLE_SEARCH TOOL
+══════════════════════════════════════ -->
+<section>
+  <div class="doctrine-badge">Spec → Context → Critic</div>
+  <h3>Tools &gt; raw LLM knowledge</h3>
+  <h2>The <span class="g-b">google_search</span> Built-in Tool</h2>
+
+  <div class="cols mt-md" style="gap:1.3em;">
+    <div class="col">
+      <div class="glass glass-blue" style="font-size:0.73em; margin-bottom:0.6em;">
+        <strong>Why tools matter</strong>
+        <p style="margin:0.3em 0 0;">Gemini's training data has a cutoff. It doesn't know the café that opened last month. <code>google_search</code> gives the agent real-time web access — on demand, not always.</p>
+      </div>
+      <div class="glass glass-green" style="font-size:0.73em;">
+        <strong>How the agent decides</strong>
+        <p style="margin:0.3em 0 0;">"I'm in Brooklyn" → agent calls <code>google_search</code> for real places. "I feel tired" → agent already knows songs and movies. No search needed.</p>
+      </div>
+      <div class="warn-chip mt-sm">
+        ⚠ Don't combine <code>google_search</code> with <code>output_schema</code> — they conflict in ADK.
+      </div>
+    </div>
+    <div class="col">
+      <pre><code class="language-python" data-trim>from google.adk.tools import google_search
+
+root_agent = LlmAgent(
+    name="mood_toolkit_agent",
+    model="gemini-2.5-flash",
+    instruction=INSTRUCTION,
+    tools=[google_search],  # just add it
+)</code></pre>
+      <p style="font-size:0.60em; color:var(--text-muted); text-align:center; margin-top:0.3em;">Built-in = import it, not write it.</p>
+
+      <div class="glass mt-sm" style="font-size:0.68em;">
+        <strong>Other built-ins available:</strong>
+        <div style="margin-top:0.3em; display:flex; gap:0.4em; flex-wrap:wrap;">
+          <span class="pill pill-blue">code_execution</span>
+          <span class="pill pill-blue">vertex_ai_search</span>
+          <span class="pill pill-blue">maps</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 10 — CLOUD RUN
+══════════════════════════════════════ -->
+<section>
+  <h3>From localhost to the world</h3>
+  <h2><span class="g-g">Cloud Run</span> Deployment</h2>
+
+  <div class="cols mt-md" style="gap:1.3em;">
+    <div class="col">
+      <div class="glass glass-green" style="font-size:0.73em; margin-bottom:0.6em;">
+        <strong>What Cloud Run is</strong>
+        <p style="margin:0.3em 0 0;">Fully managed serverless containers on Google Cloud. Scales to zero when idle (free!), auto-scales under load. Always-on public HTTPS URL. Zero Dockerfile writing.</p>
+      </div>
+      <div class="glass" style="font-size:0.73em; margin-bottom:0.5em;">
+        <strong>What ADK does for you</strong>
+        <p style="margin:0.3em 0 0;">Packages code → builds container → pushes to Artifact Registry → deploys. One command, no Docker knowledge required.</p>
+      </div>
+      <div class="glass glass-amber" style="font-size:0.68em;">
+        <strong>Prerequisites:</strong> <code>gcloud</code> CLI authenticated · GCP project with billing · <code>requirements.txt</code>
+      </div>
+    </div>
+    <div class="col">
+      <pre><code class="language-bash" data-trim># Test locally first
+adk web
+
+# One-command deploy
+adk deploy cloud_run \
+  --project=YOUR_PROJECT_ID \
+  --region=us-central1 \
+  week-1-mood-toolkit/
+
+# Output:
+# ✓ Build complete
+# ✓ Image pushed to Artifact Registry
+# ✓ Service deployed to Cloud Run
+# → https://mood-toolkit-xxxx.run.app</code></pre>
+      <p style="font-size:0.60em; color:var(--text-muted); text-align:center; margin-top:0.3em;">That URL is shareable right now. Send it to someone today.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 11 — TODAY'S PROJECT
+══════════════════════════════════════ -->
+<section>
+  <h3>What you're building today</h3>
+  <h2>🎧 The <span class="g-b">Mood Toolkit</span></h2>
+
+  <div class="cols mt-md" style="gap:1.4em; align-items:flex-start;">
+    <div class="col-40">
+      <div class="glass glass-blue" style="font-size:0.74em; margin-bottom:0.6em;">
+        <strong>Input</strong>
+        <p style="margin:0.25em 0 0;">Mood (required) + location (optional)</p>
+      </div>
+      <div class="glass" style="font-size:0.74em; margin-bottom:0.4em;">
+        <strong>Output: your toolkit</strong>
+        <div class="spec-row" style="margin-top:0.4em;"><span>🎵</span><span>Song recommendation</span></div>
+        <div class="spec-row"><span>🎬</span><span>Movie pick</span></div>
+        <div class="spec-row"><span>✨</span><span>Tiny, doable action</span></div>
+        <div class="spec-row"><span>📍</span><span>Nearby place <em>(if location)</em></span></div>
+      </div>
+      <div class="cols" style="gap:0.4em; flex-wrap:wrap;">
+        <span class="pill pill-blue">LlmAgent</span>
+        <span class="pill pill-amber">gemini-2.5-flash</span>
+        <span class="pill pill-blue">google_search</span>
+        <span class="pill pill-green">Cloud Run</span>
+      </div>
+    </div>
+    <div class="col-55">
+      <div class="toolkit-preview" style="margin-bottom:0.7em;">
+        <span class="label">mood: "I feel scattered and wired"</span>
+        Put on "Pink Moon" by Nick Drake — it doesn't rush you.<br><br>
+        Watch <em>Paterson</em> tonight. It finds the small things worth noticing.<br><br>
+        Right now: close everything except one tab. Work there for 20 minutes.
+      </div>
+      <div class="agenda-row"><span class="agenda-time">5 min</span> Read INSTRUCTIONS, open IDE</div>
+      <div class="agenda-row"><span class="agenda-time">10 min</span> Task 1: IDE generates plan.md from spec</div>
+      <div class="agenda-row"><span class="agenda-time">10 min</span> Task 2: Vibe code agent.py + test</div>
+      <div class="agenda-row"><span class="agenda-time">5 min</span> Task 3: Drift refusal moment 📸</div>
+      <div class="agenda-row"><span class="agenda-time">10 min</span> Task 4: Deploy → get your URL</div>
+      <div class="agenda-row" style="border:none;"><span class="agenda-time">5 min</span> Task 5 ✦: Critic agent</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 12 — THE 8-WEEK SHAPE
+══════════════════════════════════════ -->
+<section>
+  <h3>The series</h3>
+  <h2>Your Sidekick Over 8 Weeks</h2>
+
+  <p style="font-size:0.74em; margin-bottom:0.3em;">Drop-in friendly — each week adds a capability. Shared universe: everyone's sidekick can eventually talk to everyone else's.</p>
+
+  <div class="timeline">
+    <div class="week-dot active">
+      <div class="num">1</div>
+      <div class="label">Vibe Coding<br><em>Mood Toolkit</em></div>
+    </div>
+    <div class="week-dot">
+      <div class="num">2</div>
+      <div class="label">Memory<br>&amp; State</div>
+    </div>
+    <div class="week-dot">
+      <div class="num">3</div>
+      <div class="label">Multi-Agent<br>Systems</div>
+    </div>
+    <div class="week-dot">
+      <div class="num">4</div>
+      <div class="label">Custom<br>Tools</div>
+    </div>
+    <div class="week-dot">
+      <div class="num">5</div>
+      <div class="label">RAG &amp;<br>Context</div>
+    </div>
+    <div class="week-dot">
+      <div class="num">6</div>
+      <div class="label">Eval &amp;<br>Safety</div>
+    </div>
+    <div class="week-dot">
+      <div class="num">7</div>
+      <div class="label">Production<br>Patterns</div>
+    </div>
+    <div class="week-dot">
+      <div class="num">8</div>
+      <div class="label">Showcase<br>Day</div>
+    </div>
+  </div>
+
+  <div class="cols mt-md" style="gap:0.9em;">
+    <div class="col glass glass-blue" style="font-size:0.72em;">
+      <strong>Week 1 (today)</strong>
+      <p style="margin:0.2em 0 0;">Single LlmAgent · instruction-driven · one built-in tool · deployed URL. The full loop, minimal complexity.</p>
+    </div>
+    <div class="col glass glass-green" style="font-size:0.72em;">
+      <strong>Week 8</strong>
+      <p style="margin:0.2em 0 0;">Multi-agent system · persistent memory · custom tools · eval pipeline · Gemini 3.1 Pro preview. A sidekick you'll actually use.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 13 — THREE ON-RAMPS
+══════════════════════════════════════ -->
+<section>
+  <h3>Pick your path</h3>
+  <h2>Three On-Ramps</h2>
+
+  <p style="font-size:0.75em; margin-bottom:0.3em;">Everyone in the same session — you choose the level that fits you today. You can switch any week.</p>
+
+  <div class="onramp-grid">
+    <div class="onramp-card card-green">
+      <div style="font-size:1.6em; margin-bottom:0.2em;">🟢</div>
+      <h4>Replicator</h4>
+      <p>Follow INSTRUCTIONS exactly. Build the Mood Toolkit as described. Great if you're new to ADK or Python.</p>
+      <p class="goal" style="color:#166534;">Goal: deployed URL by end of Task 4</p>
+    </div>
+    <div class="onramp-card card-yellow">
+      <div style="font-size:1.6em; margin-bottom:0.2em;">🟡</div>
+      <h4>Riffer</h4>
+      <p>Same architecture, different domain. Try: Creative Block Unsticker, Energy Toolkit, Focus Igniter. Edit spec.md + voice-spec.md.</p>
+      <p class="goal" style="color:#92400E;">Goal: same structure, your twist</p>
+    </div>
+    <div class="onramp-card card-red">
+      <div style="font-size:1.6em; margin-bottom:0.2em;">🔴</div>
+      <h4>Freestyle</h4>
+      <p>Build whatever agent you want. Must use ADK + Gemini. Must deploy to Cloud Run. Must have a spec.md.</p>
+      <p class="goal" style="color:#991B1B;">Goal: spec-driven, deployed, yours</p>
+    </div>
+  </div>
+
+  <p style="font-size:0.63em; color:var(--text-muted); text-align:center; margin-top:0.7em;">Not sure which? Start 🟢. You can always riff in Week 2.</p>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 14 — YOUR TURN
+══════════════════════════════════════ -->
+<section>
+  <h2 style="font-size:1.9em; background: linear-gradient(135deg, #4285F4, #34A853); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:0.3em;">Your turn. 🚀</h2>
+
+  <p style="font-size:0.78em; color:var(--text-secondary);">Open your IDE. Open the starter folder. Start with Task 1.</p>
+
+  <div class="cols mt-md" style="gap:1.2em;">
+    <div class="col">
+      <div class="glass glass-blue" style="font-size:0.73em;">
+        <strong>By end of session:</strong>
+        <div class="spec-row mt-sm"><span>✅</span><span>Public Cloud Run URL</span></div>
+        <div class="spec-row"><span>✅</span><span><code>artifacts/plan.md</code> from your IDE</span></div>
+        <div class="spec-row"><span>✅</span><span><code>spec.md</code> you personalized</span></div>
+        <div class="spec-row"><span>✅</span><span>Drift refusal screenshot</span></div>
+        <div class="spec-row"><span>✅</span><span>URL sent to one friend</span></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="glass glass-green" style="font-size:0.73em;">
+        <strong>Remember:</strong>
+        <div class="spec-row mt-sm"><span>📋</span><span>Read <code>spec.md</code> before prompting</span></div>
+        <div class="spec-row"><span>📐</span><span>Generate <code>plan.md</code> first (Task 1)</span></div>
+        <div class="spec-row"><span>🧪</span><span>Test with <code>adk web</code> before deploying</span></div>
+        <div class="spec-row"><span>📸</span><span>Screenshot the drift refusal (Task 3)</span></div>
+        <div class="spec-row"><span>🙋</span><span>Ask a facilitator anytime</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass" style="font-size:0.65em; text-align:center; margin-top:0.8em; color:var(--text-muted);">
+    <span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span>
+    ADK &nbsp;·&nbsp; Gemini 2.5 Flash &nbsp;·&nbsp; Cloud Run &nbsp;·&nbsp;
+    <strong class="g-b">Spec → Context → Critic</strong>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: true,
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'none',
+    width: 1100,
+    height: 660,
+    margin: 0.06,
+    plugins: [ RevealHighlight, RevealNotes ],
+  });
+</script>
+</body>
+</html>

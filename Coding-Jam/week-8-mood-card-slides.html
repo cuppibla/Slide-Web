@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Week 8 — A2UI Mood-Reactive Card · Vibe &amp; Hack</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reset.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════
+   GOOGLE BRAND × APPLE LIQUID GLASS — LIGHT
+══════════════════════════════════════════ */
+:root {
+  /* Google brand palette */
+  --g-blue:   #4285F4;
+  --g-red:    #EA4335;
+  --g-yellow: #FBBC05;
+  --g-green:  #34A853;
+
+  /* Surface & text */
+  --bg:       #F2F5FF;
+  --surface:  rgba(255,255,255,0.72);
+  --surface2: rgba(255,255,255,0.50);
+  --text:     #202124;
+  --muted:    #5F6368;
+  --border:   rgba(255,255,255,0.90);
+
+  /* Doctrine */
+  --spec-bg:    rgba(251,188,5,0.10);
+  --spec-bdr:   rgba(251,188,5,0.45);
+  --ctx-bg:     rgba(52,168,83,0.10);
+  --ctx-bdr:    rgba(52,168,83,0.45);
+  --crit-bg:    rgba(234,67,53,0.10);
+  --crit-bdr:   rgba(234,67,53,0.45);
+
+  --glass-blur: blur(24px) saturate(1.6);
+  --glass-shadow: 0 4px 32px rgba(66,133,244,0.10), 0 1px 0 rgba(255,255,255,0.95) inset;
+  --glass-shadow-lg: 0 12px 48px rgba(66,133,244,0.14), 0 1px 0 rgba(255,255,255,0.95) inset;
+}
+
+/* ── Background ── */
+.reveal { background: linear-gradient(140deg, #EEF2FF 0%, #F8F9FA 40%, #E8F5E9 100%); }
+.reveal .slides { font-family: 'Inter', -apple-system, sans-serif; }
+.reveal .slides section { text-align: left; }
+
+/* ── Typography ── */
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-transform: none;
+  color: var(--text);
+}
+.reveal h1 { font-size: 2.8rem; }
+.reveal h2 { font-size: 1.9rem; }
+.reveal h3 { font-size: 1.2rem; }
+.reveal p, .reveal li { color: var(--text); font-size: 0.92rem; line-height: 1.65; }
+.reveal ul, .reveal ol { margin-left: 1.1em; }
+.reveal li { margin-bottom: 0.3em; }
+
+/* ── Utility ── */
+.g-blue   { color: var(--g-blue); }
+.g-red    { color: var(--g-red); }
+.g-yellow { color: var(--g-yellow); }
+.g-green  { color: var(--g-green); }
+.muted    { color: var(--muted); font-size: 0.78rem; }
+.mono     { font-family: 'JetBrains Mono', monospace; }
+.center   { text-align: center; }
+
+/* ── Glass card ── */
+.glass {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
+  padding: 20px 24px;
+}
+.glass-sm {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  padding: 14px 18px;
+}
+.glass-lg {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--glass-shadow-lg);
+  padding: 28px 32px;
+}
+.glass-tinted-blue   { background: rgba(66,133,244,0.08);  border: 1px solid rgba(66,133,244,0.20);  border-radius: 20px; padding: 20px 24px; backdrop-filter: var(--glass-blur); }
+.glass-tinted-yellow { background: rgba(251,188,5,0.08);   border: 1px solid rgba(251,188,5,0.25);   border-radius: 20px; padding: 20px 24px; }
+.glass-tinted-green  { background: rgba(52,168,83,0.08);   border: 1px solid rgba(52,168,83,0.22);   border-radius: 20px; padding: 20px 24px; }
+.glass-tinted-red    { background: rgba(234,67,53,0.07);   border: 1px solid rgba(234,67,53,0.20);   border-radius: 20px; padding: 20px 24px; }
+
+/* ── Google logo dots ── */
+.g-dots { display: flex; gap: 5px; align-items: center; }
+.g-dot  { width: 9px; height: 9px; border-radius: 50%; }
+
+/* ── Chip / tag ── */
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.chip-blue   { background: rgba(66,133,244,0.12);  color: #1a56b0; }
+.chip-green  { background: rgba(52,168,83,0.12);   color: #1a7a35; }
+.chip-yellow { background: rgba(251,188,5,0.15);   color: #875d00; }
+.chip-red    { background: rgba(234,67,53,0.10);   color: #b8271c; }
+.chip-gray   { background: rgba(95,99,104,0.10);   color: #3c4043; }
+
+/* ── Layout ── */
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.row   { display: flex; align-items: center; gap: 10px; }
+
+/* ── Flow diagram ── */
+.flow { display: flex; align-items: stretch; gap: 6px; }
+.flow-node {
+  flex: 1;
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  padding: 14px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.flow-node.hi { border-color: rgba(66,133,244,0.4); background: rgba(66,133,244,0.06); }
+.flow-node-label { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+.flow-node-sub   { font-size: 0.62rem; color: var(--muted); }
+.flow-arrow { color: var(--g-blue); font-size: 1rem; flex-shrink: 0; align-self: center; }
+
+/* ── Component gallery ── */
+.comp-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 7px;
+}
+.comp-item {
+  background: var(--surface2);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.comp-emoji { font-size: 1rem; margin-bottom: 3px; }
+.comp-name  { font-size: 0.62rem; font-weight: 700; color: var(--g-blue); }
+.comp-desc  { font-size: 0.54rem; color: var(--muted); margin-top: 1px; }
+
+/* ── Mock A2UI cards ── */
+.mock-card {
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.78rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+.mock-heading { font-weight: 800; font-size: 0.95rem; line-height: 1.2; }
+.mock-text    { line-height: 1.5; color: inherit; opacity: 0.85; }
+.mock-btn     {
+  display: inline-block; padding: 6px 14px;
+  border-radius: 8px; font-size: 0.72rem; font-weight: 700;
+  border: none; margin-top: 3px; cursor: default;
+}
+.mock-alert {
+  border-left: 4px solid;
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+  font-size: 0.78rem;
+}
+.mock-chip {
+  display: inline-block;
+  padding: 3px 9px; border-radius: 100px;
+  font-size: 0.65rem; border: 1.5px solid; margin: 2px;
+}
+.mock-chips { margin-top: 3px; }
+
+/* ── Doctrine cards ── */
+.doctrine { border-radius: 18px; padding: 18px 20px; }
+
+/* ── Achievement / check ── */
+.ach-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.ach-row:last-child { border-bottom: none; }
+.ach-badge {
+  font-size: 0.62rem; font-weight: 700;
+  color: var(--g-blue); background: rgba(66,133,244,0.10);
+  border-radius: 6px; padding: 2px 7px; flex-shrink: 0; margin-top: 1px;
+}
+.ach-text { font-size: 0.82rem; color: var(--text); line-height: 1.4; }
+.ach-sub  { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+/* ── Onramp cards ── */
+.onramp { border-radius: 18px; padding: 16px 18px; display: flex; flex-direction: column; gap: 7px; }
+
+/* ── Week timeline (compact) ── */
+.timeline { display: flex; align-items: flex-start; gap: 0; margin: 12px 0; }
+.wk-node  { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.wk-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  border: 1.5px solid rgba(0,0,0,0.10);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; color: var(--muted);
+}
+.wk-circle.done { background: rgba(66,133,244,0.12); border-color: rgba(66,133,244,0.4); color: var(--g-blue); }
+.wk-circle.curr {
+  background: var(--g-blue); border-color: var(--g-blue); color: white;
+  box-shadow: 0 0 0 5px rgba(66,133,244,0.18);
+  transform: scale(1.15);
+}
+.wk-label    { font-size: 0.52rem; color: var(--muted); margin-top: 4px; text-align: center; max-width: 56px; line-height: 1.2; }
+.wk-label.d  { color: var(--g-blue); }
+.wk-label.c  { color: var(--text); font-weight: 700; }
+.tl-bar      { flex: 1; height: 1.5px; background: rgba(0,0,0,0.10); margin-bottom: 22px; }
+.tl-bar.done { background: var(--g-blue); }
+
+/* ── Code block ── */
+.code-block {
+  background: rgba(32,33,36,0.06);
+  border: 1px solid rgba(32,33,36,0.10);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #202124;
+  line-height: 1.7;
+}
+.kw  { color: var(--g-blue); }
+.str { color: var(--g-green); }
+.cmt { color: var(--muted); font-style: italic; }
+.fn  { color: #c01a00; }
+
+/* ── Pill number ── */
+.num-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 0.9rem; font-weight: 800;
+}
+
+/* ── Check items ── */
+.check-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; }
+.check-box  {
+  width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0;
+  border: 2px solid var(--g-blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: var(--g-blue); margin-top: 1px;
+}
+.check-box.done { background: var(--g-blue); color: white; border-color: var(--g-blue); }
+.check-text { font-size: 0.84rem; color: var(--text); line-height: 1.4; }
+.check-sub  { font-size: 0.68rem; color: var(--muted); }
+
+/* ── Google G separator ── */
+.g-rule { display: flex; align-items: center; gap: 6px; margin: 10px 0; }
+.g-rule::before, .g-rule::after { content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.08); }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
+
+
+
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ══════════════════════════════════════════════════════
+     1 — TITLE
+══════════════════════════════════════════════════════ -->
+<section>
+  <div style="padding: 8px 0;">
+    <div class="row" style="margin-bottom: 18px;">
+      <div class="g-dots">
+        <div class="g-dot" style="background:#4285F4;"></div>
+        <div class="g-dot" style="background:#EA4335;"></div>
+        <div class="g-dot" style="background:#FBBC05;"></div>
+        <div class="g-dot" style="background:#34A853;"></div>
+      </div>
+      <span style="font-size:0.72rem; color:var(--muted); font-weight:600; letter-spacing:0.08em; text-transform:uppercase;">Vibe &amp; Hack · Week 8 of 8 · Series Finale</span>
+    </div>
+
+    <h1 style="font-size:3.2rem; margin-bottom:6px;">The Sidekick<br><span class="g-blue">Has a Face</span></h1>
+    <p style="font-size:1.3rem; color:var(--muted); font-weight:300; margin-bottom:28px;">Mood-Reactive Cards with A2UI</p>
+
+    <!-- Independent callout — prominent -->
+    <div class="glass-tinted-blue" style="margin-bottom: 20px; max-width: 560px;">
+      <div class="row" style="gap: 12px;">
+        <span style="font-size:1.3rem;">👋</span>
+        <div>
+          <p style="font-weight: 700; color: var(--g-blue); margin-bottom: 2px;">First time here? Welcome — you're exactly where you need to be.</p>
+          <p style="font-size:0.78rem; color:var(--muted);">Week 8 is fully self-contained. No prior sessions required. If you've been here all 8 weeks, today pays off everything you built. If this is your first time, you'll build something real in 45 minutes.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="chip chip-blue">A2UI v0.9</span>
+      <span class="chip chip-green">Agent-Driven UI</span>
+      <span class="chip chip-yellow">Spec · Context · Critic</span>
+      <span class="chip chip-gray">Standalone session</span>
+    </div>
+    <p class="muted" style="margin-top:20px;">Demo (15 min) → Concept Frame (7 min) → Hands-On (45 min) → Compare Notes</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     2 — WEEK 8 IS INDEPENDENT
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 14px;">Starting fresh</div>
+  <h2>Week 8 <span class="g-blue">Stands on Its Own</span></h2>
+  <p style="color:var(--muted); margin-bottom: 20px;">Everything you need to succeed today is in this room.</p>
+
+  <div class="cols2" style="margin-bottom: 18px;">
+    <div class="glass-tinted-green" style="border-radius:16px; padding:18px 20px;">
+      <p style="font-size:0.72rem; font-weight:700; color:var(--g-green); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">What you need today</p>
+      <div class="stack" style="gap:7px;">
+        <div class="row"><span style="color:var(--g-green); font-size:0.9rem;">✓</span><span style="font-size:0.82rem;">Python + pip</span></div>
+        <div class="row"><span style="color:var(--g-green); font-size:0.9rem;">✓</span><span style="font-size:0.82rem;">A Google API key</span></div>
+        <div class="row"><span style="color:var(--g-green); font-size:0.9rem;">✓</span><span style="font-size:0.82rem;">A terminal + code editor</span></div>
+        <div class="row"><span style="color:var(--g-green); font-size:0.9rem;">✓</span><span style="font-size:0.82rem;">45 minutes of focus</span></div>
+        <div class="row"><span style="color:var(--g-green); font-size:0.9rem;">✓</span><span style="font-size:0.82rem;">Curiosity about AI and UI</span></div>
+      </div>
+    </div>
+    <div style="background:rgba(95,99,104,0.06); border:1px solid rgba(95,99,104,0.12); border-radius:16px; padding:18px 20px;">
+      <p style="font-size:0.72rem; font-weight:700; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">What you do NOT need</p>
+      <div class="stack" style="gap:7px;">
+        <div class="row"><span style="color:var(--muted); font-size:0.9rem;">✗</span><span style="font-size:0.82rem; color:var(--muted);">Weeks 1–7 of this series</span></div>
+        <div class="row"><span style="color:var(--muted); font-size:0.9rem;">✗</span><span style="font-size:0.82rem; color:var(--muted);">Any prior A2UI experience</span></div>
+        <div class="row"><span style="color:var(--muted); font-size:0.9rem;">✗</span><span style="font-size:0.82rem; color:var(--muted);">Frontend / UI engineering background</span></div>
+        <div class="row"><span style="color:var(--muted); font-size:0.9rem;">✗</span><span style="font-size:0.82rem; color:var(--muted);">A pre-built agent to start from</span></div>
+        <div class="row"><span style="color:var(--muted); font-size:0.9rem;">✗</span><span style="font-size:0.82rem; color:var(--muted);">Any previous deliverables</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optional context for returning attendees -->
+  <div class="glass-sm" style="border-left: 3px solid var(--g-yellow);">
+    <p style="font-size:0.78rem; color:var(--muted);">
+      <span style="font-weight:700; color:#875d00;">If you've been here since Week 1 →</span> Today closes the loop. Your Week 1 Mood Toolkit returned plain text. Today, the same idea returns a rendered UI card. The sidekick gets a face.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     3 — WHAT YOU'RE BUILDING TODAY
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 14px;">Today's project</div>
+  <h2>A Mood Card That <span class="g-blue">Transforms</span> With Your Feelings</h2>
+  <p style="color:var(--muted); margin-bottom: 18px;">Type "anxious" → you get a grounding card. Type "excited" → you get an energy card. Same agent, dramatically different UI.</p>
+
+  <div class="cols3" style="margin-bottom: 18px;">
+    <div>
+      <p style="font-size:0.7rem; font-weight:700; color:#875d00; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">😊 Happy</p>
+      <div class="mock-card" style="background:#FFFBEB; color:#78350F;">
+        <div class="mock-heading" style="color:#F59E0B;">You're glowing today ✨</div>
+        <div class="mock-text">Channel that energy.</div>
+        <div class="mock-chips">
+          <span class="mock-chip" style="border-color:#F59E0B; color:#F59E0B;">Go for a run</span>
+          <span class="mock-chip" style="border-color:#F59E0B; color:#F59E0B;">Create</span>
+        </div>
+        <button class="mock-btn" style="background:#F59E0B; color:white; width:100%; text-align:center;">Start something →</button>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:0.7rem; font-weight:700; color:#1a56b0; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">😰 Anxious</p>
+      <div class="mock-alert" style="background:#EFF6FF; border-left-color:#3B82F6; color:#1E3A8A;">
+        <div class="mock-heading" style="color:#3B82F6;">Ground yourself now</div>
+        <div class="mock-text">Anxiety needs direction. Try:</div>
+        <ol style="font-size:0.72rem; padding-left:14px; line-height:1.8; color:#1E3A8A;">
+          <li>Name 5 things you see</li>
+          <li>3 slow breaths</li>
+          <li>Feet flat on the floor</li>
+        </ol>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:0.7rem; font-weight:700; color:#1a7a35; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">🌿 Calm</p>
+      <div class="mock-card" style="background:#F0FDF4; color:#166534;">
+        <div style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:50%; background:#D1FAE5; font-size:1.2rem;">🌿</div>
+        <div class="mock-heading" style="color:#059669;">You're in a good place</div>
+        <div class="mock-text">Let this clarity settle. No urgency.</div>
+        <a style="font-size:0.72rem; color:#059669; text-decoration:underline;">Take a slow walk →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass" style="text-align:center;">
+    <p style="font-size:0.88rem;">
+      <span class="g-blue" style="font-weight:700;">This is A2UI:</span> your agent returns declarative JSON, not HTML. The renderer builds native components from it. Same agent — different context — different UI.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     4 — WHY NOT HTML?
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-red" style="margin-bottom: 14px;">The problem with HTML</div>
+  <h2>Why NOT just return <span class="g-red">HTML?</span></h2>
+
+  <div class="stack" style="margin-top: 18px; gap: 12px;">
+    <div class="glass-tinted-red" style="padding: 16px 20px; border-radius: 16px;">
+      <div class="row">
+        <span style="font-size:1.2rem; flex-shrink:0;">🚨</span>
+        <div>
+          <p style="font-weight:700; color:var(--g-red); margin-bottom:2px; font-size:0.88rem;">XSS &amp; Security</p>
+          <p style="font-size:0.78rem; color:var(--muted);">An LLM generating HTML can produce <code>&lt;script&gt;</code> tags, phishing links, and layout bombs. You can't reliably sanitize all of it.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-tinted-red" style="padding: 16px 20px; border-radius: 16px;">
+      <div class="row">
+        <span style="font-size:1.2rem; flex-shrink:0;">🖼️</span>
+        <div>
+          <p style="font-weight:700; color:var(--g-red); margin-bottom:2px; font-size:0.88rem;">iframe Sandboxing is Ugly</p>
+          <p style="font-size:0.78rem; color:var(--muted);">iframes are heavy, inconsistent across platforms, and can't access your app's design system, fonts, or theme tokens.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-tinted-red" style="padding: 16px 20px; border-radius: 16px;">
+      <div class="row">
+        <span style="font-size:1.2rem; flex-shrink:0;">📐</span>
+        <div>
+          <p style="font-weight:700; color:var(--g-red); margin-bottom:2px; font-size:0.88rem;">Fixed UI = Missed Point</p>
+          <p style="font-size:0.78rem; color:var(--muted);">If the layout never changes — only the text — it's a template engine, not generative UI. A2UI generates a different component tree per response.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:18px; text-align:center; border: 1px solid rgba(66,133,244,0.25);">
+    <p style="font-size:1rem; font-weight:700; color:var(--g-blue);">A2UI's answer: declarative JSON + client-controlled catalog + native rendering.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     5 — A2UI SOLUTION
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 14px;">The solution</div>
+  <h2>A2UI: <span class="g-blue">Declarative JSON,</span> Native Rendering</h2>
+  <p style="color:var(--muted); margin-bottom: 18px; font-size:0.88rem;">Google's open protocol. <span class="mono">pip install a2ui-agent-sdk</span> — on PyPI, v0.9.</p>
+
+  <div class="cols3" style="margin-bottom: 18px;">
+    <div class="glass-tinted-blue" style="padding:18px; border-radius:18px;">
+      <div style="font-size:1.4rem; margin-bottom:8px;">🧩</div>
+      <p style="font-weight:700; color:var(--g-blue); font-size:0.85rem;">Declarative JSON</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:4px;">Agent says <em>what</em>, not <em>how</em>. Component tree, not rendering code.</p>
+    </div>
+    <div class="glass-tinted-green" style="padding:18px; border-radius:18px;">
+      <div style="font-size:1.4rem; margin-bottom:8px;">🛡️</div>
+      <p style="font-weight:700; color:var(--g-green); font-size:0.85rem;">Catalog = Allowlist</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:4px;">Only known components render. Unknown types are rejected. Zero injection risk.</p>
+    </div>
+    <div class="glass-tinted-yellow" style="padding:18px; border-radius:18px;">
+      <div style="font-size:1.4rem; margin-bottom:8px;">🌐</div>
+      <p style="font-weight:700; color:#875d00; font-size:0.85rem;">Native Rendering</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:4px;">Same JSON → web (Lit), mobile (Flutter), desktop. Client keeps its design system.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <span class="cmt">// What the agent sends</span><br>
+    { <span class="kw">"version"</span>: <span class="str">"0.9"</span>,<br>
+    &nbsp; <span class="kw">"components"</span>: [{ <span class="kw">"type"</span>: <span class="str">"Card"</span>, <span class="kw">"props"</span>: { <span class="kw">"backgroundColor"</span>: <span class="str">"#FFFBEB"</span> }, <span class="kw">"children"</span>: [<br>
+    &nbsp;&nbsp;&nbsp; { <span class="kw">"type"</span>: <span class="str">"Heading"</span>, <span class="kw">"props"</span>: { <span class="kw">"text"</span>: <span class="str">"You're glowing ✨"</span>, <span class="kw">"color"</span>: <span class="str">"#F59E0B"</span> }},<br>
+    &nbsp;&nbsp;&nbsp; { <span class="kw">"type"</span>: <span class="str">"Button"</span>, <span class="kw">"props"</span>: { <span class="kw">"label"</span>: <span class="str">"Start something exciting"</span> }}<br>
+    &nbsp; ]}]}<br>
+    <span class="cmt">// Renderer builds native Lit / Flutter / Angular components</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     6 — THE FLOW
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 14px;">Architecture</div>
+  <h2>The Agent → JSON → Renderer <span class="g-blue">Flow</span></h2>
+
+  <div class="flow" style="margin: 24px 0;">
+    <div class="flow-node">
+      <span style="font-size:1.3rem;">😊</span>
+      <div class="flow-node-label">User Input</div>
+      <div class="flow-node-sub">mood: "anxious"</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node hi">
+      <span style="font-size:1.3rem;">🤖</span>
+      <div class="flow-node-label">Python Agent</div>
+      <div class="flow-node-sub">generate_mood_card()</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node hi">
+      <span style="font-size:1.3rem;">🛡️</span>
+      <div class="flow-node-label">Validator</div>
+      <div class="flow-node-sub">A2uiSchemaManager</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <span style="font-size:1.3rem;">📦</span>
+      <div class="flow-node-label">A2UI JSON</div>
+      <div class="flow-node-sub">v0.9 component tree</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node hi">
+      <span style="font-size:1.3rem;">🖥️</span>
+      <div class="flow-node-label">Lit Renderer</div>
+      <div class="flow-node-sub">Native components</div>
+    </div>
+  </div>
+
+  <div class="cols2">
+    <div class="glass">
+      <p style="font-weight:700; color:var(--g-blue); font-size:0.85rem; margin-bottom:8px;">Agent controls</p>
+      <ul style="font-size:0.78rem;">
+        <li>Which components appear</li>
+        <li>Their props and content</li>
+        <li>The tree structure</li>
+        <li>Color palette</li>
+      </ul>
+    </div>
+    <div class="glass" style="border:1px solid rgba(52,168,83,0.3);">
+      <p style="font-weight:700; color:var(--g-green); font-size:0.85rem; margin-bottom:8px;">Client controls</p>
+      <ul style="font-size:0.78rem;">
+        <li>Which components are allowed (catalog)</li>
+        <li>How they actually render</li>
+        <li>The design system &amp; theme</li>
+        <li>Security — unknown types rejected</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     7 — THE BASIC CATALOG (18 COMPONENTS)
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">The Basic Catalog</div>
+  <h2>18 Built-in Components — <span class="g-blue">The Allowlist</span></h2>
+  <p class="muted" style="margin-bottom: 14px;">Every component your agent can use today. Nothing outside this set will render.</p>
+
+  <div class="comp-grid">
+    <div class="comp-item" style="border-color:rgba(66,133,244,0.3);">
+      <div class="comp-emoji">🃏</div><div class="comp-name">Card</div><div class="comp-desc">Container</div>
+    </div>
+    <div class="comp-item" style="border-color:rgba(234,67,53,0.3);">
+      <div class="comp-emoji">🚨</div><div class="comp-name" style="color:var(--g-red);">Alert</div><div class="comp-desc">Callout</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">⚏</div><div class="comp-name">Grid</div><div class="comp-desc">Layout</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">H</div><div class="comp-name">Heading</div><div class="comp-desc">Title</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">¶</div><div class="comp-name">Text</div><div class="comp-desc">Body copy</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">🔗</div><div class="comp-name">Link</div><div class="comp-desc">Clickable</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">▶</div><div class="comp-name">Button</div><div class="comp-desc">CTA</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">🖼️</div><div class="comp-name">Image</div><div class="comp-desc">Photo</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">👤</div><div class="comp-name">Avatar</div><div class="comp-desc">Person</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">✦</div><div class="comp-name">Icon</div><div class="comp-desc">Symbol</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">●</div><div class="comp-name">Badge</div><div class="comp-desc">Status</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">◉</div><div class="comp-name">Chip</div><div class="comp-desc">Tag</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">◉◉</div><div class="comp-name">ChipGroup</div><div class="comp-desc">Tag row</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">≡</div><div class="comp-name">List</div><div class="comp-desc">ul / ol</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">•</div><div class="comp-name">ListItem</div><div class="comp-desc">List row</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">─</div><div class="comp-name">Divider</div><div class="comp-desc">Separator</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">▓░</div><div class="comp-name">Progress</div><div class="comp-desc">Bar</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-emoji">⟳</div><div class="comp-name">Spinner</div><div class="comp-desc">Loading</div>
+    </div>
+  </div>
+
+  <p class="muted" style="margin-top:10px; text-align:center;">
+    Containers (have children): Card, Alert, Grid, List, ChipGroup &nbsp;·&nbsp; Leaves: everything else
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     8 — MOOD REACTIVITY: HAPPY vs ANXIOUS
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">Mood-reactive design</div>
+  <h2>Same Agent. <span class="g-blue">Dramatically Different</span> UI.</h2>
+  <p style="color:var(--muted); margin-bottom:14px;">Not just different text — different root component, palette, structure, and tone.</p>
+
+  <div class="cols2">
+    <div>
+      <p style="font-size:0.7rem; font-weight:700; color:#875d00; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">😊 HAPPY</p>
+      <div class="mock-card" style="background:#FFFBEB; color:#78350F;">
+        <div class="mock-heading" style="color:#F59E0B;">You're absolutely glowing today ✨</div>
+        <div class="mock-text">This energy is contagious. Point it at something that matters.</div>
+        <div class="mock-chips">
+          <span class="mock-chip" style="border-color:#F59E0B; color:#F59E0B;">Go for a run</span>
+          <span class="mock-chip" style="border-color:#F59E0B; color:#F59E0B;">Call a friend</span>
+          <span class="mock-chip" style="border-color:#F59E0B; color:#F59E0B;">Start a project</span>
+        </div>
+        <button class="mock-btn" style="background:#F59E0B; color:white; width:100%; text-align:center;">Start something exciting →</button>
+      </div>
+      <div class="glass-sm" style="margin-top:8px; padding:10px 14px;">
+        <p style="font-size:0.68rem; color:var(--muted);">
+          <span style="font-weight:700; color:var(--text);">Root:</span> Card &nbsp;·&nbsp;
+          <span style="font-weight:700; color:var(--text);">Children:</span> Heading + Text + ChipGroup + Button
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <p style="font-size:0.7rem; font-weight:700; color:#1a56b0; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">😰 ANXIOUS</p>
+      <div class="mock-alert" style="background:#EFF6FF; border-left-color:#3B82F6; color:#1E3A8A;">
+        <div class="mock-heading" style="color:#3B82F6;">Let's ground you right now</div>
+        <div class="mock-text">Anxiety is energy looking for direction. Try this:</div>
+        <ol style="font-size:0.74rem; padding-left:16px; color:#1E3A8A; line-height:1.8;">
+          <li>Name 5 things you can see</li>
+          <li>Take 3 slow breaths</li>
+          <li>Feet flat on the floor</li>
+        </ol>
+        <hr style="border:none; border-top:1px solid rgba(59,130,246,0.2); margin:4px 0;" />
+        <div style="font-size:0.74rem; font-weight:600; color:#3B82F6;">One breath at a time.</div>
+      </div>
+      <div class="glass-sm" style="margin-top:8px; padding:10px 14px;">
+        <p style="font-size:0.68rem; color:var(--muted);">
+          <span style="font-weight:700; color:var(--text);">Root:</span> Alert (not Card) &nbsp;·&nbsp;
+          <span style="font-weight:700; color:var(--text);">Children:</span> Heading + Text + List + Divider + Text
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:14px; border:1px solid rgba(66,133,244,0.2);">
+    <p style="font-size:0.82rem; text-align:center;">
+      Three dimensions of difference: <span class="g-blue" style="font-weight:600;">root component</span> (Card vs Alert) · <span class="g-yellow" style="font-weight:600;">color palette</span> (amber vs blue) · <span class="g-green" style="font-weight:600;">content structure</span> (chips+CTA vs numbered steps)
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     9 — ALL 5 MOODS
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">5 mood variants</div>
+  <h2>Each Mood, a <span class="g-blue">Different Component Tree</span></h2>
+
+  <div class="stack" style="margin-top: 14px; gap: 8px;">
+    <div class="glass-sm" style="border-left:3px solid #F59E0B; border-radius:12px 0 0 12px / 12px 0 0 12px;">
+      <div class="row">
+        <span style="font-size:1rem;">😊</span>
+        <span style="font-weight:700; color:#F59E0B; min-width:72px; font-size:0.85rem;">HAPPY</span>
+        <span style="font-size:0.78rem; color:var(--muted);">Card → Heading + Text + <strong style="color:var(--text);">ChipGroup</strong> + <strong style="color:var(--text);">Button</strong></span>
+        <span class="chip chip-yellow" style="margin-left:auto; font-size:0.6rem;">Warm amber</span>
+      </div>
+    </div>
+    <div class="glass-sm" style="border-left:3px solid #3B82F6; border-radius:12px 0 0 12px / 12px 0 0 12px;">
+      <div class="row">
+        <span style="font-size:1rem;">😰</span>
+        <span style="font-weight:700; color:#3B82F6; min-width:72px; font-size:0.85rem;">ANXIOUS</span>
+        <span style="font-size:0.78rem; color:var(--muted);"><strong style="color:var(--text);">Alert</strong> → Heading + Text + <strong style="color:var(--text);">List</strong> + Divider + Text</span>
+        <span class="chip chip-blue" style="margin-left:auto; font-size:0.6rem;">Cool blue</span>
+      </div>
+    </div>
+    <div class="glass-sm" style="border-left:3px solid #059669; border-radius:12px 0 0 12px / 12px 0 0 12px;">
+      <div class="row">
+        <span style="font-size:1rem;">🌿</span>
+        <span style="font-weight:700; color:#059669; min-width:72px; font-size:0.85rem;">CALM</span>
+        <span style="font-size:0.78rem; color:var(--muted);">Card → <strong style="color:var(--text);">Avatar</strong> + Heading + Text + Divider + <strong style="color:var(--text);">Link</strong></span>
+        <span class="chip chip-green" style="margin-left:auto; font-size:0.6rem;">Soft green</span>
+      </div>
+    </div>
+    <div class="glass-sm" style="border-left:3px solid #7C3AED; border-radius:12px 0 0 12px / 12px 0 0 12px;">
+      <div class="row">
+        <span style="font-size:1rem;">⚡</span>
+        <span style="font-weight:700; color:#7C3AED; min-width:72px; font-size:0.85rem;">EXCITED</span>
+        <span style="font-size:0.78rem; color:var(--muted);">Card → <strong style="color:var(--text);">Badge</strong> + <strong style="color:var(--text);">Icon</strong> + Heading + Text + <strong style="color:var(--text);">Progress</strong> + Button</span>
+        <span class="chip" style="background:rgba(124,58,237,0.1); color:#4c1d95; margin-left:auto; font-size:0.6rem;">Purple</span>
+      </div>
+    </div>
+    <div class="glass-sm" style="border-left:3px solid #6366F1; border-radius:12px 0 0 12px / 12px 0 0 12px;">
+      <div class="row">
+        <span style="font-size:1rem;">💧</span>
+        <span style="font-weight:700; color:#6366F1; min-width:72px; font-size:0.85rem;">SAD</span>
+        <span style="font-size:0.78rem; color:var(--muted);">Card → <strong style="color:var(--text);">Icon</strong> + Heading + Text + Divider + Button <em>(outlined)</em></span>
+        <span class="chip" style="background:rgba(99,102,241,0.1); color:#312e81; margin-left:auto; font-size:0.6rem;">Muted indigo</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="muted" style="margin-top:12px; text-align:center;">
+    Every variant differs in at least 3 dimensions: root component · palette · child structure
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     10 — A2UI SCHEMA MANAGER
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">The SDK</div>
+  <h2><code class="g-blue">A2uiSchemaManager</code> — Three Jobs</h2>
+  <p style="color:var(--muted); margin-bottom:18px;">The core class in <code>a2ui-agent-sdk</code>.</p>
+
+  <div class="cols3" style="margin-bottom: 18px;">
+    <div class="glass-tinted-yellow" style="border-radius:18px;">
+      <div class="num-pill" style="background:rgba(251,188,5,0.2); color:#875d00; margin-bottom:8px; font-size:1.1rem;">①</div>
+      <p style="font-weight:700; font-size:0.85rem; color:#875d00;">Load the Catalog</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:4px;">Loads 18 BasicCatalog components with their schemas, required props, and validation rules.</p>
+    </div>
+    <div class="glass-tinted-blue" style="border-radius:18px;">
+      <div class="num-pill" style="background:rgba(66,133,244,0.15); color:var(--g-blue); margin-bottom:8px; font-size:1.1rem;">②</div>
+      <p style="font-weight:700; font-size:0.85rem; color:var(--g-blue);">Generate the Prompt</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:4px;"><code>generate_system_prompt()</code> teaches the LLM valid A2UI JSON format with schema + few-shot examples.</p>
+    </div>
+    <div class="glass-tinted-red" style="border-radius:18px;">
+      <div class="num-pill" style="background:rgba(234,67,53,0.12); color:var(--g-red); margin-bottom:8px; font-size:1.1rem;">③</div>
+      <p style="font-weight:700; font-size:0.85rem; color:var(--g-red);">Validate Output</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:4px;"><code>validate()</code> rejects unknown components, missing props, or HTML injection before it reaches the renderer.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <span class="kw">from</span> a2ui.basic_catalog.provider <span class="kw">import</span> BasicCatalog<br>
+    <span class="kw">from</span> a2ui.core.schema.manager <span class="kw">import</span> A2uiSchemaManager<br><br>
+    catalog_config = BasicCatalog.<span class="fn">get_config</span>()<br>
+    schema_manager = <span class="fn">A2uiSchemaManager</span>(catalogs=[catalog_config])<br><br>
+    <span class="cmt"># ② LLM gets the full component spec as its system prompt</span><br>
+    system_prompt = schema_manager.<span class="fn">generate_system_prompt</span>(role_description=<span class="str">"mood card agent"</span>)<br><br>
+    <span class="cmt"># ③ Validate before returning — the Critic step</span><br>
+    validated = schema_manager.<span class="fn">validate</span>(agent_output_json)
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     11 — DOCTRINE SYNTHESIS
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">The doctrine</div>
+  <h2>Spec · Context · Critic — <span class="g-blue">All Three at Once</span></h2>
+  <p style="color:var(--muted); margin-bottom:16px;">This week they stop being separate ideas and start being one system.</p>
+
+  <div class="cols3" style="margin-bottom: 16px;">
+    <div class="doctrine glass-tinted-yellow">
+      <p style="font-size:0.65rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#875d00;">📋 Spec</p>
+      <p style="font-weight:700; font-size:0.88rem; color:var(--text); margin-top:4px;">The catalog IS the spec.</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:6px;">Not a document you might ignore. A machine that rejects non-compliant output. The agent cannot ship a component that isn't in the catalog.</p>
+    </div>
+    <div class="doctrine glass-tinted-green">
+      <p style="font-size:0.65rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#1a7a35;">🌊 Context</p>
+      <p style="font-weight:700; font-size:0.88rem; color:var(--text); margin-top:4px;">Mood shapes the UI layout.</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:6px;">Input = context = output shape. "anxious" → Alert with grounding steps. "calm" → minimal Card with Avatar. Context is structural, not decorative.</p>
+    </div>
+    <div class="doctrine glass-tinted-red">
+      <p style="font-size:0.65rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#b8271c;">🔍 Critic</p>
+      <p style="font-weight:700; font-size:0.88rem; color:var(--text); margin-top:4px;">Validation before render.</p>
+      <p style="font-size:0.74rem; color:var(--muted); margin-top:6px;"><code>schema_manager.validate()</code> runs before any JSON leaves the agent. Bad output fails loudly here — not silently at render time.</p>
+    </div>
+  </div>
+
+  <div class="glass" style="border:1px solid rgba(66,133,244,0.25);">
+    <p style="font-size:0.85rem; text-align:center;">
+      <span class="g-blue" style="font-weight:700;">The key insight:</span> In previous weeks, the spec was a document. This week, the spec is enforced by a machine. A spec that can't be violated at runtime is more powerful than one that can only be violated accidentally.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     12 — WEEK 1→8 LOOP (OPTIONAL CONTEXT)
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-yellow" style="margin-bottom: 12px;">For returning attendees</div>
+  <h2>If You Started in Week 1 — <span class="g-yellow">The Loop Closes Today</span></h2>
+  <p style="color:var(--muted); margin-bottom: 6px; font-size:0.82rem;">This slide is optional context. First-timers: skip to the hands-on. You don't need this history to build today.</p>
+
+  <div class="cols2" style="margin-top:16px; gap:20px;">
+    <div>
+      <p style="font-size:0.7rem; font-weight:700; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">Week 1 — Mood Toolkit</p>
+      <div class="glass" style="background:rgba(255,255,255,0.5);">
+        <p style="font-size:0.72rem; color:var(--muted); margin-bottom:8px; font-family:monospace;">Input: "I'm feeling anxious"</p>
+        <div style="background:rgba(0,0,0,0.04); border-radius:10px; padding:12px; font-size:0.74rem; color:var(--muted); line-height:1.8; font-family:monospace;">
+          Here's a quote for you:<br>
+          "You are braver than you believe."<br><br>
+          Try box breathing — 4 counts in,<br>
+          hold 4, out 4, hold 4.
+        </div>
+      </div>
+      <p style="font-size:0.72rem; color:var(--muted); margin-top:8px;">Output: plain text string · Terminal / chat</p>
+    </div>
+
+    <div>
+      <p style="font-size:0.7rem; font-weight:700; color:var(--g-blue); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">Week 8 — Mood-Reactive Card</p>
+      <div style="border-radius:14px; padding:14px; background:#EFF6FF;">
+        <p style="font-size:0.72rem; color:var(--muted); margin-bottom:8px; font-family:monospace;">Input: {"mood": "anxious"}</p>
+        <div class="mock-alert" style="background:#EFF6FF; border-left-color:#3B82F6; color:#1E3A8A; padding:12px 14px;">
+          <div style="font-weight:800; font-size:0.85rem; color:#3B82F6;">Let's ground you right now</div>
+          <ol style="font-size:0.7rem; padding-left:14px; line-height:1.8;">
+            <li>Name 5 things you can see</li>
+            <li>Take 3 slow breaths</li>
+          </ol>
+        </div>
+      </div>
+      <p style="font-size:0.72rem; color:var(--g-blue); margin-top:8px; font-weight:500;">Output: A2UI JSON → native components · Web / mobile / desktop</p>
+    </div>
+  </div>
+
+  <div style="margin-top:16px; padding:14px 20px; border-radius:14px; background:rgba(66,133,244,0.07); border:1px solid rgba(66,133,244,0.18); text-align:center;">
+    <p style="font-size:0.95rem; font-weight:700; color:var(--g-blue);">Same agent. Same mood input. Eight weeks of craft between the outputs.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     13 — YOUR TURN / ON-RAMPS
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">Hands-on — 45 min</div>
+  <h2>Your Turn — <span class="g-blue">Pick Your On-Ramp</span></h2>
+  <p style="color:var(--muted); margin-bottom:16px;">Open <code>INSTRUCTIONS.md</code> to start. All three paths lead to a deployed, working agent.</p>
+
+  <div class="cols3" style="margin-bottom: 14px;">
+    <div class="onramp" style="background:rgba(52,168,83,0.08); border:1.5px solid rgba(52,168,83,0.3);">
+      <span style="font-size:1.4rem;">🟢</span>
+      <p style="font-weight:700; color:var(--g-green); font-size:0.9rem;">Replicator</p>
+      <p style="font-size:0.74rem; color:var(--muted);">Follow INSTRUCTIONS exactly. Use example JSON from component-catalog.md. Build exactly 3 moods.</p>
+      <p style="font-size:0.7rem; color:var(--g-green); font-weight:600; margin-top:6px;">Done when: 3 cards render distinctly</p>
+    </div>
+    <div class="onramp" style="background:rgba(251,188,5,0.08); border:1.5px solid rgba(251,188,5,0.3);">
+      <span style="font-size:1.4rem;">🟡</span>
+      <p style="font-weight:700; color:#875d00; font-size:0.9rem;">Riffer</p>
+      <p style="font-size:0.74rem; color:var(--muted);">Adapt the patterns to your moods. Customize palettes, component choices. 4–5 variants.</p>
+      <p style="font-size:0.7rem; color:#875d00; font-weight:600; margin-top:6px;">Stretch: add a Grid layout for one mood</p>
+    </div>
+    <div class="onramp" style="background:rgba(234,67,53,0.07); border:1.5px solid rgba(234,67,53,0.25);">
+      <span style="font-size:1.4rem;">🔴</span>
+      <p style="font-weight:700; color:var(--g-red); font-size:0.9rem;">Freestyle</p>
+      <p style="font-size:0.74rem; color:var(--muted);">Build your own mood system. 5+ moods, your catalog strategy, your palette.</p>
+      <p style="font-size:0.7rem; color:var(--g-red); font-weight:600; margin-top:6px;">Ship: post your URL in the channel</p>
+    </div>
+  </div>
+
+  <div class="glass" style="border:1px solid rgba(66,133,244,0.2);">
+    <div class="cols2">
+      <div>
+        <p style="font-size:0.78rem;"><span style="font-weight:700;">Drift refusal (everyone):</span> Ask your IDE to add a component not in the catalog. See the schema validator reject it.</p>
+      </div>
+      <div>
+        <p style="font-size:0.78rem;"><span style="font-weight:700;">Ship ritual:</span> Screenshot all 3 cards side-by-side → save to <code>artifacts/</code>. That's your proof of completion.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     14 — WHERE YOU GO FROM HERE
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">What's next</div>
+  <h2>Where You Go <span class="g-blue">From Here</span></h2>
+
+  <div class="cols2" style="margin-top:16px;">
+    <div class="stack" style="gap:10px;">
+      <div class="glass-sm" style="border-left:3px solid var(--g-blue);">
+        <p style="font-weight:700; font-size:0.85rem; color:var(--g-blue);">Custom Catalogs</p>
+        <p style="font-size:0.74rem; color:var(--muted); margin-top:3px;">Build your own catalog with brand-specific components. Your design system, agent-driven.</p>
+      </div>
+      <div class="glass-sm" style="border-left:3px solid var(--g-green);">
+        <p style="font-weight:700; font-size:0.85rem; color:var(--g-green);">Flutter Renderer</p>
+        <p style="font-size:0.74rem; color:var(--muted); margin-top:3px;">Same JSON → native iOS and Android. Write the agent once, render everywhere.</p>
+      </div>
+      <div class="glass-sm" style="border-left:3px solid var(--g-red);">
+        <p style="font-weight:700; font-size:0.85rem; color:var(--g-red);">A2A + Multi-Agent</p>
+        <p style="font-size:0.74rem; color:var(--muted); margin-top:3px;">Combine A2UI with the A2A protocol. Agent networks that communicate and render UI for each other.</p>
+      </div>
+    </div>
+    <div class="stack" style="gap:10px;">
+      <div class="glass-sm" style="border-left:3px solid var(--g-yellow);">
+        <p style="font-weight:700; font-size:0.85rem; color:#875d00;">Production A2UI</p>
+        <p style="font-size:0.74rem; color:var(--muted); margin-top:3px;">Version negotiation, dynamic catalog switching, streaming incremental updates, parse-and-heal.</p>
+      </div>
+      <div class="glass-sm" style="border-left:3px solid #7C3AED;">
+        <p style="font-weight:700; font-size:0.85rem; color:#7C3AED;">Your Product</p>
+        <p style="font-size:0.74rem; color:var(--muted); margin-top:3px;">Which parts of your product UI could be agent-driven? Start with 3 states. Add A2UI.</p>
+      </div>
+      <div class="glass-sm" style="border-left:3px solid var(--g-blue);">
+        <p style="font-weight:700; font-size:0.85rem; color:var(--g-blue);">Open Source</p>
+        <p style="font-size:0.74rem; color:var(--muted); margin-top:3px;"><code>github.com/google/A2UI</code> — contribute a component, build a renderer, improve the spec.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     15 — CLOSING
+══════════════════════════════════════════════════════ -->
+<section>
+  <div class="chip chip-blue" style="margin-bottom: 12px;">Today's win</div>
+  <h2>What You <span class="g-blue">Built Today</span></h2>
+  <p style="color:var(--muted); margin-bottom:16px;">Whether this was your first session or your eighth — here's what you shipped.</p>
+
+  <div class="cols2">
+    <div>
+      <div class="check-item">
+        <div class="check-box done">✓</div>
+        <div><div class="check-text">An agent that generates A2UI JSON</div><div class="check-sub">Real SDK, real protocol, real output</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-box done">✓</div>
+        <div><div class="check-text">3+ visually distinct mood cards</div><div class="check-sub">Different layout, palette, and tone per mood</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-box done">✓</div>
+        <div><div class="check-text">Schema validation as the Critic</div><div class="check-sub">The catalog enforced the spec at runtime</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-box done">✓</div>
+        <div><div class="check-text">Deployed agent on Cloud Run</div><div class="check-sub">A public URL that returns rendered UI</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="check-item">
+        <div class="check-box done">✓</div>
+        <div><div class="check-text">Renderer running and displaying cards</div><div class="check-sub">Lit-based, browser-native, no iframe</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-box done">✓</div>
+        <div><div class="check-text">The drift refusal moment</div><div class="check-sub">You saw a machine reject a bad spec violation</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-box done">✓</div>
+        <div><div class="check-text">Understanding of why not HTML</div><div class="check-sub">Security, portability, generativity</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-box" style="border-color:var(--g-blue); background:rgba(66,133,244,0.1);">→</div>
+        <div><div class="check-text" style="color:var(--g-blue);">Screenshot in artifacts/ — your proof of ship</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px; padding:18px 24px; border-radius:20px; background:linear-gradient(135deg,rgba(66,133,244,0.10),rgba(52,168,83,0.08)); border:1px solid rgba(66,133,244,0.20); text-align:center;">
+    <div class="g-dots" style="justify-content:center; margin-bottom:10px;">
+      <div class="g-dot" style="background:#4285F4;"></div>
+      <div class="g-dot" style="background:#EA4335;"></div>
+      <div class="g-dot" style="background:#FBBC05;"></div>
+      <div class="g-dot" style="background:#34A853;"></div>
+    </div>
+    <p style="font-size:1.05rem; font-weight:700; color:var(--text);">You came in to see how agents build UI.</p>
+    <p style="font-size:0.88rem; color:var(--muted); margin-top:4px;">You leave with a deployed, mood-reactive, schema-validated, natively rendered AI card. That's not a toy. That's craft.</p>
+  </div>
+</section>
+
+</div></div>
+
+<script>
+Reveal.initialize({
+  hash: true,
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1200,
+  height: 700,
+  margin: 0.05,
+  minScale: 0.5,
+  maxScale: 1.5,
+  transition: 'slide',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'fade',
+  slideNumber: 'c/t',
+});
+</script>
+</body>
+</html>

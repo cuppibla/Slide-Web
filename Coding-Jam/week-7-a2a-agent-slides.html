@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 7 — A2A Protocol | Vibe & Hack</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/white.min.css">
+  <style>
+    /* ─── Google Brand Tokens ─────────────────────────── */
+    :root {
+      --g-blue:   #4285F4;
+      --g-red:    #EA4335;
+      --g-yellow: #FBBC05;
+      --g-green:  #34A853;
+      --g-dark:   #202124;
+      --g-muted:  #5F6368;
+      --g-light:  #F8F9FD;
+      --g-blue-t: rgba(66,133,244,0.08);
+      --g-red-t:  rgba(234,67,53,0.07);
+      --g-grn-t:  rgba(52,168,83,0.08);
+      --g-yel-t:  rgba(251,188,5,0.10);
+      /* Liquid Glass */
+      --gl:       rgba(255,255,255,0.72);
+      --gl-b:     rgba(255,255,255,0.90);
+      --gl-sh:    0 8px 32px rgba(66,133,244,0.09), 0 1px 4px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
+      --gl-sh-sm: 0 4px 16px rgba(66,133,244,0.07), inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    /* ─── Reveal Base ─────────────────────────────────── */
+    .reveal-viewport { background: var(--g-light); }
+    .reveal .slides section { padding: 24px 32px; text-align: left; }
+    .reveal { font-family: 'Google Sans', 'Segoe UI', system-ui, sans-serif; color: var(--g-dark); }
+
+    .reveal h1 { font-size: 2.1em; font-weight: 700; color: var(--g-dark); letter-spacing: -0.02em; line-height: 1.1; }
+    .reveal h2 { font-size: 1.5em; font-weight: 600; color: var(--g-dark); letter-spacing: -0.01em; margin-bottom: 0.6em; }
+    .reveal h3 { font-size: 0.72em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--g-muted); margin-bottom: 0.3em; }
+    .reveal p, .reveal li { font-size: 0.8em; line-height: 1.65; color: var(--g-dark); }
+    .reveal strong { font-weight: 600; }
+    .reveal code {
+      font-family: 'Google Sans Mono', 'Fira Code', monospace;
+      background: rgba(66,133,244,0.10);
+      color: #1a56c4;
+      padding: 1px 7px;
+      border-radius: 6px;
+      font-size: 0.88em;
+    }
+    .reveal pre {
+      background: #F1F3F4;
+      border: 1px solid rgba(0,0,0,0.07);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 0.56em;
+      line-height: 1.55;
+      box-shadow: var(--gl-sh-sm);
+    }
+    .reveal pre code { background: none; padding: 0; color: #202124; font-size: 1em; }
+
+    /* ─── Liquid Glass Card ───────────────────────────── */
+    .gl {
+      background: var(--gl);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--gl-b);
+      border-radius: 18px;
+      box-shadow: var(--gl-sh);
+      padding: 16px 20px;
+    }
+    .gl-blue   { background: rgba(66,133,244,0.08);  border-color: rgba(66,133,244,0.22);  }
+    .gl-red    { background: rgba(234,67,53,0.07);   border-color: rgba(234,67,53,0.2);    }
+    .gl-green  { background: rgba(52,168,83,0.08);   border-color: rgba(52,168,83,0.22);   }
+    .gl-yellow { background: rgba(251,188,5,0.10);   border-color: rgba(251,188,5,0.28);   }
+
+    /* ─── Grid ────────────────────────────────────────── */
+    .g2 { display: grid; grid-template-columns: 1fr 1fr;     gap: 12px; }
+    .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .g5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+
+    /* ─── Pills ───────────────────────────────────────── */
+    .pill {
+      display: inline-flex; align-items: center;
+      padding: 4px 12px; border-radius: 100px;
+      font-size: 0.62em; font-weight: 600; letter-spacing: 0.03em;
+    }
+    .p-blue   { background: rgba(66,133,244,0.13);  color: #1557B0; border: 1px solid rgba(66,133,244,0.3);  }
+    .p-red    { background: rgba(234,67,53,0.10);   color: #B31412; border: 1px solid rgba(234,67,53,0.25);  }
+    .p-green  { background: rgba(52,168,83,0.11);   color: #1E7E34; border: 1px solid rgba(52,168,83,0.28);  }
+    .p-yellow { background: rgba(251,188,5,0.15);   color: #7A5100; border: 1px solid rgba(251,188,5,0.35);  }
+    .p-gray   { background: rgba(95,99,104,0.09);   color: #3C4043; border: 1px solid rgba(95,99,104,0.22);  }
+
+    /* ─── Google G dot bar ────────────────────────────── */
+    .g-dots { display: flex; gap: 6px; align-items: center; justify-content: center; margin: 10px 0; }
+    .gd { width: 10px; height: 10px; border-radius: 50%; }
+    .gd-b { background: var(--g-blue); }
+    .gd-r { background: var(--g-red); }
+    .gd-y { background: var(--g-yellow); }
+    .gd-g { background: var(--g-green); }
+    .gd-dim { opacity: 0.2; }
+
+    /* ─── Doctrine pills ─────────────────────────────── */
+    .doc-bar { display: flex; gap: 8px; justify-content: center; margin: 10px 0; }
+    .dp-spec    { background: rgba(66,133,244,0.11);  color: #1557B0; border: 1.5px solid rgba(66,133,244,0.4);  padding: 5px 16px; border-radius: 100px; font-size: 0.7em; font-weight: 700; }
+    .dp-context { background: rgba(52,168,83,0.11);   color: #1E7E34; border: 1.5px solid rgba(52,168,83,0.35);  padding: 5px 16px; border-radius: 100px; font-size: 0.7em; font-weight: 700; }
+    .dp-critic  { background: rgba(234,67,53,0.10);   color: #B31412; border: 1.5px solid rgba(234,67,53,0.3);   padding: 5px 16px; border-radius: 100px; font-size: 0.7em; font-weight: 700; }
+    .dp-dim { opacity: 0.28; }
+
+    /* ─── Protocol boxes ─────────────────────────────── */
+    .proto-row { display: flex; align-items: center; margin: 8px 0; }
+    .proto-box { padding: 10px 14px; border-radius: 12px; font-size: 0.7em; font-weight: 600; text-align: center; min-width: 108px; }
+    .pb-blue  { background: rgba(66,133,244,0.12); border: 1.5px solid rgba(66,133,244,0.4); color: #1557B0; }
+    .pb-gray  { background: rgba(95,99,104,0.09);  border: 1.5px solid rgba(95,99,104,0.3);  color: #3C4043; }
+    .pb-green { background: rgba(52,168,83,0.12);  border: 1.5px solid rgba(52,168,83,0.4);  color: #1E7E34; }
+    .proto-line { flex: 1; height: 2px; background: rgba(95,99,104,0.2); margin: 0 8px; position: relative; }
+    .proto-line-lbl { font-size: 0.58em; color: var(--g-muted); text-align: center; margin-top: 2px; }
+
+    /* ─── JSON syntax ─────────────────────────────────── */
+    .jk { color: #1a56c4; }
+    .jv { color: #137333; }
+    .jhl { background: rgba(66,133,244,0.10); border-left: 3px solid var(--g-blue); padding-left: 7px; border-radius: 0 6px 6px 0; display: block; }
+
+    /* ─── Big number ─────────────────────────────────── */
+    .bign { font-size: 3em; font-weight: 700; line-height: 1; }
+
+    /* ─── Section label ──────────────────────────────── */
+    .lbl { font-size: 0.58em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--g-muted); margin-bottom: 4px; }
+
+    /* ─── Independence badge ─────────────────────────── */
+    .indie-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 16px; border-radius: 100px;
+      background: linear-gradient(135deg, rgba(52,168,83,0.13), rgba(66,133,244,0.10));
+      border: 1px solid rgba(52,168,83,0.35);
+      font-size: 0.65em; font-weight: 700; color: #1E7E34;
+    }
+    .indie-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--g-green); display: inline-block; }
+
+    /* ─── Week track ─────────────────────────────────── */
+    .wtrack { display: flex; gap: 4px; align-items: center; justify-content: center; }
+    .wk { padding: 3px 9px; border-radius: 6px; font-size: 0.55em; font-weight: 700; color: #BDC1C6; background: #F1F3F4; }
+    .wk-now { background: var(--g-blue); color: white; }
+
+    /* ─── Callout box ────────────────────────────────── */
+    .callout {
+      background: linear-gradient(135deg, rgba(66,133,244,0.09), rgba(52,168,83,0.06));
+      border: 1.5px solid rgba(66,133,244,0.3);
+      border-radius: 18px;
+      padding: 20px 26px;
+      text-align: center;
+    }
+
+    /* ─── Divider ─────────────────────────────────────── */
+    hr.div { border: none; border-top: 1px solid rgba(0,0,0,0.07); margin: 10px 0; }
+
+    /* ─── On-ramp cards ──────────────────────────────── */
+    .or-g { background: rgba(52,168,83,0.07);   border: 1px solid rgba(52,168,83,0.3);   border-radius: 16px; padding: 14px; }
+    .or-y { background: rgba(251,188,5,0.08);   border: 1px solid rgba(251,188,5,0.32);   border-radius: 16px; padding: 14px; }
+    .or-r { background: rgba(234,67,53,0.07);   border: 1px solid rgba(234,67,53,0.28);   border-radius: 16px; padding: 14px; }
+
+    /* ─── Slide number ───────────────────────────────── */
+    .reveal .slide-number { background: rgba(255,255,255,0.8); color: var(--g-muted); font-size: 11px; border-radius: 8px; backdrop-filter: blur(8px); }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
+
+
+
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════════════
+     01 · TITLE
+═══════════════════════════════════════════════════ -->
+<section>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div class="wtrack">
+      <div class="wk">W1</div><div class="wk">W2</div><div class="wk">W3</div><div class="wk">W4</div>
+      <div class="wk">W5</div><div class="wk">W6</div><div class="wk wk-now">W7</div><div class="wk">W8</div>
+    </div>
+    <div class="indie-badge"><div class="indie-dot"></div>No prior sessions needed</div>
+  </div>
+
+  <h3>Vibe &amp; Hack: Build Your AI Sidekick</h3>
+
+  <div style="margin:14px 0 6px">
+    <h1 style="font-size:2.4em">Week 7</h1>
+    <h2 style="color:var(--g-blue);font-size:1.8em;margin:0">A2A Protocol</h2>
+    <p style="color:var(--g-muted);margin-top:4px;font-size:0.78em">Single Agent + A2A Inspector — understanding the protocol, deeply</p>
+  </div>
+
+  <div class="doc-bar" style="margin-top:18px">
+    <div class="dp-spec">Spec ▲▲▲</div>
+    <div class="dp-context">Context</div>
+    <div class="dp-critic">Critic</div>
+  </div>
+
+  <div class="gl" style="margin-top:18px;padding:12px 20px;text-align:center">
+    <p style="margin:0;color:var(--g-muted);font-size:0.72em">
+      <strong style="color:var(--g-dark)">First time here?</strong> &nbsp;Every session is self-contained. You'll get full context for anything referenced from earlier weeks.
+    </p>
+  </div>
+
+  <div class="g-dots" style="margin-top:18px">
+    <div class="gd gd-b"></div><div class="gd gd-r"></div><div class="gd gd-y"></div><div class="gd gd-g"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     02 · THE WORKSHOP FRAMEWORK
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>The workshop framework</h3>
+  <h2>Spec → Context → Critic</h2>
+  <p style="color:var(--g-muted);font-size:0.72em;margin-bottom:14px">
+    New here? This is the three-pillar lens we apply to every AI agent build.
+  </p>
+
+  <div class="g3">
+    <div class="gl gl-blue">
+      <div class="pill p-blue" style="margin-bottom:8px">Spec</div>
+      <p>Define constraints and contracts <em>before</em> coding. What's in scope, out of scope, what does "done" look like?</p>
+      <hr class="div">
+      <p style="color:var(--g-muted);font-size:0.72em">This week: the <strong>Agent Card</strong> is your spec</p>
+    </div>
+    <div class="gl gl-green">
+      <div class="pill p-green" style="margin-bottom:8px">Context</div>
+      <p>Everything the AI reads determines output quality. Good context = good output. Garbage in, garbage out.</p>
+      <hr class="div">
+      <p style="color:var(--g-muted);font-size:0.72em">This week: the card <strong>is</strong> public context</p>
+    </div>
+    <div class="gl gl-red">
+      <div class="pill p-red" style="margin-bottom:8px">Critic</div>
+      <p>Validators and protocols check agents' output — not just answer quality, but protocol correctness.</p>
+      <hr class="div">
+      <p style="color:var(--g-muted);font-size:0.72em">This week: <strong>A2A Inspector</strong> is the critic</p>
+    </div>
+  </div>
+
+  <div class="gl" style="margin-top:14px;text-align:center;padding:10px 16px">
+    <p style="margin:0;font-size:0.72em;color:var(--g-blue);font-weight:600">This week, all three pillars converge — on the Agent Card</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     03 · MCP RECAP (context for newcomers)
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>Brief background context</h3>
+  <h2>MCP: Agent ↔ Tool</h2>
+
+  <div class="gl" style="margin:14px 0;padding:20px">
+    <div class="proto-row">
+      <div class="proto-box pb-blue">🤖 AI Agent<br><span style="font-size:0.82em;font-weight:400;color:var(--g-muted)">has reasoning</span></div>
+      <div style="flex:1;padding:0 10px">
+        <div class="proto-line"></div>
+        <div class="proto-line-lbl">MCP &nbsp;·&nbsp; tool call / result</div>
+      </div>
+      <div class="proto-box pb-gray">🔧 Tool<br><span style="font-size:0.82em;font-weight:400;color:var(--g-muted)">no reasoning</span></div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-top:12px">
+    <div class="gl">
+      <p class="lbl">What MCP solves</p>
+      <p>Any AI client can use any MCP-compatible tool. No custom integration per agent+tool pair. Standardized tool-calling protocol.</p>
+    </div>
+    <div class="gl">
+      <p class="lbl">What a "tool" is</p>
+      <p><strong>Stateless function</strong>. A database lookup, an API call, a file reader. No LLM inside. No agent loop. No opinions.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;display:flex;align-items:center;gap:10px">
+    <div class="pill p-yellow">MCP = tool protocol</div>
+    <p style="margin:0;font-size:0.72em;color:var(--g-muted)">But what if the "tool" is itself an intelligent agent that thinks back?</p>
+  </div>
+
+  <div class="gl gl-green" style="margin-top:10px;padding:8px 16px">
+    <p style="margin:0;font-size:0.68em;color:#1E7E34"><strong>New here?</strong> MCP is the prior week's topic — just know: it connects agents to dumb tools. Today we go further.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     04 · THE NEXT LEVEL: AGENT ↔ AGENT
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>The next level</h3>
+  <h2>What if the other side thinks back?</h2>
+
+  <div class="gl" style="margin:14px 0;padding:20px">
+    <div class="proto-row">
+      <div class="proto-box pb-blue">🤖 Agent A<br><span style="font-size:0.82em;font-weight:400">reasoning</span></div>
+      <div style="flex:1;padding:0 10px">
+        <div style="height:2px;background:var(--g-blue);opacity:0.5;border-radius:1px"></div>
+        <div style="font-size:0.6em;color:var(--g-blue);text-align:center;font-weight:600;margin-top:3px">A2A &nbsp;·&nbsp; tasks / artifacts</div>
+      </div>
+      <div class="proto-box pb-green">🤖 Agent B<br><span style="font-size:0.82em;font-weight:400">reasoning</span></div>
+    </div>
+    <p style="text-align:center;margin-top:10px;font-size:0.68em;color:var(--g-muted)">Both sides have an LLM. Both sides have an agent loop. Both sides have agency.</p>
+  </div>
+
+  <div class="g2" style="margin-top:12px">
+    <div class="gl gl-red">
+      <p class="lbl" style="color:#B31412">Why MCP doesn't work here</p>
+      <p>MCP assumes the other side is a dumb function. Agent B has its own context, tools, and multi-step reasoning. MCP has no model for that.</p>
+    </div>
+    <div class="gl gl-blue">
+      <p class="lbl" style="color:#1557B0">What A2A adds</p>
+      <p>Task lifecycle management. Long-running async work. Discovery via Agent Cards. A shared protocol for two full agents to collaborate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     05 · A2A PROTOCOL OVERVIEW
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>A2A Protocol</h3>
+  <h2>What it defines</h2>
+
+  <div class="g2" style="margin-top:14px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="gl gl-blue">
+        <div class="pill p-blue" style="margin-bottom:6px">Discovery</div>
+        <p>Any agent finds any other agent's capabilities by fetching <code>/.well-known/agent-card</code>. No prior handshake needed.</p>
+      </div>
+      <div class="gl">
+        <div class="pill p-gray" style="margin-bottom:6px">Message format</div>
+        <p>JSON-RPC 2.0. Method: <code>tasks/send</code>. Content wrapped in a <code>Task</code> envelope with lifecycle tracking.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="gl gl-green">
+        <div class="pill p-green" style="margin-bottom:6px">Task lifecycle</div>
+        <p>Tasks have states: <code>submitted</code> → <code>working</code> → <code>completed</code>. Long-running agents signal progress incrementally.</p>
+      </div>
+      <div class="gl gl-yellow">
+        <div class="pill p-yellow" style="margin-bottom:6px">Open standard</div>
+        <p>Contributed by Google to the Linux Foundation, April 2025. 150+ org contributors. Works across any language, any cloud.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;display:flex;align-items:center;gap:10px;justify-content:center">
+    <code style="font-size:0.68em">a2a-protocol.org</code>
+    <span style="color:rgba(0,0,0,0.2);font-size:0.8em">·</span>
+    <code style="font-size:0.68em">github.com/a2aproject/A2A</code>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     06 · AGENT CARD ANATOMY
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>Agent cards</h3>
+  <h2>Anatomy of a card</h2>
+
+  <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-top:14px;align-items:start">
+    <div class="gl" style="font-family:'Fira Code',monospace;font-size:0.62em;line-height:1.9;padding:16px">
+      <div><span class="jk">"name"</span>: <span class="jv">"Trip Idea Generator"</span>,</div>
+      <span class="jhl"><span class="jk">"description"</span>: <span class="jv">"Generates 3-day travel..."</span>,</span>
+      <div><span class="jk">"url"</span>: <span class="jv">"https://agent.run.app"</span>,</div>
+      <div><span class="jk">"version"</span>: <span class="jv">"1.0.0"</span>,</div>
+      <div><span class="jk">"defaultInputModes"</span>: [<span class="jv">"text/plain"</span>],</div>
+      <span class="jhl"><span class="jk">"skills"</span>: [{</span>
+      <div style="padding-left:12px"><span class="jk">"id"</span>: <span class="jv">"generate_itinerary"</span>,</div>
+      <div style="padding-left:12px"><span class="jk">"name"</span>: <span class="jv">"Generate Itinerary"</span>,</div>
+      <div style="padding-left:12px"><span class="jk">"examples"</span>: [<span class="jv">"relaxed, $150/day"</span>]</div>
+      <div>}],</div>
+      <div><span class="jk">"authentication"</span>: { <span class="jk">"schemes"</span>: [<span class="jv">"none"</span>] }</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="gl">
+        <p class="lbl">Identity</p>
+        <p><code>name</code>, <code>description</code>, <code>version</code>, <code>provider</code></p>
+      </div>
+      <div class="gl gl-blue">
+        <p class="lbl" style="color:#1557B0">Skills (capabilities)</p>
+        <p>What the agent can do. Each skill has <code>id</code>, <code>name</code>, <code>description</code>, <code>examples</code>.</p>
+      </div>
+      <div class="gl">
+        <p class="lbl">I/O contracts</p>
+        <p><code>defaultInputModes</code> + <code>outputModes</code> — MIME types</p>
+      </div>
+      <div class="gl">
+        <p class="lbl">Auth</p>
+        <p><code>authentication.schemes: ["none"]</code> = public agent</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:10px">
+    <span style="font-size:0.62em;color:var(--g-muted)">Served at: </span>
+    <code style="font-size:0.68em">https://your-agent.run.app/.well-known/agent-card</code>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     07 · AGENT CARD = SPEC  ← THE INSIGHT
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3 style="color:var(--g-blue)">Spec pillar — the deepest expression</h3>
+  <h2>Agent Card = Spec</h2>
+
+  <div class="callout" style="margin:14px 0">
+    <p style="font-size:1.05em;font-weight:700;color:var(--g-dark);margin:0">
+      The Agent Card is <code style="font-size:0.9em">spec.md</code> — but <span style="color:var(--g-blue)">public</span>, <span style="color:var(--g-green)">machine-readable</span>, and <span style="color:var(--g-red)">cross-org</span>.
+    </p>
+    <p style="font-size:0.72em;color:var(--g-muted);margin-top:8px">
+      Edit it → redeploy → the world sees the updated spec. <em>Immediately.</em>
+    </p>
+  </div>
+
+  <div class="g2" style="margin-top:12px">
+    <div class="gl">
+      <p class="lbl" style="color:var(--g-muted)">A spec.md file (traditional)</p>
+      <p>Human-readable. Project-internal. Your team reads it. Defines constraints for this sprint.</p>
+      <p style="color:var(--g-muted);font-size:0.72em;margin-top:6px">Scope: your team</p>
+    </div>
+    <div class="gl gl-blue">
+      <p class="lbl" style="color:#1557B0">Agent Card (today)</p>
+      <p>Machine-readable. <strong>Public.</strong> Any agent, any org, any cloud can discover your capabilities at runtime.</p>
+      <p style="color:var(--g-blue);font-size:0.72em;margin-top:6px;font-weight:600">Scope: the entire A2A ecosystem</p>
+    </div>
+  </div>
+
+  <div class="gl gl-yellow" style="margin-top:12px;text-align:center;padding:10px 16px">
+    <p style="margin:0;font-size:0.75em;color:#7A5100;font-weight:500">
+      A vague <code style="color:#7A5100">description</code> field = a broken contract. Future agents can't decide whether to call you.
+      <span style="color:var(--g-muted);font-weight:400"> The Spec pillar, at protocol scale.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     08 · M×N → M+N
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>Why A2A matters</h3>
+  <h2>The M×N → M+N problem</h2>
+
+  <div class="g2" style="margin-top:16px;align-items:start">
+    <div class="gl gl-red">
+      <p class="lbl" style="color:#B31412">Without A2A</p>
+      <div class="bign" style="color:var(--g-red)">M×N</div>
+      <p style="margin-top:8px">Every agent pair needs a <strong>custom integration</strong>. 5 agents = up to 20 custom bridges. Each brittle and undocumented.</p>
+      <hr class="div">
+      <p style="font-size:0.7em;color:var(--g-muted)">3 agents → 6 integrations<br>10 agents → 90 integrations</p>
+    </div>
+    <div class="gl gl-green">
+      <p class="lbl" style="color:#1E7E34">With A2A</p>
+      <div class="bign" style="color:var(--g-green)">M+N</div>
+      <p style="margin-top:8px">Every agent implements A2A <strong>once</strong>. Any A2A agent can call any other. Discovery is automatic via Agent Cards.</p>
+      <hr class="div">
+      <p style="font-size:0.7em;color:var(--g-muted)">3 agents → 3 integrations<br>10 agents → 10 integrations</p>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;text-align:center">
+    <p style="font-size:0.72em;color:var(--g-muted)">
+      Same value MCP gave for tools — now applied to full agents.<br>
+      One protocol. Any agent calls any other. No prior arrangement.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     09 · ADK A2A WRAPPING
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>ADK + A2A</h3>
+  <h2>Exposing an agent via A2A</h2>
+
+  <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-top:14px;align-items:start">
+    <div>
+      <pre><code>from google.adk.agents import LlmAgent
+from google.adk.a2a.utils.agent_to_a2a import to_a2a
+import uvicorn
+
+# 1. Build your agent (same as always)
+agent = LlmAgent(
+    name="trip-idea-generator",
+    model="gemini-2.0-flash",
+    description="Generates 3-day itineraries...",
+    instruction="You are a travel planner..."
+)
+
+# 2. Wrap with A2A — one line
+#    ✦ Creates a FastAPI app
+#    ✦ Auto-generates Agent Card
+#    ✦ Handles JSON-RPC 2.0 routing
+#    ✦ Serves /.well-known/agent-card
+app = to_a2a(agent)
+
+# 3. Run
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8080)</code></pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="gl gl-blue">
+        <p class="lbl" style="color:#1557B0">What <code style="color:#1557B0">to_a2a()</code> gives you</p>
+        <p>Complete A2A server. Agent Card at <code>/.well-known/agent-card</code>. Task routing. JSON-RPC 2.0. All automatic.</p>
+      </div>
+      <div class="gl">
+        <p class="lbl">Deploy</p>
+        <pre style="margin:0;font-size:0.75em;padding:10px"><code>gcloud run deploy my-agent \
+  --source . \
+  --allow-unauthenticated \
+  --port 8080</code></pre>
+      </div>
+      <div class="gl">
+        <p class="lbl">Test</p>
+        <pre style="margin:0;font-size:0.75em;padding:10px"><code>curl YOUR_URL/.well-known/agent-card</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     10 · A2A INSPECTOR
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>The critic</h3>
+  <h2>A2A Inspector</h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:14px;margin-top:14px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="gl gl-green">
+        <p class="lbl" style="color:#1E7E34">What it is</p>
+        <p>Official protocol-level debugger. NOT a chatbot — a <strong>compliance validator</strong> and wire-level inspector.</p>
+        <p style="font-size:0.68em;color:var(--g-muted);margin-top:6px">github.com/a2aproject/a2a-inspector</p>
+      </div>
+      <div class="gl">
+        <p class="lbl">Get it</p>
+        <pre style="margin:0;font-size:0.78em;padding:8px"><code>npx @a2a/inspector</code></pre>
+      </div>
+      <div class="gl">
+        <p class="lbl">Connect</p>
+        <p style="font-size:0.72em">Paste Cloud Run URL → Inspector fetches <code>/.well-known/agent-card</code> automatically</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="gl gl-blue">
+        <div class="pill p-blue" style="margin-bottom:5px">Agent Card panel</div>
+        <p>Fetches and displays your card. Shows spec compliance issues.</p>
+      </div>
+      <div class="gl">
+        <div class="pill p-gray" style="margin-bottom:5px">Chat panel</div>
+        <p>Send messages. Watch them get wrapped in A2A Task envelopes.</p>
+      </div>
+      <div class="gl gl-yellow">
+        <div class="pill p-yellow" style="margin-bottom:5px">Debug console ← the key panel</div>
+        <p>Raw JSON-RPC 2.0. See <code>tasks/send</code>, <code>status.state</code>, <code>artifacts</code>. The protocol, naked.</p>
+      </div>
+      <div class="gl gl-green">
+        <div class="pill p-green" style="margin-bottom:5px">Compliance panel</div>
+        <p>Validates Agent Card fields. Finds spec violations your app tests miss.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     11 · TODAY'S PROJECT
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>Today's project</h3>
+  <h2>One agent, deeply specified</h2>
+
+  <div class="gl gl-blue" style="margin:12px 0;padding:14px 20px;text-align:center">
+    <p style="font-size:0.82em;font-weight:600;color:#1557B0;margin:0">
+      Why one agent — not multi-agent?
+    </p>
+    <p style="font-size:0.68em;color:var(--g-muted);margin-top:5px">
+      When you bury A2A under multi-service complexity, the protocol disappears into the plumbing.<br>
+      One agent + Inspector = <strong style="color:var(--g-dark)">the protocol is the star.</strong>
+    </p>
+  </div>
+
+  <div class="g5" style="margin-top:12px">
+    <div class="gl" style="text-align:center;padding:10px 6px">
+      <div style="font-size:1.3em">✍️</div>
+      <p style="font-size:0.6em;margin-top:5px;color:var(--g-muted)">Write mini spec</p>
+    </div>
+    <div class="gl" style="text-align:center;padding:10px 6px">
+      <div style="font-size:1.3em">🤖</div>
+      <p style="font-size:0.6em;margin-top:5px;color:var(--g-muted)">Code + A2A wrap</p>
+    </div>
+    <div class="gl" style="text-align:center;padding:10px 6px">
+      <div style="font-size:1.3em">☁️</div>
+      <p style="font-size:0.6em;margin-top:5px;color:var(--g-muted)">Deploy Cloud Run</p>
+    </div>
+    <div class="gl" style="text-align:center;padding:10px 6px">
+      <div style="font-size:1.3em">🔬</div>
+      <p style="font-size:0.6em;margin-top:5px;color:var(--g-muted)">Inspect + trace</p>
+    </div>
+    <div class="gl" style="text-align:center;padding:10px 6px">
+      <div style="font-size:1.3em">🔄</div>
+      <p style="font-size:0.6em;margin-top:5px;color:var(--g-muted)">Edit card, redeploy</p>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-top:10px">
+    <div class="gl">
+      <p class="lbl">Deliverables</p>
+      <p style="font-size:0.72em">✅ Deployed A2A agent<br>✅ Public Agent Card at <code>/.well-known/agent-card</code><br>✅ Inspector screenshot with trace<br>✅ URL on Wall of Vibes</p>
+    </div>
+    <div class="gl gl-blue">
+      <p class="lbl" style="color:#1557B0">The moment</p>
+      <p style="font-size:0.72em">Change the Agent Card → redeploy → Inspector shows your updated spec. <strong>You just published a new contract to the world.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     12 · THE MULTI-AGENT FUTURE
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>Looking forward</h3>
+  <h2>Your agent is already composable</h2>
+
+  <div class="gl" style="margin:14px 0;padding:20px">
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+      <div class="proto-box pb-blue" style="text-align:center">
+        Orchestrator<br><span style="font-size:0.8em;color:var(--g-muted);font-weight:400">Week 8 agent</span>
+      </div>
+      <div style="color:rgba(0,0,0,0.2);font-size:1.4em;padding:0 4px">→</div>
+      <div class="proto-box pb-green" style="text-align:center">
+        Your agent<br><span style="font-size:0.8em;color:var(--g-muted);font-weight:400">today's build</span>
+      </div>
+      <div style="color:rgba(0,0,0,0.2);font-size:1.2em;padding:0 4px">+</div>
+      <div class="proto-box pb-green" style="text-align:center">
+        Classmate's agent<br><span style="font-size:0.8em;color:var(--g-muted);font-weight:400">Wall of Vibes</span>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:10px;font-size:0.68em;color:var(--g-muted)">
+      All connected via A2A. Orchestrator reads each Agent Card to know what's available.
+    </p>
+  </div>
+
+  <div class="g2" style="margin-top:10px">
+    <div class="gl">
+      <p class="lbl">What you've built today</p>
+      <p style="font-size:0.72em">A public, discoverable, protocol-compliant agent. Anyone can inspect it. Any A2A orchestrator can call it without asking you first.</p>
+    </div>
+    <div class="gl gl-yellow">
+      <p class="lbl" style="color:#7A5100">Week 8 preview</p>
+      <p style="font-size:0.72em">Build an orchestrator that discovers and composes agents from the Wall of Vibes. Your Agent Card is already its spec.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     13 · ON-RAMPS
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>Your turn</h3>
+  <h2>Pick your on-ramp</h2>
+
+  <div class="g3" style="margin-top:14px">
+    <div class="or-g">
+      <p style="font-size:0.85em;font-weight:700;color:#1E7E34;margin:0 0 4px">🟢 Replicator</p>
+      <p>Copy the demo agent exactly. Change only the capability topic. Follow the playbook step by step.</p>
+      <hr class="div" style="border-color:rgba(52,168,83,0.2)">
+      <p style="font-size:0.68em;color:#1E7E34">Goal: get Inspector connected and showing a protocol trace</p>
+    </div>
+    <div class="or-y">
+      <p style="font-size:0.85em;font-weight:700;color:#7A5100;margin:0 0 4px">🟡 Riffer</p>
+      <p>Build a different agent with 2+ skills. Write a richer Agent Card. Use the manual card override pattern.</p>
+      <hr class="div" style="border-color:rgba(251,188,5,0.25)">
+      <p style="font-size:0.68em;color:#7A5100">Goal: card specific enough that a stranger knows whether to call you</p>
+    </div>
+    <div class="or-r">
+      <p style="font-size:0.85em;font-weight:700;color:#B31412;margin:0 0 4px">🔴 Freestyle</p>
+      <p>Add streaming, integrate an MCP tool inside your A2A agent, or build something product-grade.</p>
+      <hr class="div" style="border-color:rgba(234,67,53,0.2)">
+      <p style="font-size:0.68em;color:#B31412">Goal: something you'd put in a real agent network</p>
+    </div>
+  </div>
+
+  <div class="doc-bar" style="margin-top:18px">
+    <div class="dp-spec">Spec → write a good Agent Card</div>
+    <div class="dp-context">Context → card as public context</div>
+    <div class="dp-critic">Critic → Inspector validates you</div>
+  </div>
+
+  <p style="text-align:center;font-size:0.62em;color:var(--g-muted);margin-top:8px">
+    Timer starts now. <code>INSTRUCTIONS.md</code> has the full playbook.
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     14 · COMPARE NOTES
+═══════════════════════════════════════════════════ -->
+<section>
+  <h3>Compare notes</h3>
+  <h2>Wall of Vibes</h2>
+
+  <div class="callout" style="margin:14px 0">
+    <p style="font-size:0.95em;font-weight:600;color:var(--g-blue);margin:0">Share your agent URL</p>
+    <p style="font-size:0.68em;color:var(--g-muted);margin-top:5px">Others paste it into their Inspector and inspect your Agent Card. You inspect theirs.</p>
+  </div>
+
+  <div class="g2" style="margin-top:10px">
+    <div class="gl">
+      <p class="lbl">What to discuss</p>
+      <p style="font-size:0.7em">
+        • What did your Inspector Debug Console show?<br>
+        • Did your Agent Card pass compliance checks?<br>
+        • What happened when you edited the card and redeployed?<br>
+        • Whose card had the clearest description — and why?
+      </p>
+    </div>
+    <div class="gl gl-blue">
+      <p class="lbl" style="color:#1557B0">The key question</p>
+      <p style="font-size:0.7em">If you were building an orchestrator next week and could only call agents from this Wall of Vibes — which ones would you call?</p>
+      <p style="font-size:0.62em;color:var(--g-muted);margin-top:6px">That answer is determined entirely by how good each Agent Card's <code>description</code> is.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:18px;display:flex;align-items:center;justify-content:center;gap:12px">
+    <div class="wtrack">
+      <div class="wk">W1–6</div>
+      <div class="wk wk-now" style="position:relative">W7 ✓</div>
+      <div class="wk" style="background:rgba(66,133,244,0.12);color:var(--g-blue);font-weight:700">W8 →</div>
+    </div>
+    <p style="margin:0;font-size:0.62em;color:var(--g-muted)">Final week: compose everything. Your agents are ready.</p>
+  </div>
+
+  <div class="g-dots" style="margin-top:14px">
+    <div class="gd gd-b"></div><div class="gd gd-r"></div><div class="gd gd-y"></div><div class="gd gd-g"></div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    center: false,
+    margin: 0.03,
+    width: 1200,
+    height: 700,
+    plugins: []
+  });
+</script>
+</body>
+</html>
