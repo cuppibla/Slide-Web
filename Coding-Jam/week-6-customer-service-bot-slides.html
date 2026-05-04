@@ -277,6 +277,24 @@
     border-radius: 50%;
     display: inline-block;
   }
+    /* ════════════════════════════════════════════
+       OVERFLOW SCROLL — fit MacBook screens
+    ════════════════════════════════════════════ */
+    .reveal .slides > section {
+      overflow-y: auto !important;
+      max-height: 100% !important;
+      box-sizing: border-box !important;
+    }
+    /* Subtle glass scrollbar */
+    .reveal .slides > section::-webkit-scrollbar { width: 5px; }
+    .reveal .slides > section::-webkit-scrollbar-track { background: transparent; }
+    .reveal .slides > section::-webkit-scrollbar-thumb {
+      background: rgba(66,133,244,0.18);
+      border-radius: 99px;
+    }
+    .reveal .slides > section::-webkit-scrollbar-thumb:hover {
+      background: rgba(66,133,244,0.35);
+    }
 </style>
 
 
@@ -946,10 +964,13 @@ secret = client.<span class="fn">access_secret_version</span>(
     backgroundTransition: 'fade',
     controls: true,
     progress: true,
+    center: false,
     slideNumber: 'c/t',
     width: 1280,
     height: 720,
-    margin: 0.05,
+    margin: 0.04,
+    minScale: 0.5,
+    maxScale: 1.0,
   });
 </script>
 </body>

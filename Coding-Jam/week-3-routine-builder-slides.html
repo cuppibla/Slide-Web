@@ -168,6 +168,24 @@
 
 /* Indent utility */
 .indent { margin-left: 1em; }
+    /* ════════════════════════════════════════════
+       OVERFLOW SCROLL — fit MacBook screens
+    ════════════════════════════════════════════ */
+    .reveal .slides > section {
+      overflow-y: auto !important;
+      max-height: 100% !important;
+      box-sizing: border-box !important;
+    }
+    /* Subtle glass scrollbar */
+    .reveal .slides > section::-webkit-scrollbar { width: 5px; }
+    .reveal .slides > section::-webkit-scrollbar-track { background: transparent; }
+    .reveal .slides > section::-webkit-scrollbar-thumb {
+      background: rgba(66,133,244,0.18);
+      border-radius: 99px;
+    }
+    .reveal .slides > section::-webkit-scrollbar-thumb:hover {
+      background: rgba(66,133,244,0.35);
+    }
 </style>
 
 
@@ -745,13 +763,16 @@ def log_model_call(
   Reveal.initialize({
     hash: true,
     slideNumber: 'c/t',
+    center: false,
     transition: 'slide',
     transitionSpeed: 'fast',
     backgroundTransition: 'fade',
     plugins: [RevealHighlight],
     width: 1100,
     height: 700,
-    margin: 0.05,
+    margin: 0.04,
+    minScale: 0.5,
+    maxScale: 1.0,
   });
 </script>
 </body>
