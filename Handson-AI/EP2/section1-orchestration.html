@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>ADK Agents: Skills, MCP & A2UI — Section 1: Orchestration</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:28px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:24px;color:var(--g800);padding:10px 0;padding-left:32px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:18px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dot-red::before{background:var(--red)!important}
+.dot-green::before{background:var(--green)!important}
+.dot-yellow::before{background:var(--yellow)!important}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;font-size:22px;margin-top:12px}
+th{background:var(--blue);color:white;text-align:left;padding:14px 20px;font-weight:500}
+td{padding:12px 20px;border-bottom:1px solid var(--g200);background:var(--white)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--g50)}
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:28px;font-family:var(--mono);font-size:19px;line-height:1.6;overflow:hidden;margin-top:12px}
+code{font-family:var(--mono);font-size:19px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}.fn{color:#F28B82}.op{color:#FDD663}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+.quote{border-left:4px solid var(--blue);padding:20px 28px;background:var(--g50);border-radius:0 12px 12px 0;font-size:24px;font-style:italic;color:var(--g800);margin:16px 0;line-height:1.5}
+.title-slide{background:linear-gradient(160deg,#FFFFFF 0%,#F0F4FF 50%,#E8F0FE 100%)}
+.title-slide h1{font-size:64px;max-width:1400px}
+.divider-slide{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.divider-slide h1{color:white;font-size:52px}
+.divider-slide p{color:rgba(255,255,255,0.85);font-size:28px}
+.divider-slide .section-tag{color:rgba(255,255,255,0.7)}
+.demo-slide{background:var(--g800);color:white}
+.demo-slide h2{color:white}
+.demo-slide .section-tag{color:var(--yellow)}
+.demo-ring{width:260px;height:260px;border-radius:50%;border:4px solid var(--blue);display:flex;align-items:center;justify-content:center;animation:pulse 2s infinite;font-size:20px;color:var(--blue);font-weight:500;text-align:center;margin:0 auto}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(66,133,244,0.3)}50%{box-shadow:0 0 0 30px rgba(66,133,244,0)}}
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck">
+
+<!-- SLIDE 0-A: Title -->
+<div class="slide title-slide active" data-id="0A">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">Building ADK Agents · Episode 2</div>
+    <h1 style="font-size:60px">Skills, MCP &amp; A2UI</h1>
+    <h3 style="font-size:30px;color:var(--g600);max-width:1200px;margin-top:8px">Graph-based orchestration, reusable skills, live data via MCP,<br>and agents that own their UI surface</h3>
+    <div style="margin-top:48px;display:flex;gap:12px">
+      <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue)">ADK 2.0</span>
+      <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green)">Skills</span>
+      <span class="pill" style="background:rgba(234,67,53,0.1);color:var(--red)">MCP</span>
+      <span class="pill" style="background:rgba(251,188,4,0.15);color:#E37400">A2UI</span>
+    </div>
+  </div>
+  <div class="slide-num">0-A</div>
+</div>
+
+<!-- SLIDE 0-B: Live Demo -->
+<div class="slide demo-slide" data-id="0B">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div class="section-tag">LIVE DEMO</div>
+    <h2 style="font-size:48px;margin-bottom:48px">A2UI in Action — adk web</h2>
+    <div class="demo-ring">LIVE DEMO<br>A2UI renders<br>plan card</div>
+    <p style="color:rgba(255,255,255,0.5);margin-top:40px;font-size:20px">Route plan card · Evaluation dashboard · All from agent's structured JSON output</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">0-B</div>
+</div>
+
+<!-- SLIDE 0-C: Episode Roadmap -->
+<div class="slide" data-id="0C">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">INTRO</div>
+  <h2>Episode Roadmap</h2>
+  <div style="margin-top:24px">
+    <table>
+      <tr><th style="width:120px">Time</th><th>Section</th><th style="width:400px">Key Concept</th></tr>
+      <tr><td><strong>4:00</strong></td><td>ADK 2.0 graph-based orchestration</td><td>SequentialAgent, LoopAgent, AgentTool</td></tr>
+      <tr><td><strong>18:00</strong></td><td>Writing &amp; loading skills</td><td>SKILL.md + tools.py pattern</td></tr>
+      <tr><td><strong>34:00</strong></td><td>MCP vs Skills</td><td>Live data vs. encoded opinions</td></tr>
+      <tr><td><strong>46:00</strong></td><td>A2UI — agents own the UI</td><td>18 primitives, two-pass validation</td></tr>
+      <tr><td><strong>57:00</strong></td><td>Wrap-up &amp; call to action</td><td>Three takeaways</td></tr>
+    </table>
+  </div>
+  <div class="slide-num">0-C</div>
+</div>
+
+<!-- SECTION 1 DIVIDER -->
+<div class="slide divider-slide" data-id="S1">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">SECTION 1 · 4:00 – 18:00</div>
+    <h1>ADK 2.0 —<br>Graph-Based Orchestration</h1>
+    <p>The four primitives that compose real workflows</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">S1</div>
+</div>
+
+<!-- SLIDE 1-A: Agent Taxonomy -->
+<div class="slide" data-id="1A">
+  <div class="section-tag">SECTION 1 · ORCHESTRATION</div>
+  <h2>ADK 2.0 Agent Primitives</h2>
+  <h3 style="font-size:22px">Graph nodes, not LLM wrappers — the graph IS the control flow</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1;margin-top:8px">
+    <div class="glass glass-blue" style="padding:28px 32px">
+      <div style="font-weight:700;color:var(--blue);font-size:24px;margin-bottom:12px">LlmAgent</div>
+      <p style="font-size:20px;color:var(--g800)">Calls the model. Has instructions, tools, callbacks, session state.</p>
+      <p style="font-size:17px;margin-top:8px">Use for: reasoning, synthesis, adaptive responses</p>
+    </div>
+    <div class="glass glass-green" style="padding:28px 32px">
+      <div style="font-weight:700;color:var(--green);font-size:24px;margin-bottom:12px">SequentialAgent</div>
+      <p style="font-size:20px;color:var(--g800)">Runs sub-agents in order. No LLM routing — pure pipeline.</p>
+      <p style="font-size:17px;margin-top:8px">Use for: known ordered sequences</p>
+    </div>
+    <div class="glass glass-yellow" style="padding:28px 32px">
+      <div style="font-weight:700;color:#E37400;font-size:24px;margin-bottom:12px">LoopAgent</div>
+      <p style="font-size:20px;color:var(--g800)">Repeats sub-agent until condition met or max_iterations reached.</p>
+      <p style="font-size:17px;margin-top:8px">Use for: race ticks, retries, polling</p>
+    </div>
+    <div class="glass glass-red" style="padding:28px 32px">
+      <div style="font-weight:700;color:var(--red);font-size:24px;margin-bottom:12px">ParallelAgent</div>
+      <p style="font-size:20px;color:var(--g800)">Runs sub-agents concurrently. All execute simultaneously.</p>
+      <p style="font-size:17px;margin-top:8px">Use for: independent data gathering</p>
+    </div>
+  </div>
+  <div class="slide-num">1-A</div>
+</div>
+
+<!-- SLIDE 1-B: Simulator Graph -->
+<div class="slide" data-id="1B">
+  <div class="section-tag">SECTION 1 · ORCHESTRATION</div>
+  <h2>Simulator Agent Graph</h2>
+  <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:16px">agents/simulator/agent.py</p>
+  <div class="row" style="flex:1">
+    <div style="flex:1">
+      <!-- Nested liquid glass tree -->
+      <div class="glass glass-blue" style="padding:24px 28px">
+        <div style="font-weight:700;font-size:20px;color:var(--blue)">LlmAgent("simulator") <span style="font-weight:400;color:var(--g600);font-size:16px">← root router</span></div>
+        <div style="margin-left:24px;margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <div class="glass glass-green" style="padding:12px 20px"><code>verify_plan()</code> <span style="color:var(--g600);font-size:16px">← cheap</span></div>
+          <div class="glass glass-yellow" style="padding:16px 20px">
+            <div style="font-weight:700;color:#E37400;font-size:18px">AgentTool → SequentialAgent("pipeline")</div>
+            <div style="margin-left:20px;margin-top:10px;display:flex;flex-direction:column;gap:8px">
+              <div class="glass" style="padding:10px 16px;font-size:17px"><strong>pre_race</strong> <span style="color:var(--g600)">→ parse, spawn, fire</span></div>
+              <div class="glass" style="padding:10px 16px;font-size:17px"><strong>LoopAgent("race_engine")</strong> <span style="color:var(--g600)">→ max 200 ticks</span>
+                <div style="margin-left:16px;margin-top:6px" class="glass glass-red" style="padding:8px 12px;font-size:16px"><strong>tick</strong> <span style="color:var(--g600)">→ advance + check</span></div>
+              </div>
+              <div class="glass" style="padding:10px 16px;font-size:17px"><strong>post_race</strong> <span style="color:var(--g600)">→ compile results</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass glass-red" style="margin-bottom:20px">
+        <div style="font-weight:700;color:var(--red);font-size:20px;margin-bottom:8px">Key Insight</div>
+        <p style="font-size:20px;color:var(--g800);line-height:1.6">Despite being <code>LlmAgent</code>s, <strong>pre_race</strong> and <strong>tick</strong> never call the LLM. <code>before_model_callback</code> intercepts every invocation.</p>
+      </div>
+      <div class="glass" style="padding:20px 28px">
+        <div style="font-weight:700;color:var(--blue);font-size:18px;margin-bottom:12px">Composition Pattern</div>
+        <ul style="margin:0">
+          <li style="font-size:19px;padding:6px 0;padding-left:28px">Root routes via <strong>LlmAgent</strong></li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-yellow">Pipeline runs via <strong>SequentialAgent</strong></li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-green">Ticks iterate via <strong>LoopAgent</strong></li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-red"><strong>AgentTool</strong> bridges the two levels</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">1-B</div>
+</div>
+
+<!-- SLIDE 1-C: AgentTool & skip_summarization -->
+<div class="slide" data-id="1C">
+  <div class="section-tag">SECTION 1 · ORCHESTRATION</div>
+  <h2>AgentTool — Composing Sub-Graphs</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1">
+      <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:8px">agents/simulator/agent.py line 522</p>
+      <pre><span class="cm"># Root agent sees pipeline as a tool</span>
+tools=[
+    verify_plan,
+    AgentTool(
+        agent=pipeline,
+        <span class="fn">skip_summarization</span>=<span class="kw">True</span>,
+    ),
+]</pre>
+      <div class="glass glass-blue" style="margin-top:20px;padding:20px 28px">
+        <div style="font-weight:700;color:var(--blue);font-size:18px;margin-bottom:8px">Why skip_summarization?</div>
+        <p style="font-size:19px;color:var(--g800)">Without it, ADK asks the model to <em>summarize</em> the pipeline output before returning. The root agent just relays — no summary needed.</p>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="padding:28px 32px;margin-bottom:20px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">AgentTool Bridges Two Levels</div>
+        <ul style="margin:0">
+          <li style="font-size:20px;padding:8px 0;padding-left:28px"><strong>Parent</strong>: LlmAgent that reasons and routes</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-green"><strong>Child</strong>: SequentialAgent with pure execution</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-yellow"><strong>Interface</strong>: same tool-calling API for both</li>
+        </ul>
+      </div>
+      <div class="glass glass-red" style="padding:20px 28px">
+        <div style="font-weight:700;color:var(--red);font-size:18px;margin-bottom:8px">Reexecution Guard</div>
+        <p style="font-size:18px;color:var(--g800)"><code>before_tool_callback</code> prevents the pipeline from running twice per session. On Agent Engine, the root model's while-loop can re-invoke it.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">1-C</div>
+</div>
+
+<!-- SLIDE 1-D: Runner Autopilot -->
+<div class="slide" data-id="1D">
+  <div class="section-tag">SECTION 1 · ORCHESTRATION</div>
+  <h2>runner_autopilot — 113 Lines, Zero LLM</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1">
+      <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:8px">agents/runner_autopilot/agent.py</p>
+      <pre><span class="kw">def</span> <span class="fn">get_agent</span>():
+    agent = get_base_agent()
+    agent.name = <span class="str">"runner_autopilot"</span>
+    agent.before_model_callback \
+        = autopilot_callback
+    agent.generate_content_config = \
+        GenerateContentConfig(
+            temperature=<span class="op">0.0</span>,
+            max_output_tokens=<span class="op">1</span>,
+        )
+    <span class="kw">return</span> agent</pre>
+    </div>
+    <div style="flex:1">
+      <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:8px">agents/runner_autopilot/autopilot.py — dispatch table</p>
+      <pre><span class="cm"># Pure function dispatch</span>
+HANDLERS = {
+    START_GUN:        handle_start_gun,
+    CROWD_BOOST:      handle_crowd_boost,
+    DISTANCE_UPDATE:  handle_distance_update,
+    HYDRATION_STATION:handle_hydration,
+    TICK:             handle_tick,
+}</pre>
+      <div class="glass glass-green" style="margin-top:16px;padding:20px 28px">
+        <p style="font-size:19px;color:var(--g800);margin:0">Each handler: <code>(state, data) → LlmResponse</code><br>The callback ALWAYS returns — model is never invoked. <strong>293 lines of deterministic logic.</strong></p>
+      </div>
+    </div>
+  </div>
+  <div class="quote" style="margin-top:16px;font-size:24px">The agent boundary is about interface, lifecycle, and observability — not about whether an LLM is running inside.</div>
+  <div class="slide-num">1-D</div>
+</div>
+
+<!-- SLIDE 1-E: When to Use What -->
+<div class="slide" data-id="1E">
+  <div class="section-tag">SECTION 1 · ORCHESTRATION</div>
+  <h2>Choosing the Right Primitive</h2>
+  <table style="font-size:21px;margin-top:16px">
+    <tr><th>Scenario</th><th>Primitive</th><th>Why</th></tr>
+    <tr><td>Open-ended reasoning</td><td><strong>LlmAgent</strong></td><td>Needs the model's judgment</td></tr>
+    <tr><td>Known ordered pipeline</td><td><strong>SequentialAgent</strong></td><td>Steps always run in order</td></tr>
+    <tr><td>Repeat until done</td><td><strong>LoopAgent</strong></td><td>max_iterations as safety bound</td></tr>
+    <tr><td>Independent tasks</td><td><strong>ParallelAgent</strong></td><td>Speed via concurrency</td></tr>
+    <tr><td>Fully deterministic</td><td><strong>before_model_callback</strong></td><td>Known logic, zero LLM cost</td></tr>
+    <tr><td>Sub-graph as tool</td><td><strong>AgentTool</strong></td><td>Compose graph inside parent agent</td></tr>
+  </table>
+  <div class="row" style="margin-top:24px;gap:20px">
+    <div class="glass glass-blue" style="flex:1;padding:20px 28px">
+      <p style="font-size:19px;margin:0;color:var(--g800)"><strong>Deterministic routing</strong> — the graph IS the logic, not prompt engineering</p>
+    </div>
+    <div class="glass glass-green" style="flex:1;padding:20px 28px">
+      <p style="font-size:19px;margin:0;color:var(--g800)"><strong>Composability</strong> — LoopAgent inside SequentialAgent inside AgentTool</p>
+    </div>
+    <div class="glass glass-yellow" style="flex:1;padding:20px 28px">
+      <p style="font-size:19px;margin:0;color:var(--g800)"><strong>Checkpointing</strong> — ADK persists state between graph nodes</p>
+    </div>
+  </div>
+  <div class="slide-num">1-E</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>

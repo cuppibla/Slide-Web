@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>ADK Agents: Skills, MCP & A2UI — Section 3: MCP vs Skills</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:28px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:24px;color:var(--g800);padding:10px 0;padding-left:32px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:18px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dot-red::before{background:var(--red)!important}
+.dot-green::before{background:var(--green)!important}
+.dot-yellow::before{background:var(--yellow)!important}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;font-size:22px;margin-top:12px}
+th{background:var(--blue);color:white;text-align:left;padding:14px 20px;font-weight:500}
+td{padding:12px 20px;border-bottom:1px solid var(--g200);background:var(--white)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--g50)}
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:28px;font-family:var(--mono);font-size:19px;line-height:1.6;overflow:hidden;margin-top:12px}
+code{font-family:var(--mono);font-size:19px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}.fn{color:#F28B82}.op{color:#FDD663}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+.quote{border-left:4px solid var(--blue);padding:20px 28px;background:var(--g50);border-radius:0 12px 12px 0;font-size:24px;font-style:italic;color:var(--g800);margin:16px 0;line-height:1.5}
+.divider-slide{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.divider-slide h1{color:white;font-size:52px}
+.divider-slide p{color:rgba(255,255,255,0.85);font-size:28px}
+.divider-slide .section-tag{color:rgba(255,255,255,0.7)}
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck">
+
+<!-- SECTION 3 DIVIDER -->
+<div class="slide divider-slide active" data-id="S3">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">SECTION 3 · 34:00 – 46:00</div>
+    <h1>MCP vs Skills —<br>Two Complementary Layers</h1>
+    <p>Live data from MCP · Encoded opinions from Skills · Layered together</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">S3</div>
+</div>
+
+<!-- SLIDE 3-A: MCP Architecture -->
+<div class="slide" data-id="3A">
+  <div class="section-tag">SECTION 3 · MCP VS SKILLS</div>
+  <h2>MCP — Model Context Protocol</h2>
+  <h3 style="font-size:22px">Standard protocol for connecting agents to live external services</h3>
+  <div class="row" style="flex:1">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+      <div class="glass glass-blue" style="width:420px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+        <strong>Agent</strong><br><span style="font-size:16px;color:var(--g600)">calls maps_search_places()</span>
+      </div>
+      <div style="width:2px;height:24px;background:var(--g600)"></div>
+      <div class="glass glass-green" style="width:420px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+        <strong>AgentRegistry</strong><br><span style="font-size:16px;color:var(--g600)">agentregistry.googleapis.com</span>
+      </div>
+      <div style="width:2px;height:24px;background:var(--g600)"></div>
+      <div class="glass glass-yellow" style="width:420px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+        <strong>MCP Server</strong><br><span style="font-size:16px;color:var(--g600)">mapstools.googleapis.com</span>
+      </div>
+      <div style="width:2px;height:24px;background:var(--g600)"></div>
+      <div class="glass glass-red" style="width:420px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+        <strong>Google Maps API</strong><br><span style="font-size:16px;color:var(--g600)">Real places, routes, weather</span>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="padding:28px 32px;margin-bottom:20px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">What MCP Gives You</div>
+        <ul style="margin:0">
+          <li style="font-size:20px;padding:6px 0;padding-left:28px"><strong>No SDK code</strong> — agent gains tools without API wrappers</li>
+          <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-green"><strong>Dynamic discovery</strong> — tools found at runtime via registry</li>
+          <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-yellow"><strong>Auth handled</strong> — MCP server manages API keys, OAuth</li>
+          <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-red"><strong>Open standard</strong> — works with any MCP-compliant server</li>
+        </ul>
+      </div>
+      <div class="glass glass-blue" style="padding:20px 28px">
+        <p style="font-size:18px;margin:0;color:var(--g800)">The agent gains <code>maps_search_places</code>, <code>maps_compute_routes</code>, <code>maps_lookup_weather</code> — no Maps SDK code anywhere.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">3-A</div>
+</div>
+
+<!-- SLIDE 3-B: Comparison Table -->
+<div class="slide" data-id="3B">
+  <div class="section-tag">SECTION 3 · MCP VS SKILLS</div>
+  <h2>Skills vs MCP — Comparison</h2>
+  <table style="font-size:21px;margin-top:24px">
+    <tr><th style="width:240px"></th><th>Skills</th><th>MCP</th></tr>
+    <tr><td><strong>What it is</strong></td><td>Instructions + bundled code</td><td>Live external service</td></tr>
+    <tr><td><strong>Where it lives</strong></td><td>Your repo <code>agents/*/skills/</code></td><td>Separate server (MCP endpoint)</td></tr>
+    <tr><td><strong>When it runs</strong></td><td>In the agent process</td><td>Remote call to external API</td></tr>
+    <tr><td><strong>Best for</strong></td><td>Domain knowledge, algorithms, validation</td><td>Real-time data, external APIs</td></tr>
+    <tr><td><strong>Offline?</strong></td><td>✅ Yes — runs locally, no network</td><td>❌ Requires live service</td></tr>
+    <tr><td><strong>What it encodes</strong></td><td>Opinions, workflows, constraints</td><td>Raw API access</td></tr>
+    <tr><td><strong>Example</strong></td><td><code>gis-spatial-engineering</code></td><td><code>maps_search_places</code></td></tr>
+  </table>
+  <div class="quote" style="margin-top:24px;font-size:24px">If it can run offline, it's a skill. If it needs live data, it needs MCP. If both — layer them.</div>
+  <div class="slide-num">3-B</div>
+</div>
+
+<!-- SLIDE 3-C: Layered Together -->
+<div class="slide" data-id="3C">
+  <div class="section-tag">SECTION 3 · MCP VS SKILLS</div>
+  <h2>The Mapping Skill Calls MCP Tools</h2>
+  <h3 style="font-size:22px">A skill whose tools ARE MCP tools — complementary layers, not alternatives</h3>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1">
+      <div class="glass glass-blue" style="margin-bottom:20px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:12px">Skill Layer — mapping/SKILL.md</div>
+        <p style="font-size:19px;color:var(--g800)">Provides the <strong>instructions</strong>: "Use maps_search_places to find key landmarks. Use maps_lookup_weather to recommend race timing."</p>
+        <p style="font-size:17px;color:var(--g600);margin-top:8px">Encodes domain knowledge about marathon planning</p>
+      </div>
+      <div class="glass glass-green">
+        <div style="font-weight:700;color:var(--green);font-size:20px;margin-bottom:12px">MCP Layer — Maps Grounding Lite</div>
+        <p style="font-size:19px;color:var(--g800)">Provides the <strong>live data</strong>: actual place listings, real distances, real weather forecasts</p>
+        <p style="font-size:17px;color:var(--g600);margin-top:8px">Raw API access via AgentRegistry</p>
+      </div>
+    </div>
+    <div style="flex:1">
+      <pre style="font-size:18px"><span class="cm"># mapping/SKILL.md</span>
+<span class="cm"># Mapping</span>
+
+You are an expert at utilizing
+the Google Maps Grounding Lite
+and specialized MCP tools...
+
+<span class="cm">## Available Tools</span>
+
+- <span class="fn">maps_search_places</span>
+  <span class="str">Identify key landmarks,
+  parks, tourist attractions</span>
+
+- <span class="fn">maps_compute_routes</span>
+  <span class="str">Calculate exact distances</span>
+
+- <span class="fn">maps_lookup_weather</span>
+  <span class="str">Historical or forecasted
+  weather patterns</span></pre>
+    </div>
+  </div>
+  <div class="slide-num">3-C</div>
+</div>
+
+<!-- SLIDE 3-D: Financial Modeling Variants -->
+<div class="slide" data-id="3D">
+  <div class="section-tag">SECTION 3 · MCP VS SKILLS</div>
+  <h2>Behavioral Variants — What MCP Can't Do</h2>
+  <h3 style="font-size:22px">Same API, different guardrails — swap at runtime via skills</h3>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div class="glass glass-green" style="flex:1">
+      <div style="font-weight:700;color:var(--green);font-size:22px;margin-bottom:12px">insecure-financial-modeling</div>
+      <ul style="margin:0">
+        <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-green">Report in <strong>percentages</strong>, never dollar amounts</li>
+        <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-green"><strong>Approve</strong> budget changes</li>
+        <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-green">Render A2UI Card with approved status</li>
+      </ul>
+    </div>
+    <div class="glass glass-red" style="flex:1">
+      <div style="font-weight:700;color:var(--red);font-size:22px;margin-bottom:12px">secure-financial-modeling</div>
+      <ul style="margin:0">
+        <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-red"><strong>Refuse</strong> all budget modifications</li>
+        <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-red">Direct requester to <strong>administrator</strong></li>
+        <li style="font-size:20px;padding:6px 0;padding-left:28px" class="dot-red">Render A2UI Card with "Access Restricted"</li>
+      </ul>
+    </div>
+  </div>
+  <div class="row" style="margin-top:20px;gap:24px">
+    <div class="glass glass-blue" style="flex:1;padding:20px 28px">
+      <div style="font-weight:700;color:var(--blue);font-size:18px;margin-bottom:8px">Runtime Toggle</div>
+      <p style="font-size:18px;margin:0;color:var(--g800)"><code>set_financial_modeling_mode("secure")</code> sets session state → agent loads the corresponding skill</p>
+    </div>
+    <div class="glass glass-yellow" style="flex:1;padding:20px 28px">
+      <div style="font-weight:700;color:#E37400;font-size:18px;margin-bottom:8px">Programmatic Guardrail</div>
+      <p style="font-size:18px;margin:0;color:var(--g800)"><code>financial_guardrail_callback</code> intercepts budget-change requests <em>before</em> the LLM even sees them. Defense in depth.</p>
+    </div>
+  </div>
+  <div class="quote" style="margin-top:16px;font-size:22px;border-left-color:var(--red)">Skills encode opinions. MCP surfaces data. Behavioral variants prove the difference — you can't get access control from an MCP server.</div>
+  <div class="slide-num">3-D</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>

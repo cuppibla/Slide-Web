@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>ADK Agents: Skills, MCP & A2UI — Section 2: Skills</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:28px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:24px;color:var(--g800);padding:10px 0;padding-left:32px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:18px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dot-red::before{background:var(--red)!important}
+.dot-green::before{background:var(--green)!important}
+.dot-yellow::before{background:var(--yellow)!important}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;font-size:22px;margin-top:12px}
+th{background:var(--blue);color:white;text-align:left;padding:14px 20px;font-weight:500}
+td{padding:12px 20px;border-bottom:1px solid var(--g200);background:var(--white)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--g50)}
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:28px;font-family:var(--mono);font-size:19px;line-height:1.6;overflow:hidden;margin-top:12px}
+code{font-family:var(--mono);font-size:19px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}.fn{color:#F28B82}.op{color:#FDD663}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+.quote{border-left:4px solid var(--blue);padding:20px 28px;background:var(--g50);border-radius:0 12px 12px 0;font-size:24px;font-style:italic;color:var(--g800);margin:16px 0;line-height:1.5}
+.divider-slide{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.divider-slide h1{color:white;font-size:52px}
+.divider-slide p{color:rgba(255,255,255,0.85);font-size:28px}
+.divider-slide .section-tag{color:rgba(255,255,255,0.7)}
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck">
+
+<!-- SECTION 2 DIVIDER -->
+<div class="slide divider-slide active" data-id="S2">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">SECTION 2 · 18:00 – 34:00</div>
+    <h1>Skills —<br>Reusable Agent Capabilities</h1>
+    <p>SKILL.md + tools.py · loaded on demand · context scoping</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">S2</div>
+</div>
+
+<!-- SLIDE 2-A: What a Skill Is -->
+<div class="slide" data-id="2A">
+  <div class="section-tag">SECTION 2 · SKILLS</div>
+  <h2>What Is a Skill?</h2>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1">
+      <div class="glass glass-blue" style="margin-bottom:24px;padding:28px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:12px">SKILL.md</div>
+        <p style="font-size:20px;color:var(--g800)">The <strong>instruction contract</strong> — what the LLM reads. When to use it, what tools are available, what order to call them.</p>
+      </div>
+      <div class="glass glass-green" style="padding:28px 32px">
+        <div style="font-weight:700;color:var(--green);font-size:22px;margin-bottom:12px">tools.py</div>
+        <p style="font-size:20px;color:var(--g800)">The <strong>implementation</strong> — actual Python functions the LLM calls. Executes in the agent process.</p>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="padding:28px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">Two Skill Locations</div>
+        <table style="font-size:19px;margin:0">
+          <tr><th>Location</th><th>Scope</th></tr>
+          <tr><td><code>agents/skills/</code></td><td><strong>Shared</strong> — every agent</td></tr>
+          <tr><td><code>agents/&lt;agent&gt;/skills/</code></td><td><strong>Local</strong> — one agent only</td></tr>
+        </table>
+        <p style="font-size:17px;color:var(--g600);margin-top:16px">Local overrides shared on name collision</p>
+      </div>
+      <div class="glass glass-yellow" style="margin-top:20px;padding:20px 28px">
+        <p style="font-size:19px;color:var(--g800);margin:0"><strong>Key rule:</strong> Skills are loaded ON DEMAND — the LLM doesn't see tools it doesn't need this turn</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">2-A</div>
+</div>
+
+<!-- SLIDE 2-B: Skill Anatomy -->
+<div class="slide" data-id="2B">
+  <div class="section-tag">SECTION 2 · SKILLS</div>
+  <h2>Anatomy: preparing-the-race</h2>
+  <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:16px">agents/simulator/skills/preparing-the-race/</p>
+  <div class="row" style="flex:1">
+    <div style="flex:1">
+      <div style="font-weight:700;color:var(--blue);font-size:18px;margin-bottom:8px">SKILL.md — Frontmatter</div>
+      <pre style="font-size:18px"><span class="cm">---</span>
+name: <span class="str">preparing-the-race</span>
+description: <span class="op">></span>
+  <span class="str">Use when the simulator receives
+  a validated plan and must
+  initialize the race...</span>
+<span class="cm">---</span></pre>
+      <div style="font-weight:700;color:var(--blue);font-size:18px;margin-top:16px;margin-bottom:8px">SKILL.md — Workflow Contract</div>
+      <pre style="font-size:18px"><span class="cm"># Workflow — separate responses:</span>
+<span class="op">1.</span> prepare_simulation <span class="cm">(alone)</span>
+<span class="op">2.</span> spawn_runners +
+   start_race_collector <span class="cm">(parallel)</span>
+<span class="op">3.</span> fire_start_gun</pre>
+    </div>
+    <div style="flex:1">
+      <div style="font-weight:700;color:var(--green);font-size:18px;margin-bottom:8px">tools.py — Four Functions</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="glass glass-green" style="padding:16px 24px">
+          <div style="font-weight:700;font-size:18px;color:var(--green)">prepare_simulation()</div>
+          <p style="font-size:17px;margin-top:4px">Parse plan, validate route, build traffic model, set state</p>
+        </div>
+        <div class="glass glass-green" style="padding:16px 24px">
+          <div style="font-weight:700;font-size:18px;color:var(--green)">spawn_runners()</div>
+          <p style="font-size:17px;margin-top:4px">HTTP POST to gateway /api/v1/spawn with OIDC auth</p>
+        </div>
+        <div class="glass glass-green" style="padding:16px 24px">
+          <div style="font-weight:700;font-size:18px;color:var(--green)">start_race_collector()</div>
+          <p style="font-size:17px;margin-top:4px">Subscribe to Redis broadcast for runner telemetry</p>
+        </div>
+        <div class="glass glass-green" style="padding:16px 24px">
+          <div style="font-weight:700;font-size:18px;color:var(--green)">fire_start_gun()</div>
+          <p style="font-size:17px;margin-top:4px">Broadcast START_GUN event, wait for runner readiness</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">2-B</div>
+</div>
+
+<!-- SLIDE 2-C: Per-Agent Scoping -->
+<div class="slide" data-id="2C">
+  <div class="section-tag">SECTION 2 · SKILLS</div>
+  <h2>Per-Agent Skill Scoping</h2>
+  <h3 style="font-size:22px">Each sub-agent in the graph gets ONLY the skills it needs</h3>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+      <div class="glass glass-blue" style="padding:24px 28px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:8px">pre_race agent</div>
+        <div style="display:flex;gap:8px">
+          <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue)">prepare_simulation</span>
+          <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue)">spawn_runners</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue)">start_collector</span>
+          <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue)">fire_start_gun</span>
+        </div>
+      </div>
+      <div class="glass glass-yellow" style="padding:24px 28px">
+        <div style="font-weight:700;color:#E37400;font-size:20px;margin-bottom:8px">tick agent</div>
+        <div style="display:flex;gap:8px">
+          <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400">advance_tick</span>
+          <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400">check_race_complete</span>
+        </div>
+      </div>
+      <div class="glass glass-green" style="padding:24px 28px">
+        <div style="font-weight:700;color:var(--green);font-size:20px;margin-bottom:8px">post_race agent</div>
+        <div style="display:flex;gap:8px">
+          <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green)">compile_results</span>
+          <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green)">stop_collector</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="padding:28px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">Why Scoped, Not Shared?</div>
+        <ul style="margin:0">
+          <li style="font-size:20px;padding:8px 0;padding-left:28px"><strong>No cross-contamination</strong> — tick can't call spawn_runners</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-green"><strong>Lean context</strong> — each agent pays only for what it uses</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-yellow"><strong>Least privilege</strong> — reduces LLM tool confusion</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-red"><strong>Composable</strong> — graph model + skills = scoped capability</li>
+        </ul>
+      </div>
+      <pre style="margin-top:16px;font-size:18px"><span class="cm"># Each sub-agent: own skill scope</span>
+pre_race_tools = load_skill_tools(
+    <span class="str">"preparing-the-race"</span>)
+tick_tools = load_skill_tools(
+    <span class="str">"advancing-race-ticks"</span>)
+post_tools = load_skill_tools(
+    <span class="str">"completing-the-race"</span>)</pre>
+    </div>
+  </div>
+  <div class="slide-num">2-C</div>
+</div>
+
+<!-- SLIDE 2-D: Skill Loading Flow -->
+<div class="slide" data-id="2D">
+  <div class="section-tag">SECTION 2 · SKILLS</div>
+  <h2>How Skills Are Discovered</h2>
+  <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:16px">agents/utils/__init__.py → load_agent_skills()</p>
+  <div class="row" style="flex:1">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+      <!-- Flow diagram -->
+      <div class="glass glass-blue" style="width:460px;padding:16px 24px;text-align:center;font-size:20px;font-weight:500">
+        <strong>1.</strong> Scan <code>agents/skills/</code> → shared skills
+      </div>
+      <div style="width:2px;height:20px;background:var(--g600)"></div>
+      <div class="glass glass-green" style="width:460px;padding:16px 24px;text-align:center;font-size:20px;font-weight:500">
+        <strong>2.</strong> Scan <code>agents/&lt;agent&gt;/skills/</code> → local skills
+      </div>
+      <div style="width:2px;height:20px;background:var(--g600)"></div>
+      <div class="glass glass-yellow" style="width:460px;padding:16px 24px;text-align:center;font-size:20px;font-weight:500">
+        <strong>3.</strong> Merge by name — local wins on collision
+      </div>
+      <div style="width:2px;height:20px;background:var(--g600)"></div>
+      <div class="glass glass-red" style="width:460px;padding:16px 24px;text-align:center;font-size:20px;font-weight:500">
+        <strong>4.</strong> Combine all tools from both directories
+      </div>
+      <div style="width:2px;height:20px;background:var(--g600)"></div>
+      <div class="glass" style="width:460px;padding:16px 24px;text-align:center;font-size:20px;font-weight:500;background:rgba(66,133,244,0.12)">
+        <strong>5.</strong> Return <code>(skills, tools)</code> → SkillToolset
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="padding:28px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">Discovery Details</div>
+        <ul style="margin:0">
+          <li style="font-size:19px;padding:6px 0;padding-left:28px">Each subdirectory with <code>SKILL.md</code> = one skill</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-green"><code>load_skill_from_dir()</code> → ADK's native Skill loader</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-yellow"><code>importlib</code> dynamically imports <code>tools.py</code></li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-red">If <code>__all__</code> defined → use verbatim (re-export)</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px">Otherwise → <code>__module__</code> heuristic</li>
+        </ul>
+      </div>
+      <div class="quote" style="margin-top:20px;font-size:22px">Drop a directory with SKILL.md + tools.py into the skills folder. Next run, it's auto-discovered. No registration, no rebuild.</div>
+    </div>
+  </div>
+  <div class="slide-num">2-D</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>

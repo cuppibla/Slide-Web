@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>ADK Agents — Section 4: A2UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:28px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:24px;color:var(--g800);padding:10px 0;padding-left:32px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:18px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dot-red::before{background:var(--red)!important}.dot-green::before{background:var(--green)!important}.dot-yellow::before{background:var(--yellow)!important}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;font-size:22px;margin-top:12px}
+th{background:var(--blue);color:white;text-align:left;padding:14px 20px;font-weight:500}
+td{padding:12px 20px;border-bottom:1px solid var(--g200);background:var(--white)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--g50)}
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:28px;font-family:var(--mono);font-size:19px;line-height:1.6;overflow:hidden;margin-top:12px}
+code{font-family:var(--mono);font-size:19px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}.fn{color:#F28B82}.op{color:#FDD663}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+.quote{border-left:4px solid var(--blue);padding:20px 28px;background:var(--g50);border-radius:0 12px 12px 0;font-size:24px;font-style:italic;color:var(--g800);margin:16px 0;line-height:1.5}
+.divider-slide{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.divider-slide h1{color:white;font-size:52px}
+.divider-slide p{color:rgba(255,255,255,0.85);font-size:28px}
+.divider-slide .section-tag{color:rgba(255,255,255,0.7)}
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck">
+
+<!-- SECTION 4 DIVIDER -->
+<div class="slide divider-slide active" data-id="S4">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">SECTION 4 · 46:00 – 57:00</div>
+    <h1>A2UI — Agents That<br>Own Their Visual Surface</h1>
+    <p>Declarative JSON · 18 primitives · Two-pass validation · Streaming to frontend</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">S4</div>
+</div>
+
+<!-- SLIDE 4-A: What A2UI Is -->
+<div class="slide" data-id="4A">
+  <div class="section-tag">SECTION 4 · A2UI</div>
+  <h2>What Is A2UI?</h2>
+  <h3 style="font-size:22px">Agent-to-User Interface — declarative JSON, not HTML, not text blobs</h3>
+  <div class="row" style="flex:1;margin-top:8px">
+    <div style="flex:1">
+      <div class="glass glass-blue" style="margin-bottom:20px;padding:24px 28px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:12px">surfaceUpdate</div>
+        <p style="font-size:19px;color:var(--g800)">Defines the component tree — flat array of typed components with unique IDs and property objects</p>
+        <pre style="font-size:16px;margin-top:12px;padding:16px"><span class="cm">// defines WHAT exists</span>
+{ <span class="str">"surfaceUpdate"</span>: {
+    <span class="str">"surfaceId"</span>: <span class="str">"my-surface"</span>,
+    <span class="str">"components"</span>: [...]
+}}</pre>
+      </div>
+      <div class="glass glass-green" style="padding:24px 28px">
+        <div style="font-weight:700;color:var(--green);font-size:20px;margin-bottom:12px">beginRendering</div>
+        <p style="font-size:19px;color:var(--g800)">Tells the frontend which component is root — triggers render</p>
+        <pre style="font-size:16px;margin-top:12px;padding:16px"><span class="cm">// tells WHERE to start</span>
+{ <span class="str">"beginRendering"</span>: {
+    <span class="str">"surfaceId"</span>: <span class="str">"my-surface"</span>,
+    <span class="str">"root"</span>: <span class="str">"card-id"</span>
+}}</pre>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="glass" style="padding:28px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:20px;margin-bottom:16px">Design Principles</div>
+        <ul style="margin:0">
+          <li style="font-size:20px;padding:8px 0;padding-left:28px"><strong>Declarative</strong> — JSON blueprint, not executable code</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-green"><strong>Secure</strong> — no UI injection attacks possible</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-yellow"><strong>Framework-agnostic</strong> — same JSON for Angular, React, Flutter</li>
+          <li style="font-size:20px;padding:8px 0;padding-left:28px" class="dot-red"><strong>LLM-friendly</strong> — structured for incremental generation</li>
+        </ul>
+      </div>
+      <div class="glass glass-red" style="margin-top:20px;padding:20px 28px">
+        <div style="font-weight:700;color:var(--red);font-size:18px;margin-bottom:8px">Critical Rule</div>
+        <p style="font-size:18px;margin:0;color:var(--g800)"><code>validate_and_emit_a2ui</code> must be called <strong>twice</strong> per surface — once for surfaceUpdate, once for beginRendering. Without beginRendering, nothing renders.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">4-A</div>
+</div>
+
+<!-- SLIDE 4-B: 18 Primitives -->
+<div class="slide" data-id="4B">
+  <div class="section-tag">SECTION 4 · A2UI</div>
+  <h2>The 18 Component Primitives</h2>
+  <div class="row" style="flex:1;margin-top:16px">
+    <div class="glass glass-blue" style="flex:1;padding:24px 28px">
+      <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:16px">Layout (7)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue);font-size:18px">Column</span>
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue);font-size:18px">Row</span>
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue);font-size:18px">List</span>
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue);font-size:18px">Card</span>
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue);font-size:18px">Tabs</span>
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue);font-size:18px">Modal</span>
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue);font-size:18px">Divider</span>
+      </div>
+      <p style="font-size:17px;color:var(--g600);margin-top:12px">Children via <code>{"explicitList": ["id1", "id2"]}</code></p>
+    </div>
+    <div class="glass glass-green" style="flex:1;padding:24px 28px">
+      <div style="font-weight:700;color:var(--green);font-size:22px;margin-bottom:16px">Display (5)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">Text</span>
+        <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">Image</span>
+        <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">Icon</span>
+        <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">Video</span>
+        <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green);font-size:18px">AudioPlayer</span>
+      </div>
+      <p style="font-size:17px;color:var(--g600);margin-top:12px">Strings wrapped: <code>{"literalString": "..."}</code></p>
+    </div>
+    <div class="glass glass-yellow" style="flex:1;padding:24px 28px">
+      <div style="font-weight:700;color:#E37400;font-size:22px;margin-bottom:16px">Input (6)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400;font-size:18px">Button</span>
+        <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400;font-size:18px">TextField</span>
+        <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400;font-size:18px">CheckBox</span>
+        <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400;font-size:18px">Slider</span>
+        <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400;font-size:18px">MultipleChoice</span>
+        <span class="pill" style="background:rgba(251,188,4,0.12);color:#E37400;font-size:18px">DateTimeInput</span>
+      </div>
+      <p style="font-size:17px;color:var(--g600);margin-top:12px">Booleans wrapped: <code>{"literalBoolean": true}</code></p>
+    </div>
+  </div>
+  <div class="glass" style="margin-top:24px;padding:20px 28px">
+    <div style="font-weight:700;color:var(--red);font-size:18px;margin-bottom:8px">Typed Value Wrappers — Never Raw Primitives</div>
+    <div style="display:flex;gap:24px">
+      <p style="font-size:18px;margin:0;color:var(--g800);flex:1">❌ <code>"text": "Hello"</code> — rejected</p>
+      <p style="font-size:18px;margin:0;color:var(--g800);flex:1">✅ <code>"text": {"literalString": "Hello"}</code> — valid</p>
+      <p style="font-size:18px;margin:0;color:var(--g800);flex:1">❌ <code>"children": ["a","b"]</code> — rejected</p>
+      <p style="font-size:18px;margin:0;color:var(--g800);flex:1">✅ <code>"children": {"explicitList": ["a","b"]}</code></p>
+    </div>
+  </div>
+  <div class="slide-num">4-B</div>
+</div>
+
+<!-- SLIDE 4-C: Two-Pass Validation -->
+<div class="slide" data-id="4C">
+  <div class="section-tag">SECTION 4 · A2UI</div>
+  <h2>Two-Pass Validation</h2>
+  <p style="font-size:16px;font-family:var(--mono);color:var(--g600);margin-bottom:16px">agents/skills/a2ui-rendering/tools.py — 436 lines</p>
+  <div class="row" style="flex:1">
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+      <div class="glass glass-blue" style="padding:24px 28px">
+        <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:12px">Pass 1 — Per-Component</div>
+        <ul style="margin:0">
+          <li style="font-size:19px;padding:6px 0;padding-left:28px">Type against 18-primitive catalog</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-green">Required props per type</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-yellow">Typed value wrappers enforced</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-red">Duplicate ID detection</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px">Collect all ID references</li>
+        </ul>
+      </div>
+      <div class="glass glass-green" style="padding:24px 28px">
+        <div style="font-weight:700;color:var(--green);font-size:22px;margin-bottom:12px">Pass 2 — Reference Resolution</div>
+        <ul style="margin:0">
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-green">Every reference must resolve to a known ID</li>
+          <li style="font-size:19px;padding:6px 0;padding-left:28px" class="dot-green">Catches dangling pointers (Card → missing child)</li>
+        </ul>
+      </div>
+    </div>
+    <div style="flex:1">
+      <pre style="font-size:17px"><span class="kw">def</span> <span class="fn">_validate_surface_update</span>(data):
+    violations = []
+    components = data[<span class="str">"surfaceUpdate"</span>]
+                     [<span class="str">"components"</span>]
+
+    all_ids: set = set()
+    refs: list = []
+
+    <span class="cm"># Pass 1: per-component checks</span>
+    <span class="kw">for</span> entry <span class="kw">in</span> components:
+        _validate_component(
+            entry, all_ids, refs,
+            violations)
+
+    <span class="cm"># Pass 2: resolve references</span>
+    <span class="kw">for</span> src, field, ref_id <span class="kw">in</span> refs:
+        <span class="kw">if</span> ref_id <span class="kw">not in</span> all_ids:
+            violations.append(...)
+
+    <span class="kw">return</span> violations</pre>
+      <div class="glass glass-yellow" style="margin-top:12px;padding:16px 24px">
+        <p style="font-size:18px;margin:0;color:var(--g800)"><strong>On failure:</strong> structured violations with <code>component_id</code>, <code>field</code>, <code>message</code> — LLM gets actionable feedback to fix and retry</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">4-C</div>
+</div>
+
+<!-- SLIDE 4-D: Rendering Pipeline -->
+<div class="slide" data-id="4D">
+  <div class="section-tag">SECTION 4 · A2UI</div>
+  <h2>Rendering Pipeline</h2>
+  <h3 style="font-size:22px">From tool call to pixels — sub-100ms end to end</h3>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+    <div class="glass glass-blue" style="width:700px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+      Agent calls <code>validate_and_emit_a2ui(payload)</code>
+    </div>
+    <div style="width:2px;height:20px;background:var(--g600)"></div>
+    <div class="glass glass-green" style="width:700px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+      Two-pass validation → returns <code>{"status":"success","a2ui": ...}</code>
+    </div>
+    <div style="width:2px;height:20px;background:var(--g600)"></div>
+    <div class="glass glass-yellow" style="width:700px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+      <code>RedisDashLogPlugin</code> extracts "a2ui" key → emits to Redis
+    </div>
+    <div style="width:2px;height:20px;background:var(--g600)"></div>
+    <div class="glass glass-red" style="width:700px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500">
+      Go gateway picks up → WebSocket broadcast to frontends
+    </div>
+    <div style="width:2px;height:20px;background:var(--g600)"></div>
+    <div class="glass" style="width:700px;padding:18px 28px;text-align:center;font-size:20px;font-weight:500;background:rgba(66,133,244,0.12)">
+      Frontend A2UI renderer maps components → native UI
+    </div>
+  </div>
+  <div class="quote" style="margin-top:16px;font-size:22px">A2UI updates stream as the agent runs — not after it finishes. The user sees progress, not silence.</div>
+  <div class="slide-num">4-D</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>

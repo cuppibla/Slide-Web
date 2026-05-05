@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>ADK Agents — Section 5: Wrap-up</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:28px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:24px;color:var(--g800);padding:10px 0;padding-left:32px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:18px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dot-red::before{background:var(--red)!important}.dot-green::before{background:var(--green)!important}.dot-yellow::before{background:var(--yellow)!important}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+.quote{border-left:4px solid var(--blue);padding:20px 28px;background:var(--g50);border-radius:0 12px 12px 0;font-size:24px;font-style:italic;color:var(--g800);margin:16px 0;line-height:1.5}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+.divider-slide{background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 100%);color:white}
+.divider-slide h1{color:white;font-size:52px}
+.divider-slide p{color:rgba(255,255,255,0.85);font-size:28px}
+.divider-slide .section-tag{color:rgba(255,255,255,0.7)}
+.title-slide{background:linear-gradient(160deg,#FFFFFF 0%,#F0F4FF 50%,#E8F0FE 100%)}
+.nav-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0.5}
+code{font-family:var(--mono);font-size:19px}
+</style>
+</head>
+<body>
+<div class="nav-hint">← → Arrow keys · Slide <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck">
+
+<!-- SECTION 5 DIVIDER -->
+<div class="slide divider-slide active" data-id="S5">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">WRAP-UP · 57:00 – 60:00</div>
+    <h1>Three Big Takeaways</h1>
+    <p>And what's coming next</p>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">S5</div>
+</div>
+
+<!-- SLIDE 5-A: Three Takeaways -->
+<div class="slide" data-id="5A">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">WRAP-UP</div>
+  <h2>Three Takeaways</h2>
+  <div style="display:flex;flex-direction:column;gap:24px;flex:1;margin-top:16px">
+    <div class="glass glass-blue" style="flex:1;display:flex;align-items:center;padding:28px 36px">
+      <div>
+        <div style="font-weight:700;color:var(--blue);font-size:28px;margin-bottom:8px">1. ADK 2.0 is a graph model</div>
+        <p style="font-size:22px;color:var(--g800)"><code>SequentialAgent</code>, <code>LoopAgent</code>, <code>AgentTool</code> compose real orchestration workflows. <code>before_model_callback</code> lets you go fully deterministic without leaving the framework.</p>
+      </div>
+    </div>
+    <div class="glass glass-green" style="flex:1;display:flex;align-items:center;padding:28px 36px">
+      <div>
+        <div style="font-weight:700;color:var(--green);font-size:28px;margin-bottom:8px">2. Skills encode opinions · MCP surfaces live data</div>
+        <p style="font-size:22px;color:var(--g800)">The mapping skill <em>calls</em> MCP tools — they're complementary layers. Financial modeling skills prove it: same API, different behavioral rules. MCP can't give you that.</p>
+      </div>
+    </div>
+    <div class="glass glass-red" style="flex:1;display:flex;align-items:center;padding:28px 36px">
+      <div>
+        <div style="font-weight:700;color:var(--red);font-size:28px;margin-bottom:8px">3. A2UI makes agents accountable</div>
+        <p style="font-size:22px;color:var(--g800)">18 primitives, two-pass validation, streaming to the frontend in real time. The UI is part of the agent's output contract, not an afterthought.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">5-A</div>
+</div>
+
+<!-- SLIDE 5-B: Coming Next -->
+<div class="slide" data-id="5B">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">COMING NEXT</div>
+  <h2>Future Episodes</h2>
+  <div class="row" style="flex:1;margin-top:24px">
+    <div class="glass glass-blue" style="flex:1;padding:36px 40px">
+      <div style="font-weight:700;color:var(--blue);font-size:26px;margin-bottom:16px">A2A + Agent Registry + Evaluation</div>
+      <p style="font-size:22px;color:var(--g800)">How agents discover each other via A2A. How <code>planner_with_eval</code> uses LLM-as-judge to score plans across six quality pillars.</p>
+      <div style="margin-top:20px">
+        <span class="pill" style="background:rgba(66,133,244,0.1);color:var(--blue)">with Casey</span>
+      </div>
+    </div>
+    <div class="glass glass-green" style="flex:1;padding:36px 40px">
+      <div style="font-weight:700;color:var(--green);font-size:26px;margin-bottom:16px">MCP Deep Dive</div>
+      <p style="font-size:22px;color:var(--g800)">Non-Google MCP servers. Building custom MCP tools. The Agent Registry governance model.</p>
+      <div style="margin-top:20px">
+        <span class="pill" style="background:rgba(52,168,83,0.1);color:var(--green)">with Christina</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">5-B</div>
+</div>
+
+<!-- SLIDE 5-C: Call to Action -->
+<div class="slide title-slide" data-id="5C">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="section-tag">GET STARTED</div>
+    <h1 style="font-size:52px">Try It Yourself</h1>
+    <div class="row" style="margin-top:40px;gap:24px">
+      <div class="glass glass-blue" style="flex:1;padding:28px 32px">
+        <div style="font-weight:700;color:var(--blue);font-size:22px;margin-bottom:12px">Clone &amp; Run</div>
+        <p style="font-size:20px;color:var(--g800)"><code>github.com/GoogleCloudPlatform/race-condition</code></p>
+        <p style="font-size:18px;margin-top:12px"><code>make init</code> → first-time setup<br><code>make start</code> → runs everything locally</p>
+      </div>
+      <div class="glass glass-green" style="flex:1;padding:28px 32px">
+        <div style="font-weight:700;color:var(--green);font-size:22px;margin-bottom:12px">Start Reading</div>
+        <p style="font-size:20px;color:var(--g800)"><code>runner_autopilot/agent.py</code> — 113 lines, the full pattern</p>
+        <p style="font-size:18px;margin-top:12px">Any <code>SKILL.md</code> — the authoring loop is just files</p>
+      </div>
+      <div class="glass glass-yellow" style="flex:1;padding:28px 32px">
+        <div style="font-weight:700;color:#E37400;font-size:22px;margin-bottom:12px">Codelab</div>
+        <p style="font-size:20px;color:var(--g800)"><code>building-agents-with-skills</code></p>
+        <p style="font-size:18px;margin-top:12px">Zero to deployed Agent Engine endpoint in 45 minutes</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">5-C</div>
+</div>
+
+</div>
+<script>
+const slides=document.querySelectorAll('.slide');
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){slides[idx].classList.remove('active');idx=Math.max(0,Math.min(n,slides.length-1));slides[idx].classList.add('active');document.getElementById('cur').textContent=idx+1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+</script>
+</body>
+</html>
