@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Race Condition — Mesh vs Pipeline (Slide 13, updated)</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--purple:#9334E6;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.slide{display:flex;flex-direction:column;padding:56px 80px 40px;width:1920px;height:1080px;position:relative}
+.g-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);position:relative;overflow:hidden}
+.glass-blue{background:rgba(66,133,244,0.07);border:1px solid rgba(66,133,244,0.18)}
+.section-tag{font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+h2{font-size:52px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:10px}
+h3{font-size:26px;font-weight:400;color:var(--g600);line-height:1.4}
+h3 b{color:var(--g800);font-weight:600}
+code{font-family:var(--mono);font-size:20px;background:var(--g100);padding:3px 8px;border-radius:5px}
+.row{display:flex;gap:32px;align-items:stretch}
+.panel-cap{font-size:24px;font-weight:700;margin-bottom:4px}
+.panel-sub{font-size:18px;color:var(--g600);margin-bottom:8px}
+.tag{display:inline-block;padding:6px 16px;border-radius:16px;font-size:16px;font-weight:600}
+.credit{position:absolute;bottom:28px;right:56px;font-size:15px;color:var(--g600);font-weight:500}
+.note{font-size:23px;font-weight:600;text-align:center;padding:18px 32px}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+
+  <div style="margin-top:30px">
+    <div class="section-tag">Agent Communication</div>
+    <h2>Built as a mesh, used as a pipeline</h2>
+    <h3>Any agent <b>can</b> reach any other — but in practice it runs <b>planner → simulator → runners</b>. <code>call_agent()</code> wraps A2A and hides the networking.</h3>
+  </div>
+
+  <div class="row" style="flex:1;margin-top:16px;align-items:stretch">
+
+    <!-- LEFT: the capability (mesh) -->
+    <div class="glass glass-blue" style="flex:1;padding:28px 32px;display:flex;flex-direction:column;align-items:center">
+      <div style="align-self:flex-start">
+        <div class="panel-cap" style="color:var(--blue)">The capability — a mesh</div>
+        <div class="panel-sub">Open transport: no allowlist, no fixed routes</div>
+      </div>
+      <svg width="540" height="430" viewBox="0 0 540 430" style="margin-top:6px">
+        <!-- all edges -->
+        <g stroke="#4285F4" stroke-width="2.5" opacity="0.85">
+          <line x1="270" y1="80" x2="120" y2="235"/>
+          <line x1="270" y1="80" x2="420" y2="235"/>
+          <line x1="120" y1="235" x2="420" y2="235"/>
+          <line x1="270" y1="80" x2="270" y2="350"/>
+          <line x1="120" y1="235" x2="270" y2="350"/>
+          <line x1="420" y1="235" x2="270" y2="350"/>
+        </g>
+        <g font-family="Google Sans" font-size="17" font-weight="700" text-anchor="middle">
+          <circle cx="270" cy="80" r="48" fill="#fff" stroke="#4285F4" stroke-width="3"/><text x="270" y="86" fill="#4285F4">Planner</text>
+          <circle cx="120" cy="235" r="48" fill="#fff" stroke="#34A853" stroke-width="3"/><text x="120" y="241" fill="#34A853">Simulator</text>
+          <circle cx="420" cy="235" r="48" fill="#fff" stroke="#FBBC04" stroke-width="3"/><text x="420" y="241" fill="#E37400">Runner</text>
+          <circle cx="270" cy="350" r="48" fill="#fff" stroke="#EA4335" stroke-width="3"/><text x="270" y="356" fill="#EA4335">Telemetry</text>
+        </g>
+      </svg>
+      <div class="tag" style="background:rgba(66,133,244,.12);color:var(--blue);margin-top:4px">Any agent ↔ any agent · discovered via the gateway catalog</div>
+    </div>
+
+    <!-- RIGHT: how it's actually used (pipeline) -->
+    <div class="glass" style="flex:1;padding:28px 32px;display:flex;flex-direction:column;align-items:center;background:var(--g50)">
+      <div style="align-self:flex-start">
+        <div class="panel-cap" style="color:var(--g800)">How it's actually used — a pipeline</div>
+        <div class="panel-sub">Disciplined into a directed workflow by prompts</div>
+      </div>
+      <svg width="540" height="430" viewBox="0 0 540 430" style="margin-top:6px">
+        <defs><marker id="ah" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#5F6368"/></marker></defs>
+        <!-- directed edges -->
+        <line x1="270" y1="118" x2="270" y2="182" stroke="#5F6368" stroke-width="3" marker-end="url(#ah)"/>
+        <line x1="270" y1="278" x2="270" y2="312" stroke="#5F6368" stroke-width="3" marker-end="url(#ah)"/>
+        <g font-family="Google Sans" font-size="17" font-weight="700" text-anchor="middle">
+          <circle cx="270" cy="78" r="46" fill="#fff" stroke="#4285F4" stroke-width="3"/><text x="270" y="84" fill="#4285F4">Planner</text>
+          <circle cx="270" cy="230" r="46" fill="#fff" stroke="#34A853" stroke-width="3"/><text x="270" y="236" fill="#34A853">Simulator</text>
+          <g>
+            <circle cx="200" cy="362" r="40" fill="#fff" stroke="#FBBC04" stroke-width="3"/><text x="200" y="368" fill="#E37400">Runner</text>
+            <circle cx="290" cy="362" r="40" fill="#fff" stroke="#FBBC04" stroke-width="2.5" opacity="0.55"/>
+            <circle cx="340" cy="362" r="40" fill="#fff" stroke="#FBBC04" stroke-width="2" opacity="0.3"/>
+          </g>
+          <text x="270" y="150" font-size="14" font-weight="500" fill="#5F6368">plans, then asks to run</text>
+          <text x="270" y="304" font-size="14" font-weight="500" fill="#5F6368">broadcasts ticks to 1,000s</text>
+        </g>
+      </svg>
+      <div class="tag" style="background:var(--g200);color:var(--g600);margin-top:4px">Real edges in code: simulator → runner (broadcast)</div>
+    </div>
+  </div>
+
+  <div class="glass glass-blue note" style="margin-top:18px;color:var(--blue)">
+    Built for any-to-any — then disciplined into a workflow. The mesh is capability you can grow into, not a constraint.
+  </div>
+
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+</body>
+</html>

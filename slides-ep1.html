@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Race Condition — Episode 1 Slides</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--purple:#9334E6;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:#DADCE0;color:var(--g800);padding:40px 0}
+.deck-label{width:1920px;margin:0 auto;padding:10px 4px;font-size:22px;font-weight:700;color:#202124}
+.deck-label span{font-weight:400;color:#5F6368;font-size:18px}
+.slide{display:flex;flex-direction:column;padding:56px 80px 40px;width:1920px;height:1080px;background:var(--white);margin:0 auto 56px;position:relative;overflow:hidden}
+
+/* shared */
+.g-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);position:relative;overflow:hidden}
+.glass-blue{background:rgba(66,133,244,0.07);border:1px solid rgba(66,133,244,0.18)}
+.glass-green{background:rgba(52,168,83,0.07);border:1px solid rgba(52,168,83,0.18)}
+.glass-red{background:rgba(234,67,53,0.06);border:1px solid rgba(234,67,53,0.14)}
+.glass-yellow{background:rgba(251,188,4,0.07);border:1px solid rgba(251,188,4,0.18)}
+.glass-purple{background:rgba(147,52,230,0.06);border:1px solid rgba(147,52,230,0.16)}
+.section-tag{font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+h1{font-size:108px;font-weight:700;line-height:1.05;letter-spacing:-2px}
+h2{font-size:52px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:10px}
+h3{font-size:28px;font-weight:400;color:var(--g600)}
+.pill{display:inline-block;padding:6px 16px;border-radius:18px;font-size:16px;font-weight:500}
+.row{display:flex;gap:32px;align-items:stretch}
+code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8px;border-radius:5px}
+.credit{position:absolute;bottom:28px;right:56px;font-size:15px;color:var(--g600);font-weight:500}
+.arrow-down{font-size:30px;color:var(--g600);text-align:center;line-height:1}
+.cover{align-items:center;justify-content:center;text-align:center}
+
+/* layer card */
+.layer{display:flex;align-items:center;gap:28px;padding:26px 36px;border-radius:18px}
+.layer .ic{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
+.layer .ttl{font-size:30px;font-weight:700}
+.layer .sub{font-size:20px;color:var(--g600);margin-top:2px}
+.layer .path{margin-left:auto;font-family:var(--mono);font-size:18px;color:var(--g600);background:var(--g50);padding:8px 14px;border-radius:8px}
+
+/* big two-col compare */
+.compare{flex:1;padding:40px 44px;border-radius:24px;display:flex;flex-direction:column}
+.compare .cap{font-size:34px;font-weight:700;margin-bottom:18px}
+.compare li{font-size:23px;line-height:1.9;list-style:none;display:flex;gap:12px;align-items:flex-start}
+.compare li::before{content:'';width:9px;height:9px;border-radius:50%;margin-top:13px;flex-shrink:0;background:currentColor;opacity:.65}
+
+/* tri cards (tried/problem/solution) */
+.tri{flex:1;padding:36px 40px;border-radius:24px;display:flex;flex-direction:column}
+.tri .k{font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.tri .v{font-size:30px;font-weight:700;line-height:1.25}
+.tri .d{font-size:21px;color:var(--g600);margin-top:14px;line-height:1.5}
+
+/* json agent card */
+.jcard{flex:1;border-radius:20px;overflow:hidden;border:1px solid var(--g200)}
+.jcard .hd{padding:16px 28px;font-size:22px;font-weight:700;color:var(--white);display:flex;justify-content:space-between;align-items:center}
+.jcard .bd{padding:28px;font-family:var(--mono);font-size:21px;line-height:2;color:var(--g800);background:var(--g50)}
+.jkey{color:var(--g600)}
+.jhi{background:var(--yellow);color:#5f4b00;padding:2px 8px;border-radius:6px;font-weight:700}
+
+/* why-adk rows */
+.adk-item{display:flex;align-items:center;gap:24px;padding:22px 32px;border-radius:16px;background:var(--g50)}
+.adk-item .n{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.adk-item .t{font-size:26px;font-weight:500}
+.adk-item .t b{font-weight:700}
+
+/* concept cards */
+.concept{flex:1;padding:40px;border-radius:22px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.concept .ic{font-size:56px;margin-bottom:18px}
+.concept .t{font-size:30px;font-weight:700;margin-bottom:10px}
+.concept .d{font-size:20px;color:var(--g600);line-height:1.5}
+
+/* prompt stack */
+.pstep{padding:24px 36px;border-radius:16px;display:flex;align-items:center;gap:24px}
+.pstep .lbl{font-size:30px;font-weight:700}
+.pstep .meta{margin-left:auto;font-size:19px;font-weight:600;padding:6px 16px;border-radius:16px}
+
+/* big bullets (vision / next) */
+.bigbullet{display:flex;align-items:center;gap:24px;padding:26px 36px;border-radius:18px;background:var(--g50);font-size:30px;font-weight:500}
+.bigbullet .ic{font-size:36px}
+.codepath{font-family:var(--mono);font-size:19px;color:var(--g600);background:var(--g50);padding:14px 22px;border-radius:12px;display:inline-block}
+
+@media print{.deck-label{display:none}.slide{margin:0;page-break-after:always}body{padding:0;background:#fff}}
+</style>
+</head>
+<body>
+
+<!-- ============ SLIDE 1 — TITLE (Scene 1, 0:00) ============ -->
+<div class="deck-label">Slide 1 — Title card <span>· Scene 1 cold open (over demo b-roll), ~0:30</span></div>
+<div class="slide cover">
+  <div class="g-bar" style="width:360px;margin-bottom:48px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="font-size:22px">Hands On AI · Episode 1</div>
+  <h1>Race&nbsp;Condition</h1>
+  <h3 style="font-size:40px;color:var(--g800);font-weight:500;margin-top:18px">How 1,000 AI Agents Run a Marathon</h3>
+  <div style="font-size:24px;color:var(--g600);margin-top:28px">Architecture · How the agents are built</div>
+</div>
+
+<!-- ============ SLIDE 2 — FOUR LAYERS (Scene 4, ~2:00) ============ -->
+<div class="deck-label">Slide 2 — Four-layer architecture <span>· Scene 4, when Casey names the layers (~2:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">System Architecture</div>
+    <h2>Four layers — best tool for each job</h2>
+    <h3>A polyglot stack, on purpose</h3>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center">
+    <div class="glass glass-blue layer">
+      <div class="ic" style="background:rgba(66,133,244,.14)">🖥️</div>
+      <div><div class="ttl" style="color:var(--blue)">Frontend</div><div class="sub">Angular 21 + Three.js — 3D Las Vegas, real-time</div></div>
+      <div class="path">web/frontend/</div>
+    </div>
+    <div class="arrow-down">↓ &nbsp;WebSocket · protobuf</div>
+    <div class="glass glass-green layer">
+      <div class="ic" style="background:rgba(52,168,83,.14)">🚦</div>
+      <div><div class="ttl" style="color:var(--green)">Gateway</div><div class="sub">Go — the high-concurrency traffic cop</div></div>
+      <div class="path">cmd/gateway/</div>
+    </div>
+    <div class="arrow-down">↓ &nbsp;A2A · HTTP + Redis pub/sub</div>
+    <div class="glass glass-yellow layer">
+      <div class="ic" style="background:rgba(251,188,4,.16)">🧠</div>
+      <div><div class="ttl" style="color:#E37400">Agents</div><div class="sub">Python + Google ADK — where all the AI lives</div></div>
+      <div class="path">agents/</div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="glass layer" style="background:var(--g50)">
+      <div class="ic" style="background:var(--g200)">🗄️</div>
+      <div><div class="ttl" style="color:var(--g800)">Infrastructure</div><div class="sub">Redis · Pub/Sub · PostgreSQL — sessions, fan-out, memory</div></div>
+      <div class="path">docker-compose.yml</div>
+    </div>
+  </div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 3 — SYSTEM DIAGRAM (Scene 5, ~4:30) ============ -->
+<div class="deck-label">Slide 3 — System architecture diagram <span>· Scene 5, replaces the mermaid screen-share (~4:30)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">One Source of Truth</div>
+    <h2>How everything fits together</h2>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:18px;justify-content:center;margin-top:10px">
+    <!-- browser -->
+    <div class="glass glass-blue" style="padding:26px 36px">
+      <div style="font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px">In the Browser</div>
+      <div class="row">
+        <div class="glass" style="flex:1;padding:18px 24px;font-size:23px;font-weight:600;background:rgba(66,133,244,.1)">Simulation UI</div>
+        <div class="glass" style="flex:1;padding:18px 24px;font-size:23px;font-weight:600;background:rgba(66,133,244,.1)">Admin dashboards</div>
+        <div class="glass" style="flex:1;padding:18px 24px;font-size:23px;font-weight:600;background:rgba(66,133,244,.1)">Telemetry view</div>
+      </div>
+    </div>
+    <div class="arrow-down">↓ &nbsp;WebSocket (protobuf envelope)</div>
+    <!-- gateway -->
+    <div class="glass glass-green" style="padding:24px 36px;text-align:center">
+      <span style="font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green)">Go Gateway</span>
+      <span style="font-size:24px;font-weight:500;color:var(--g600);margin-left:16px">central message hub · reads dispatch mode · routes A2A</span>
+    </div>
+    <div class="arrow-down">↓ &nbsp;HTTP (callable) &nbsp;·&nbsp; Redis pub/sub (subscriber)</div>
+    <!-- agents -->
+    <div class="glass glass-yellow" style="padding:26px 36px">
+      <div style="font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#E37400;margin-bottom:12px">Python ADK Agents</div>
+      <div class="row">
+        <div class="glass" style="flex:1;padding:18px 24px;font-size:23px;font-weight:600;background:rgba(251,188,4,.12)">Planner</div>
+        <div class="glass" style="flex:1;padding:18px 24px;font-size:23px;font-weight:600;background:rgba(251,188,4,.12)">Simulator</div>
+        <div class="glass" style="flex:1;padding:18px 24px;font-size:23px;font-weight:600;background:rgba(251,188,4,.12)">Runners ×1,000</div>
+      </div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <!-- infra -->
+    <div class="glass glass-purple" style="padding:22px 36px;text-align:center">
+      <span style="font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--purple)">Infrastructure</span>
+      <span style="font-size:24px;font-weight:500;color:var(--g600);margin-left:16px">Redis (sessions + fan-out) · Pub/Sub (telemetry) · PostgreSQL</span>
+    </div>
+  </div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 4 — TWO DISPATCH MODES (transition, Scene 5) ============ -->
+<div class="deck-label">Slide 4 — "Two dispatch modes" transition card <span>· Scene 5 → 6 transition</span></div>
+<div class="slide cover">
+  <div class="g-bar" style="width:300px;margin-bottom:44px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="font-size:20px">How the gateway talks to agents</div>
+  <h1 style="font-size:88px">Two Dispatch Modes</h1>
+  <div style="display:flex;gap:24px;margin-top:40px">
+    <span class="pill" style="background:rgba(66,133,244,.12);color:var(--blue);font-size:26px;padding:12px 32px">Subscriber</span>
+    <span class="pill" style="background:rgba(52,168,83,.12);color:var(--green);font-size:26px;padding:12px 32px">Callable</span>
+  </div>
+</div>
+
+<!-- ============ SLIDE 5 — SUBSCRIBER VS CALLABLE (Scene 6) ============ -->
+<div class="deck-label">Slide 5 — Subscriber vs Callable comparison <span>· Scene 6 (~6:30)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Dispatch Modes</div>
+    <h2>Two ways agents receive work</h2>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px">
+    <div class="glass glass-blue compare" style="color:var(--blue)">
+      <div class="cap">Subscriber</div>
+      <ul style="color:var(--g800)">
+        <li>Long-lived <b style="color:var(--blue)">Redis pub/sub</b> subscription</li>
+        <li>Wakes on every simulation tick</li>
+        <li><b style="color:var(--blue)">Sub-millisecond</b> — no HTTP latency</li>
+        <li>For the <b>runners</b> — 1,000s at once</li>
+        <li>Always at least one hot instance</li>
+      </ul>
+      <div style="margin-top:auto;font-size:20px;color:var(--blue);font-weight:600;padding-top:20px">The "doers" — the hot path</div>
+    </div>
+    <div class="glass glass-green compare" style="color:var(--green)">
+      <div class="cap">Callable</div>
+      <ul style="color:var(--g800)">
+        <li>Standard <b style="color:var(--green)">A2A over HTTP</b></li>
+        <li>Invoked on demand</li>
+        <li><b style="color:var(--green)">Scales to zero</b> — no idle CPU cost</li>
+        <li>For the <b>planner &amp; simulator</b></li>
+        <li>Runs on Agent Runtime</li>
+      </ul>
+      <div style="margin-top:auto;font-size:20px;color:var(--green);font-weight:600;padding-top:20px">The "thinkers" — occasional work</div>
+    </div>
+  </div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 6 — WAR STORY (Scene 7, ~8:30) ============ -->
+<div class="deck-label">Slide 6 — War story before/after <span>· Scene 7, the HTTP→Redis story (~9:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">A Scaling Decision</div>
+    <h2>Why we threw out HTTP</h2>
+  </div>
+  <div class="row" style="flex:1;margin-top:28px;align-items:stretch">
+    <div class="glass tri" style="background:var(--g50)">
+      <div class="k" style="color:var(--g600)">Tried</div>
+      <div class="v" style="color:var(--g800)">HTTP A2A</div>
+      <div class="d">The default way A2A agents talk — start with the standard.</div>
+    </div>
+    <div class="arrow-down" style="align-self:center;font-size:44px">→</div>
+    <div class="glass glass-red tri">
+      <div class="k" style="color:var(--red)">Problem</div>
+      <div class="v" style="color:var(--red)">The network is the bottleneck</div>
+      <div class="d">1,000 sessions need responses in &lt;10s. HTTP overhead per call won't scale.</div>
+    </div>
+    <div class="arrow-down" style="align-self:center;font-size:44px">→</div>
+    <div class="glass glass-green tri">
+      <div class="k" style="color:var(--green)">Solution</div>
+      <div class="v" style="color:var(--green)">Redis pub/sub</div>
+      <div class="d">Memory Store — one broadcast reaches every agent. 100,000+ messages/node.</div>
+    </div>
+  </div>
+  <div class="glass glass-blue" style="margin-top:20px;padding:18px 32px;text-align:center;font-size:24px;font-weight:600;color:var(--blue)">
+    Target: respond to 1,000 agents in under 10 seconds &nbsp;·&nbsp; sub-millisecond fan-out
+  </div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 7 — AGENT CARD (Scene 8, ~11:00) ============ -->
+<div class="deck-label">Slide 7 — Agent card (planner vs runner) <span>· Scene 8 (~11:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">A2A Protocol</div>
+    <h2>Agent card = an agent's public identity</h2>
+    <h3>The gateway reads the <code>dispatch</code> extension to decide how to talk to it</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px">
+    <div class="jcard">
+      <div class="hd" style="background:var(--blue)"><span>Planner</span><span style="font-size:17px;font-weight:500">localhost:9105</span></div>
+      <div class="bd">
+        <div><span class="jkey">"name":</span> "planner"</div>
+        <div><span class="jkey">"description":</span> "Marathon route &amp; event planning"</div>
+        <div><span class="jkey">"skills":</span> ["create_simulation_plan", …]</div>
+        <div><span class="jkey">"dispatch":</span> <span class="jhi">"callable"</span></div>
+      </div>
+    </div>
+    <div class="jcard">
+      <div class="hd" style="background:var(--green)"><span>Runner</span><span style="font-size:17px;font-weight:500">localhost:9108</span></div>
+      <div class="bd">
+        <div><span class="jkey">"name":</span> "runner"</div>
+        <div><span class="jkey">"description":</span> "A single marathon runner"</div>
+        <div><span class="jkey">"skills":</span> ["advance_tick", …]</div>
+        <div><span class="jkey">"dispatch":</span> <span class="jhi">"subscriber"</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 8 — WHY ADK (Scene 10, ~14:00) ============ -->
+<div class="deck-label">Slide 8 — "Why ADK?" <span>· Scene 10 (~14:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Why an Agent Framework?</div>
+    <h2>Don't build the plumbing. Build the intelligence.</h2>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center">
+    <div class="adk-item"><div class="n" style="background:rgba(66,133,244,.14);color:var(--blue)">♻️</div><div class="t"><b>LLM lifecycle management</b> — retries, sessions, the model call itself</div></div>
+    <div class="adk-item"><div class="n" style="background:rgba(234,67,53,.12);color:var(--red)">💾</div><div class="t"><b>Sessions that live across requests</b></div></div>
+    <div class="adk-item"><div class="n" style="background:rgba(251,188,4,.16);color:#E37400">🪝</div><div class="t"><b>Callbacks</b> — intercept model &amp; tool calls</div></div>
+    <div class="adk-item"><div class="n" style="background:rgba(52,168,83,.14);color:var(--green)">🔗</div><div class="t"><b>A2A discovery</b> — agents find each other, no hard-coding</div></div>
+    <div class="adk-item"><div class="n" style="background:rgba(147,52,230,.12);color:var(--purple)">📊</div><div class="t"><b>Telemetry</b> — a dashboard you can subscribe to</div></div>
+  </div>
+  <div class="glass glass-blue" style="padding:16px 32px;text-align:center;font-size:24px;font-weight:600;color:var(--blue)">Built in weeks, not months.</div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 9 — RESILIENT MODEL (Scene 11, ~16:00) ============ -->
+<div class="deck-label">Slide 9 — resilient_model <span>· Scene 11 (~16:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Reliability</div>
+    <h2><code style="font-size:46px;background:none;padding:0">resilient_model</code></h2>
+    <h3>Why a demo built on AI still feels rock-solid</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px">
+    <div class="glass glass-blue concept"><div class="ic">🔁</div><div class="t" style="color:var(--blue)">Retry</div><div class="d">Auto-retries transient failures — like 429 quota errors</div></div>
+    <div class="glass glass-yellow concept"><div class="ic">📈</div><div class="t" style="color:#E37400">Exponential backoff</div><div class="d">Waits longer between each attempt — lets the network recover</div></div>
+    <div class="glass glass-green concept"><div class="ic">🎲</div><div class="t" style="color:var(--green)">Jitter</div><div class="d">Small random variation so retries don't sync up</div></div>
+  </div>
+  <div style="margin-top:22px;text-align:center"><span class="codepath">Wraps the Google Gen AI SDK · <strong>agents/utils/retry.py</strong></span></div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 10 — GLOBAL_GEMINI (Scene 12, ~19:30) ============ -->
+<div class="deck-label">Slide 10 — global_gemini problem/solution <span>· Scene 12 (~19:30)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Preview Models</div>
+    <h2><code style="font-size:46px;background:none;padding:0">global_gemini</code></h2>
+    <h3>Targeting the newest models on Agent Runtime</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px">
+    <div class="glass glass-red tri">
+      <div class="k" style="color:var(--red)">Problem</div>
+      <div class="v" style="color:var(--red)">Preview models live only in the <code style="font-size:24px">global</code> region</div>
+      <div class="d">Agent Runtime has no easy way to target Gemini 3 Pro / Flash Preview.</div>
+    </div>
+    <div class="arrow-down" style="align-self:center;font-size:44px">→</div>
+    <div class="glass glass-green tri">
+      <div class="k" style="color:var(--green)">Solution</div>
+      <div class="v" style="color:var(--green)">Pass a custom model object to ADK</div>
+      <div class="d">A small wrapper points at the global endpoint — newest models, everywhere.</div>
+    </div>
+  </div>
+  <div style="margin-top:22px;text-align:center"><span class="codepath"><strong>agents/utils/global_gemini.py</strong></span></div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 11 — PROMPT ASSEMBLY (Scene 13, ~21:30) ============ -->
+<div class="deck-label">Slide 11 — Prompt assembly order <span>· Scene 13 (~22:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Context Engineering</div>
+    <h2>How ADK builds the prompt</h2>
+    <h3>Put the unchanging parts first — they get cached</h3>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:14px;justify-content:center">
+    <div class="glass glass-blue pstep">
+      <div class="lbl" style="color:var(--blue)">1 · Static instructions</div>
+      <div class="meta" style="background:rgba(66,133,244,.14);color:var(--blue)">✓ cached server-side</div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="glass pstep" style="background:var(--g50)">
+      <div class="lbl" style="color:var(--g800)">2 · Dynamic instructions</div>
+      <div class="meta" style="background:var(--g200);color:var(--g600)">session-state variables</div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="glass pstep" style="background:var(--g50)">
+      <div class="lbl" style="color:var(--g800)">3 · Session events</div>
+      <div class="meta" style="background:var(--g200);color:var(--g600)">history</div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="glass pstep" style="background:var(--g50)">
+      <div class="lbl" style="color:var(--g800)">4 · User message</div>
+      <div class="meta" style="background:var(--g200);color:var(--g600)">the new turn</div>
+    </div>
+  </div>
+  <div class="glass glass-green" style="padding:14px 32px;text-align:center;font-size:22px;font-weight:600;color:var(--green)">Static instructions cache by the 3rd–4th turn → faster + cheaper</div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 12 — SKILLS (Scene 14, ~24:00) ============ -->
+<div class="deck-label">Slide 12 — Skills lazy-loading <span>· Scene 14 (~24:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Context Window Management</div>
+    <h2>Skills = lazy-loaded context + tools</h2>
+    <h3>Load capability only when the agent needs it</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px;align-items:center">
+    <div class="glass glass-blue" style="flex:1;padding:40px;text-align:center">
+      <div style="font-size:52px;margin-bottom:14px">🤖</div>
+      <div style="font-size:28px;font-weight:700;color:var(--blue)">Agent</div>
+      <div style="font-size:20px;color:var(--g600);margin-top:8px">lean context window</div>
+    </div>
+    <div style="flex:0 0 auto;text-align:center">
+      <div style="font-size:40px;color:var(--g600)">→</div>
+      <div style="font-family:var(--mono);font-size:18px;color:var(--g600);margin-top:6px">load_skill()</div>
+      <div style="font-size:16px;color:var(--g600);margin-top:4px">on demand</div>
+    </div>
+    <div class="glass glass-green" style="flex:1.4;padding:36px 40px">
+      <div style="font-family:var(--mono);font-size:20px;color:var(--green);font-weight:700;margin-bottom:16px">skill.markdown</div>
+      <div class="bigbullet" style="background:rgba(52,168,83,.08);font-size:24px;margin-bottom:12px"><span class="ic">📋</span>Instructions — when &amp; how to use it</div>
+      <div class="bigbullet" style="background:rgba(52,168,83,.08);font-size:24px"><span class="ic">🛠️</span>Tools — bundled, loaded with the skill</div>
+    </div>
+  </div>
+  <div style="margin-top:22px;text-align:center"><span class="codepath"><strong>agents/planner/skills/gis-spatial-engineering/</strong></span></div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 13 — MESH NETWORK (Scene 15, ~28:00) ============ -->
+<div class="deck-label">Slide 13 — Mesh network diagram <span>· Scene 15 (~30:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Agent Communication</div>
+    <h2>A mesh, not a directed graph</h2>
+    <h3>Any agent can reach any other — <code>call_agent()</code> wraps A2A and hides the networking</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:10px;align-items:center">
+    <!-- mesh -->
+    <div class="glass glass-blue" style="flex:1;padding:24px;display:flex;flex-direction:column;align-items:center">
+      <div style="font-size:20px;font-weight:700;color:var(--blue);margin-bottom:8px">Mesh — what we built</div>
+      <svg width="520" height="420" viewBox="0 0 520 420">
+        <line x1="260" y1="80" x2="120" y2="240" stroke="#4285F4" stroke-width="2.5"/>
+        <line x1="260" y1="80" x2="400" y2="240" stroke="#4285F4" stroke-width="2.5"/>
+        <line x1="120" y1="240" x2="400" y2="240" stroke="#4285F4" stroke-width="2.5"/>
+        <line x1="260" y1="80" x2="260" y2="340" stroke="#4285F4" stroke-width="2.5"/>
+        <line x1="120" y1="240" x2="260" y2="340" stroke="#4285F4" stroke-width="2.5"/>
+        <line x1="400" y1="240" x2="260" y2="340" stroke="#4285F4" stroke-width="2.5"/>
+        <g font-family="Google Sans" font-size="17" font-weight="700" text-anchor="middle">
+          <circle cx="260" cy="80" r="46" fill="#fff" stroke="#4285F4" stroke-width="3"/><text x="260" y="86" fill="#4285F4">Planner</text>
+          <circle cx="120" cy="240" r="46" fill="#fff" stroke="#34A853" stroke-width="3"/><text x="120" y="246" fill="#34A853">Simulator</text>
+          <circle cx="400" cy="240" r="46" fill="#fff" stroke="#FBBC04" stroke-width="3"/><text x="400" y="246" fill="#E37400">Runner</text>
+          <circle cx="260" cy="340" r="46" fill="#fff" stroke="#EA4335" stroke-width="3"/><text x="260" y="346" fill="#EA4335">Telemetry</text>
+        </g>
+      </svg>
+    </div>
+    <!-- directed graph -->
+    <div class="glass" style="flex:1;padding:24px;display:flex;flex-direction:column;align-items:center;background:var(--g50)">
+      <div style="font-size:20px;font-weight:700;color:var(--g600);margin-bottom:8px">Directed graph — the usual way</div>
+      <svg width="520" height="420" viewBox="0 0 520 420">
+        <defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#9AA0A6"/></marker></defs>
+        <line x1="260" y1="110" x2="260" y2="190" stroke="#9AA0A6" stroke-width="2.5" marker-end="url(#ah)"/>
+        <line x1="260" y1="270" x2="260" y2="320" stroke="#9AA0A6" stroke-width="2.5" marker-end="url(#ah)"/>
+        <g font-family="Google Sans" font-size="17" font-weight="700" text-anchor="middle" fill="#5F6368">
+          <circle cx="260" cy="80" r="42" fill="#fff" stroke="#9AA0A6" stroke-width="2.5"/><text x="260" y="86">Planner</text>
+          <circle cx="260" cy="230" r="42" fill="#fff" stroke="#9AA0A6" stroke-width="2.5"/><text x="260" y="236">Simulator</text>
+          <circle cx="260" cy="360" r="42" fill="#fff" stroke="#9AA0A6" stroke-width="2.5"/><text x="260" y="366">Runner</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 14 — THE VISION (Scene 16, ~31:30) ============ -->
+<div class="deck-label">Slide 14 — "The vision" <span>· Scene 16, frames the future-agents idea (~32:00)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Where This Could Go</div>
+    <h2>What if every stakeholder were an agent?</h2>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:18px;justify-content:center">
+    <div class="bigbullet" style="background:rgba(66,133,244,.07)"><span class="ic">🚦</span><div><b>Public-safety agents</b> — keep runners safe from traffic, manage crossings</div></div>
+    <div class="bigbullet" style="background:rgba(251,188,4,.08)"><span class="ic">☕</span><div><b>Business agents</b> — a closed street hurts the drive-through, helps the coffee shop</div></div>
+    <div class="bigbullet" style="background:rgba(234,67,53,.07)"><span class="ic">🏃</span><div><b>Runners with identity</b> — some follow the rules, some try to cheat… and get caught</div></div>
+  </div>
+  <div class="glass glass-blue" style="padding:16px 32px;text-align:center;font-size:23px;font-weight:600;color:var(--blue)">With an LLM in the mix, you get emergent, unscripted behavior.</div>
+  <div class="credit">Race Condition · Episode 1</div>
+</div>
+
+<!-- ============ SLIDE 15 — NEXT EPISODE (Scene 17, outro) ============ -->
+<div class="deck-label">Slide 15 — Next Episode tease <span>· Scene 17 outro</span></div>
+<div class="slide cover">
+  <div class="g-bar" style="width:300px;margin-bottom:40px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="font-size:20px">Coming Next</div>
+  <h1 style="font-size:80px;margin-bottom:36px">Episode 2</h1>
+  <div style="display:flex;flex-direction:column;gap:16px;width:1100px">
+    <div class="bigbullet" style="justify-content:center"><span class="ic">⚖️</span>When to use AI — and when to skip the LLM entirely</div>
+    <div class="bigbullet" style="justify-content:center"><span class="ic">⚡</span>Scaling to 1,000 simultaneous sessions</div>
+    <div class="bigbullet" style="justify-content:center"><span class="ic">🛠️</span>The dev workflow that shipped it in weeks</div>
+  </div>
+  <div style="margin-top:40px;font-family:var(--mono);font-size:20px;color:var(--g600)">github.com/ · Race Condition · open source</div>
+</div>
+
+</body>
+</html>
