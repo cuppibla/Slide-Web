@@ -40,16 +40,16 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
 .layer .path{margin-left:auto;font-family:var(--mono);font-size:18px;color:var(--g600);background:var(--g50);padding:8px 14px;border-radius:8px}
 
 /* big two-col compare */
-.compare{flex:1;padding:40px 44px;border-radius:24px;display:flex;flex-direction:column}
-.compare .cap{font-size:48px;font-weight:700;margin-bottom:24px}
-.compare li{font-size:32px;line-height:1.65;list-style:none;display:flex;gap:14px;align-items:flex-start;margin:4px 0}
-.compare li::before{content:'';width:11px;height:11px;border-radius:50%;margin-top:18px;flex-shrink:0;background:currentColor;opacity:.65}
+.compare{flex:1;padding:56px 60px;border-radius:24px;display:flex;flex-direction:column}
+.compare .cap{font-size:42px;font-weight:700;margin-bottom:28px}
+.compare li{font-size:26px;line-height:1.7;list-style:none;display:flex;gap:14px;align-items:flex-start;margin:8px 0}
+.compare li::before{content:'';width:10px;height:10px;border-radius:50%;margin-top:16px;flex-shrink:0;background:currentColor;opacity:.65}
 
 /* tri cards (tried/problem/solution) */
-.tri{flex:1;padding:36px 40px;border-radius:24px;display:flex;flex-direction:column}
-.tri .k{font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
-.tri .v{font-size:44px;font-weight:700;line-height:1.2}
-.tri .d{font-size:28px;color:var(--g600);margin-top:20px;line-height:1.45}
+.tri{flex:1;padding:48px 44px;border-radius:24px;display:flex;flex-direction:column;justify-content:center}
+.tri .k{font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
+.tri .v{font-size:36px;font-weight:700;line-height:1.2}
+.tri .d{font-size:22px;color:var(--g600);margin-top:18px;line-height:1.5}
 
 /* json agent card */
 .jcard{flex:1;border-radius:20px;overflow:hidden;border:1px solid var(--g200)}
@@ -66,9 +66,9 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
 
 /* concept cards */
 .concept{flex:1;padding:40px;border-radius:22px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.concept .ic{font-size:68px;margin-bottom:22px}
-.concept .t{font-size:36px;font-weight:700;margin-bottom:14px}
-.concept .d{font-size:24px;color:var(--g600);line-height:1.5}
+.concept .ic{font-size:60px;margin-bottom:20px}
+.concept .t{font-size:32px;font-weight:700;margin-bottom:12px}
+.concept .d{font-size:22px;color:var(--g600);line-height:1.5}
 
 /* prompt stack */
 .pstep{padding:24px 36px;border-radius:16px;display:flex;align-items:center;gap:24px}
@@ -196,7 +196,7 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
     <div class="section-tag">Dispatch Modes</div>
     <h2>Two ways agents receive work</h2>
   </div>
-  <div class="row" style="flex:1;margin-top:24px;align-items:center">
+  <div class="row" style="flex:1;margin-top:24px">
     <div class="glass glass-blue compare" style="color:var(--blue)">
       <div class="cap">Subscriber</div>
       <ul style="color:var(--g800)">
@@ -231,7 +231,7 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
     <div class="section-tag">A Scaling Decision</div>
     <h2>Why we threw out HTTP</h2>
   </div>
-  <div class="row" style="flex:1;margin-top:28px;align-items:center">
+  <div class="row" style="flex:1;margin-top:28px;align-items:stretch">
     <div class="glass tri" style="background:var(--g50)">
       <div class="k" style="color:var(--g600)">Tried</div>
       <div class="v" style="color:var(--g800)">HTTP A2A</div>
@@ -316,7 +316,7 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
     <h2><code style="font-size:46px;background:none;padding:0">resilient_model</code></h2>
     <h3>Why a demo built on AI still feels rock-solid</h3>
   </div>
-  <div class="row" style="flex:1;margin-top:24px;align-items:center">
+  <div class="row" style="flex:1;margin-top:24px">
     <div class="glass glass-blue concept"><div class="ic">🔁</div><div class="t" style="color:var(--blue)">Retry</div><div class="d">Auto-retries transient failures — like 429 quota errors</div></div>
     <div class="glass glass-yellow concept"><div class="ic">📈</div><div class="t" style="color:#E37400">Exponential backoff</div><div class="d">Waits longer between each attempt — lets the network recover</div></div>
     <div class="glass glass-green concept"><div class="ic">🎲</div><div class="t" style="color:var(--green)">Jitter</div><div class="d">Small random variation so retries don't sync up</div></div>
@@ -334,7 +334,7 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
     <h2><code style="font-size:46px;background:none;padding:0">global_gemini</code></h2>
     <h3>Targeting the newest models on Agent Runtime</h3>
   </div>
-  <div class="row" style="flex:1;margin-top:24px;align-items:center">
+  <div class="row" style="flex:1;margin-top:24px">
     <div class="glass glass-red tri">
       <div class="k" style="color:var(--red)">Problem</div>
       <div class="v" style="color:var(--red)">Preview models live only in the <code style="font-size:24px">global</code> region</div>
