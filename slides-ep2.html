@@ -104,8 +104,8 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
 <div class="slide cover">
   <div class="g-bar" style="width:360px;margin-bottom:48px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
   <div class="section-tag" style="font-size:22px">Hands On AI · Episode 2</div>
-  <h1>1,000 AI Agents.<br>Almost 0 Tokens.</h1>
-  <h3 style="font-size:34px;color:var(--g800);font-weight:500;margin-top:24px">When to skip the LLM — and what it saves</h3>
+  <h1>1,000 AI Agents<br>That Don't Call the LLM</h1>
+  <h3 style="font-size:38px;color:var(--blue);font-weight:700;margin-top:26px">Plan with AI · Run with Code</h3>
 </div>
 
 <!-- ============ SLIDE 2 — WHY NOT GOOGLE MAPS ============ -->
@@ -316,26 +316,30 @@ code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8
   <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
   <div style="margin-top:30px">
     <div class="section-tag">Where the Tokens Actually Go</div>
-    <h2>350K tokens — almost all of it is the planner</h2>
-    <h3>One-time, upfront, to design the route. The 1,000 runners add almost nothing.</h3>
+    <h2>The AI plans once. The code runs 1,000 times.</h2>
+    <h3>Every token comes from planning the race upfront — not from running it</h3>
   </div>
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:40px">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:36px">
     <div class="tokbar">
-      <div class="seg" style="flex:94;background:var(--blue)"><div class="bt">Planner</div><div class="bs">~one-time route design</div></div>
-      <div class="seg" style="flex:6;background:var(--green)"><div class="bt">Rest</div></div>
+      <div class="seg" style="flex:99;background:var(--blue)"><div class="bt">Planner — route + evaluation</div><div class="bs">runs once, upfront</div></div>
+      <div class="seg" style="flex:1;background:var(--green);min-width:4px"></div>
     </div>
     <div class="row" style="align-items:stretch">
-      <div class="glass glass-blue" style="flex:1;padding:32px 36px">
-        <div style="font-size:26px;font-weight:700;color:var(--blue);margin-bottom:10px">The planner · ~95%</div>
-        <div style="font-size:22px;color:var(--g600);line-height:1.5">Runs <b>once</b>, before the race, to plan the route. Fixed cost — doesn't grow.</div>
+      <div class="glass glass-blue" style="flex:1.2;padding:30px 34px">
+        <div style="font-size:26px;font-weight:700;color:var(--blue);margin-bottom:8px">Planner · ~353,000 tokens</div>
+        <div style="font-size:21px;color:var(--g600);line-height:1.45">Reasons through the race plan <b>once</b>. (The route <em>math</em> is deterministic code — the LLM just decides.)</div>
       </div>
-      <div class="glass glass-green" style="flex:1;padding:32px 36px">
-        <div style="font-size:26px;font-weight:700;color:var(--green);margin-bottom:10px">1,000 runners + simulator · ~0%</div>
-        <div style="font-size:22px;color:var(--g600);line-height:1.5">Autopilot + <code style="font-size:18px">before_model_callback</code> → they never call the model.</div>
+      <div class="glass" style="flex:1;padding:30px 34px;background:var(--g50)">
+        <div style="font-size:26px;font-weight:700;color:var(--g600);margin-bottom:8px">Simulator · ~1,600 tokens</div>
+        <div style="font-size:21px;color:var(--g600);line-height:1.45"><code style="font-size:17px">before_model_callback</code> bypasses the model — this is just overhead.</div>
+      </div>
+      <div class="glass glass-green" style="flex:1;padding:30px 34px">
+        <div style="font-size:26px;font-weight:700;color:var(--green);margin-bottom:8px">1,000 runners · 0 tokens</div>
+        <div style="font-size:21px;color:var(--g600);line-height:1.45">Autopilot — pure heuristics. They <b>never</b> call the model.</div>
       </div>
     </div>
   </div>
-  <div class="glass glass-yellow" style="padding:18px 32px;text-align:center;font-size:26px;font-weight:700;color:#E37400;margin-top:8px">Double the runners → the token count barely moves. <span style="color:var(--g800)">That's the whole trick.</span></div>
+  <div class="glass glass-yellow" style="padding:18px 32px;text-align:center;font-size:26px;font-weight:700;color:#E37400;margin-top:8px">Cost is fixed — 100 agents or 10,000, the token count barely moves. <span style="color:var(--g800)">The AI plans; the code runs.</span></div>
   <div class="credit">Race Condition · Episode 2</div>
 </div>
 
