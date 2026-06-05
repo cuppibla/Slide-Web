@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Race Condition — Episode 2 Slides</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--purple:#9334E6;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:#DADCE0;color:var(--g800);padding:40px 0}
+.deck-label{width:1920px;margin:0 auto;padding:10px 4px;font-size:22px;font-weight:700;color:#202124}
+.deck-label span{font-weight:400;color:#5F6368;font-size:18px}
+.slide{display:flex;flex-direction:column;padding:56px 80px 40px;width:1920px;height:1080px;background:var(--white);margin:0 auto 56px;position:relative;overflow:hidden}
+
+/* shared */
+.g-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);position:relative;overflow:hidden}
+.glass-blue{background:rgba(66,133,244,0.07);border:1px solid rgba(66,133,244,0.18)}
+.glass-green{background:rgba(52,168,83,0.07);border:1px solid rgba(52,168,83,0.18)}
+.glass-red{background:rgba(234,67,53,0.06);border:1px solid rgba(234,67,53,0.14)}
+.glass-yellow{background:rgba(251,188,4,0.07);border:1px solid rgba(251,188,4,0.18)}
+.glass-purple{background:rgba(147,52,230,0.06);border:1px solid rgba(147,52,230,0.16)}
+.section-tag{font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+h1{font-size:108px;font-weight:700;line-height:1.05;letter-spacing:-2px}
+h2{font-size:52px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:10px}
+h3{font-size:28px;font-weight:400;color:var(--g600)}
+.pill{display:inline-block;padding:6px 16px;border-radius:18px;font-size:16px;font-weight:500}
+.row{display:flex;gap:32px;align-items:stretch}
+code{font-family:var(--mono);font-size:18px;background:var(--g100);padding:3px 8px;border-radius:5px}
+.credit{position:absolute;bottom:28px;right:56px;font-size:15px;color:var(--g600);font-weight:500}
+.arrow-down{font-size:30px;color:var(--g600);text-align:center;line-height:1}
+.cover{align-items:center;justify-content:center;text-align:center}
+
+/* tri cards (tried/problem/solution) */
+.tri{flex:1;padding:48px 44px;border-radius:24px;display:flex;flex-direction:column;justify-content:center}
+.tri .k{font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
+.tri .v{font-size:36px;font-weight:700;line-height:1.2}
+.tri .d{font-size:22px;color:var(--g600);margin-top:18px;line-height:1.5}
+
+/* compare cols */
+.compare{flex:1;padding:56px 60px;border-radius:24px;display:flex;flex-direction:column}
+.compare .cap{font-size:42px;font-weight:700;margin-bottom:28px}
+.compare li{font-size:26px;line-height:1.7;list-style:none;display:flex;gap:14px;align-items:flex-start;margin:8px 0}
+.compare li::before{content:'';width:10px;height:10px;border-radius:50%;margin-top:16px;flex-shrink:0;background:currentColor;opacity:.65}
+
+/* concept cards */
+.concept{flex:1;padding:40px;border-radius:22px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.concept .ic{font-size:60px;margin-bottom:20px}
+.concept .t{font-size:32px;font-weight:700;margin-bottom:12px}
+.concept .d{font-size:22px;color:var(--g600);line-height:1.5}
+
+/* big bullets */
+.bigbullet{display:flex;align-items:center;gap:24px;padding:26px 36px;border-radius:18px;background:var(--g50);font-size:30px;font-weight:500}
+.bigbullet .ic{font-size:36px}
+.codepath{font-family:var(--mono);font-size:19px;color:var(--g600);background:var(--g50);padding:14px 22px;border-radius:12px;display:inline-block}
+
+/* dark code block */
+.codeblock{background:#202124;border-radius:16px;padding:32px 40px;font-family:var(--mono);font-size:24px;line-height:1.8;color:#E8EAED}
+.codeblock .cm{color:#9AA0A6}
+.codeblock .kw{color:#8AB4F8}
+.codeblock .st{color:#81C995}
+.codeblock .fn{color:#FDD663}
+
+/* stat tiles */
+.stat{flex:1;border-radius:22px;padding:44px 32px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.stat .num{font-size:84px;font-weight:700;line-height:1}
+.stat .lbl{font-size:22px;color:var(--g600);margin-top:14px;font-weight:500}
+
+/* matrix rows */
+.mrow{display:flex;align-items:center;gap:24px;padding:22px 32px;border-radius:16px;margin-bottom:14px}
+.mrow .mname{font-size:30px;font-weight:700;width:340px;flex-shrink:0}
+.mrow .mwhy{font-size:24px;color:var(--g600);flex:1}
+.mrow .mmark{font-size:34px;flex-shrink:0}
+
+/* step flow (research workflow) */
+.stepcard{flex:1;padding:36px 32px;border-radius:20px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.stepcard .sn{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin-bottom:18px}
+.stepcard .st2{font-size:26px;font-weight:700;margin-bottom:10px}
+.stepcard .sd{font-size:19px;color:var(--g600);line-height:1.45}
+.step-arrow{display:flex;align-items:center;font-size:40px;color:var(--g600)}
+
+/* token bar */
+.tokbar{display:flex;height:120px;border-radius:16px;overflow:hidden;border:1px solid var(--g200)}
+.tokbar .seg{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.tokbar .seg .bt{font-size:30px}
+.tokbar .seg .bs{font-size:18px;font-weight:500;opacity:.9;margin-top:6px}
+
+/* lower-third (overlay band) */
+.lt-stage{width:1920px;height:1080px;margin:0 auto 56px;background:repeating-conic-gradient(#cfd2d6 0% 25%, #dadce0 0% 50%) 50%/56px 56px;display:flex;align-items:flex-end;position:relative}
+.lower-third{margin:0 0 120px 100px;display:inline-flex;align-items:center;gap:0;border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.lower-third .accent{width:14px;align-self:stretch}
+.lower-third .body{background:rgba(255,255,255,.94);backdrop-filter:blur(20px);padding:22px 40px}
+.lower-third .kk{font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g600)}
+.lower-third .vv{font-size:40px;font-weight:700;color:var(--g800);margin-top:2px}
+
+@media print{.deck-label{display:none}.slide,.lt-stage{margin:0;page-break-after:always}body{padding:0;background:#fff}}
+</style>
+</head>
+<body>
+
+<!-- ============ SLIDE 1 — TITLE ============ -->
+<div class="deck-label">Slide 1 — Title card <span>· opening, ~0:25 (slams in on hook VO)</span></div>
+<div class="slide cover">
+  <div class="g-bar" style="width:360px;margin-bottom:48px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="font-size:22px">Hands On AI · Episode 2</div>
+  <h1>1,000 AI Agents.<br>Almost 0 Tokens.</h1>
+  <h3 style="font-size:34px;color:var(--g800);font-weight:500;margin-top:24px">When to skip the LLM — and what it saves</h3>
+</div>
+
+<!-- ============ SLIDE 2 — WHY NOT GOOGLE MAPS ============ -->
+<div class="deck-label">Slide 2 — Why Google Maps can't do this <span>· Scene 3, ~2:00 (reuse from Ep1 deck)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Why Not the Easy Option</div>
+    <h2>Google Maps can't route a marathon</h2>
+  </div>
+  <div class="row" style="flex:1;margin-top:28px;align-items:center">
+    <div class="glass glass-red tri">
+      <div class="k" style="color:var(--red)">Walking directions</div>
+      <div class="v" style="color:var(--red)">Cuts through buildings ❌</div>
+      <div class="d">Routes you over pedestrian bridges and straight through the Luxor.</div>
+    </div>
+    <div class="glass glass-red tri">
+      <div class="k" style="color:var(--red)">Driving directions</div>
+      <div class="v" style="color:var(--red)">Honors one-way streets ❌</div>
+      <div class="d">But a closed marathon course runs any direction it wants.</div>
+    </div>
+    <div class="glass glass-green tri">
+      <div class="k" style="color:var(--green)">What we need</div>
+      <div class="v" style="color:var(--green)">Full road closures ✅</div>
+      <div class="d">On a city-approved subset of streets — exactly 26.2 miles.</div>
+    </div>
+  </div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 3 — WHEN NOT TO USE AN LLM ============ -->
+<div class="deck-label">Slide 3 — When NOT to use an LLM <span>· Scene 4, ~3:43</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">The Decision Framework</div>
+    <h2>When NOT to use an LLM</h2>
+    <h3>Route planning is an NP-hard graph problem — the LLM is the wrong tool</h3>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:18px;justify-content:center">
+    <div class="bigbullet" style="background:rgba(234,67,53,.07)"><span class="ic">🧮</span><div><b>NP-hard problems</b> with known classical algorithms (shortest path, Dijkstra)</div></div>
+    <div class="bigbullet" style="background:rgba(251,188,4,.08)"><span class="ic">🎯</span><div><b>Strict correctness</b> — must be <em>exactly</em> 26.2188 miles, every time</div></div>
+    <div class="bigbullet" style="background:rgba(52,168,83,.07)"><span class="ic">✅</span><div><b>Unit-testable logic</b> — deterministic in, deterministic out</div></div>
+    <div class="bigbullet" style="background:rgba(66,133,244,.07)"><span class="ic">🪙</span><div><b>Would burn tokens</b> — an LLM call per agent, per tick, never scales</div></div>
+  </div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 4 — SPINE & SPROUT ============ -->
+<div class="deck-label">Slide 4 — Spine &amp; Sprout algorithm <span>· Scene 5, ~5:27 (simplified)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">The Deterministic Solution</div>
+    <h2>The Spine &amp; Sprout algorithm</h2>
+    <h3>Zero LLM calls · fully unit-testable · exactly 26.2188 miles</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px;align-items:center">
+    <div class="glass glass-blue concept">
+      <div class="ic">🦴</div>
+      <div class="t" style="color:var(--blue)">1 · Dijkstra spine</div>
+      <div class="d">Shortest path stitching the landmarks together (Haversine-weighted edges)</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="glass glass-green concept">
+      <div class="ic">🌿</div>
+      <div class="t" style="color:var(--green)">2 · Serpentine sprout</div>
+      <div class="d">Extend the path with non-overlapping waypoints to add distance</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="glass glass-red concept">
+      <div class="ic">✂️</div>
+      <div class="t" style="color:var(--red)">3 · Trim</div>
+      <div class="d">Cut the last segment to land on exactly 26.2188 mi</div>
+    </div>
+  </div>
+  <div style="margin-top:20px;text-align:center"><span class="codepath">Route constraints: finish on the Strip · no overlap · no road reused</span></div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 5 — RESEARCH WORKFLOW ============ -->
+<div class="deck-label">Slide 5 — Research workflow <span>· Scene 6, ~7:01 (the "used AI to avoid AI" irony)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">The Irony</div>
+    <h2>We used AI to decide <em>not</em> to use AI</h2>
+    <h3>AI found the deterministic algorithm — it just doesn't run at runtime</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:30px;align-items:center">
+    <div class="glass glass-blue stepcard">
+      <div class="sn" style="background:var(--blue)">1</div>
+      <div class="st2" style="color:var(--blue)">AI Studio</div>
+      <div class="sd">Upload the GeoJSON + constraints · code execution + Search grounding → Gemini writes a starting Python algorithm</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="glass glass-green stepcard">
+      <div class="sn" style="background:var(--green)">2</div>
+      <div class="st2" style="color:var(--green)">Gemini CLI</div>
+      <div class="sd">"Here's a starting point. Make it unit-testable. Do a deep code review." → iterate</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="glass glass-red stepcard">
+      <div class="sn" style="background:var(--red)">3</div>
+      <div class="st2" style="color:var(--red)">Reviewed code</div>
+      <div class="sd">Hand-verified, deterministic, committed — runs with <b>zero</b> LLM calls</div>
+    </div>
+  </div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 6 — THE TRICK (setup card) ============ -->
+<div class="deck-label">Slide 6 — The trick / setup card <span>· Scene 7, into the reveal ~8:38</span></div>
+<div class="slide cover">
+  <div class="g-bar" style="width:300px;margin-bottom:44px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="font-size:20px">The Trick</div>
+  <h1 style="font-size:76px;line-height:1.1">Keep the agent framework.<br>Skip the LLM.<br><span style="color:var(--blue)">Save the tokens.</span></h1>
+</div>
+
+<!-- ============ SLIDE 7 — CALLBACK 101 (micro-slide) ============ -->
+<div class="deck-label">Slide 7 — Callback-101 micro-slide <span>· Scene 7, ~8s when Casey says "before model callback" (~12:03)</span></div>
+<div class="slide cover">
+  <div class="g-bar" style="width:300px;margin-bottom:40px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="font-size:20px">Quick definition</div>
+  <div style="max-width:1400px">
+    <div style="font-size:54px;font-weight:700;margin-bottom:30px"><code style="font-size:54px;background:var(--g100);padding:6px 18px">callback</code> = code that runs at a set point in an agent's lifecycle</div>
+    <div class="glass glass-blue" style="padding:40px 48px;text-align:left">
+      <div style="font-family:var(--mono);font-size:34px;font-weight:700;color:var(--blue);margin-bottom:14px">before_model_callback</div>
+      <div style="font-size:30px;color:var(--g800);line-height:1.4">runs <b>right before the LLM is called</b> — and can replace it entirely.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 8 — LIFECYCLE DIAGRAM ============ -->
+<div class="deck-label">Slide 8 — before_model_callback lifecycle <span>· Scene 7, the reveal</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">The Mechanism</div>
+    <h2>The callback routes <em>around</em> the model</h2>
+    <h3>The agent still has a model — it's just never called</h3>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center">
+    <svg width="1500" height="540" viewBox="0 0 1500 540">
+      <defs><marker id="ah" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#34A853"/></marker>
+      <marker id="ahg" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#9AA0A6"/></marker></defs>
+
+      <!-- invocation -->
+      <rect x="40" y="220" width="240" height="100" rx="18" fill="#fff" stroke="#4285F4" stroke-width="3"/>
+      <text x="160" y="262" text-anchor="middle" font-family="Google Sans" font-size="24" font-weight="700" fill="#4285F4">Agent invoked</text>
+      <text x="160" y="294" text-anchor="middle" font-family="Google Sans" font-size="18" fill="#5F6368">every tick</text>
+
+      <!-- callback -->
+      <rect x="420" y="210" width="300" height="120" rx="18" fill="rgba(66,133,244,.08)" stroke="#4285F4" stroke-width="3"/>
+      <text x="570" y="252" text-anchor="middle" font-family="Google Sans Mono" font-size="20" font-weight="700" fill="#4285F4">before_model_callback</text>
+      <text x="570" y="288" text-anchor="middle" font-family="Google Sans" font-size="18" fill="#5F6368">intercepts the invocation</text>
+
+      <!-- LLM (bypassed) -->
+      <rect x="860" y="40" width="300" height="120" rx="18" fill="#F8F9FA" stroke="#9AA0A6" stroke-width="3" stroke-dasharray="8 6"/>
+      <text x="1010" y="92" text-anchor="middle" font-family="Google Sans" font-size="24" font-weight="700" fill="#9AA0A6">LLM call</text>
+      <text x="1010" y="124" text-anchor="middle" font-family="Google Sans" font-size="20" fill="#9AA0A6">⛔ never happens</text>
+
+      <!-- deterministic tools -->
+      <rect x="860" y="380" width="300" height="120" rx="18" fill="rgba(52,168,83,.08)" stroke="#34A853" stroke-width="3"/>
+      <text x="1010" y="432" text-anchor="middle" font-family="Google Sans" font-size="24" font-weight="700" fill="#34A853">Deterministic</text>
+      <text x="1010" y="464" text-anchor="middle" font-family="Google Sans" font-size="20" fill="#34A853">tool calls (code)</text>
+
+      <!-- result -->
+      <rect x="1280" y="380" width="180" height="120" rx="18" fill="#fff" stroke="#34A853" stroke-width="3"/>
+      <text x="1370" y="448" text-anchor="middle" font-family="Google Sans" font-size="22" font-weight="700" fill="#34A853">Result</text>
+
+      <!-- edges -->
+      <line x1="280" y1="270" x2="412" y2="270" stroke="#9AA0A6" stroke-width="3" marker-end="url(#ahg)"/>
+      <!-- around the LLM (greyed) -->
+      <path d="M620,210 C620,120 720,100 852,100" stroke="#9AA0A6" stroke-width="3" fill="none" stroke-dasharray="8 6" marker-end="url(#ahg)"/>
+      <text x="700" y="150" font-family="Google Sans" font-size="17" fill="#9AA0A6">skipped</text>
+      <!-- to deterministic (green) -->
+      <path d="M620,330 C620,420 720,440 852,440" stroke="#34A853" stroke-width="4" fill="none" marker-end="url(#ah)"/>
+      <text x="660" y="412" font-family="Google Sans" font-size="18" font-weight="600" fill="#34A853">returns code path</text>
+      <line x1="1160" y1="440" x2="1272" y2="440" stroke="#34A853" stroke-width="4" marker-end="url(#ah)"/>
+    </svg>
+  </div>
+  <div class="glass glass-green" style="padding:16px 32px;text-align:center;font-size:24px;font-weight:600;color:var(--green);margin-top:4px">Saves cost · cuts latency · guarantees reliability · keeps the ADK lifecycle &amp; telemetry</div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 9 — AUTOPILOT STAT CARD ============ -->
+<div class="deck-label">Slide 9 — Autopilot stat card <span>· Scene 10, ~17:27</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">The Payoff</div>
+    <h2>1,000 runners. 0 LLM calls per tick.</h2>
+    <h3>Autopilot runners decide with heuristics from Gemini deep research — all code, no model</h3>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px;align-items:center">
+    <div class="glass glass-blue stat"><div class="num" style="color:var(--blue)">10K</div><div class="lbl">simultaneous agents<br>(backend capacity)</div></div>
+    <div class="glass glass-yellow stat"><div class="num" style="color:#E37400">1K</div><div class="lbl">on screen<br>(Chrome ceiling)</div></div>
+    <div class="glass glass-green stat"><div class="num" style="color:var(--green)">50</div><div class="lbl">Cloud Run instances<br>(in production)</div></div>
+    <div class="glass glass-red stat"><div class="num" style="color:var(--red)">0</div><div class="lbl">LLM calls per tick<br>(per runner)</div></div>
+  </div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 10 — TOKEN BREAKDOWN ============ -->
+<div class="deck-label">Slide 10 — Token breakdown <span>· Scene 11, the token-honesty beat (~21:10)</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Where the Tokens Actually Go</div>
+    <h2>350K tokens — almost all of it is the planner</h2>
+    <h3>One-time, upfront, to design the route. The 1,000 runners add almost nothing.</h3>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:40px">
+    <div class="tokbar">
+      <div class="seg" style="flex:94;background:var(--blue)"><div class="bt">Planner</div><div class="bs">~one-time route design</div></div>
+      <div class="seg" style="flex:6;background:var(--green)"><div class="bt">Rest</div></div>
+    </div>
+    <div class="row" style="align-items:stretch">
+      <div class="glass glass-blue" style="flex:1;padding:32px 36px">
+        <div style="font-size:26px;font-weight:700;color:var(--blue);margin-bottom:10px">The planner · ~95%</div>
+        <div style="font-size:22px;color:var(--g600);line-height:1.5">Runs <b>once</b>, before the race, to plan the route. Fixed cost — doesn't grow.</div>
+      </div>
+      <div class="glass glass-green" style="flex:1;padding:32px 36px">
+        <div style="font-size:26px;font-weight:700;color:var(--green);margin-bottom:10px">1,000 runners + simulator · ~0%</div>
+        <div style="font-size:22px;color:var(--g600);line-height:1.5">Autopilot + <code style="font-size:18px">before_model_callback</code> → they never call the model.</div>
+      </div>
+    </div>
+  </div>
+  <div class="glass glass-yellow" style="padding:18px 32px;text-align:center;font-size:26px;font-weight:700;color:#E37400;margin-top:8px">Double the runners → the token count barely moves. <span style="color:var(--g800)">That's the whole trick.</span></div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 11 — SESSION SERVICES COMPARISON ============ -->
+<div class="deck-label">Slide 11 — Session services comparison <span>· Scene 14, ~22:53</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">Pillar 2 · The State Cost</div>
+    <h2>Where does the session state live?</h2>
+    <h3>1,000 stateless sessions across 50 Cloud Run instances — state must be shared</h3>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="mrow" style="background:rgba(234,67,53,.06)"><div class="mname" style="color:var(--red)">InMemory</div><div class="mwhy">Single instance only — can't share across 50</div><div class="mmark">❌</div></div>
+    <div class="mrow" style="background:rgba(234,67,53,.06)"><div class="mname" style="color:var(--red)">AlloyDB / Cloud SQL</div><div class="mwhy">SQL queries + transactions too slow — became a bottleneck</div><div class="mmark">❌</div></div>
+    <div class="mrow" style="background:rgba(234,67,53,.06)"><div class="mname" style="color:var(--red)">Vertex AI sessions</div><div class="mwhy">Agent Runtime only — incompatible with Cloud Run</div><div class="mmark">❌</div></div>
+    <div class="mrow glass glass-green" style="margin-bottom:0"><div class="mname" style="color:var(--green)">Redis</div><div class="mwhy">Sub-millisecond, shared across all instances — the winner</div><div class="mmark">✅</div></div>
+  </div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 12 — REDIS / ADK-COMMUNITY ============ -->
+<div class="deck-label">Slide 12 — Redis session store (community win) <span>· Scene 15, ~24:45</span></div>
+<div class="slide">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div style="margin-top:30px">
+    <div class="section-tag">The Fix</div>
+    <h2>Redis as a session store — from the community</h2>
+  </div>
+  <div class="row" style="flex:1;margin-top:24px;align-items:center">
+    <div class="glass glass-red tri" style="flex:0.9">
+      <div class="k" style="color:var(--red)">Before</div>
+      <div class="v" style="color:var(--red)">AlloyDB queries</div>
+      <div class="d">SQL round-trips on every session read/write — one of the first things that broke.</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="glass glass-green tri" style="flex:0.9">
+      <div class="k" style="color:var(--green)">After</div>
+      <div class="v" style="color:var(--green)">Redis lookups</div>
+      <div class="d">Sub-millisecond, shared across all 50 instances. Agents as fast as we needed.</div>
+    </div>
+  </div>
+  <div class="glass glass-blue" style="padding:28px 40px;margin-top:8px">
+    <div style="font-size:22px;font-weight:700;color:var(--blue);margin-bottom:8px">🙌 Built by the ADK community</div>
+    <div style="font-size:24px;color:var(--g800)">A community-contributed Redis session service — <code style="font-size:20px">github.com/google/adk-community</code>. Pull it into your Python code, configure the session service, done.</div>
+  </div>
+  <div class="credit">Race Condition · Episode 2</div>
+</div>
+
+<!-- ============ SLIDE 13 — END CARD ============ -->
+<div class="deck-label">Slide 13 — End card <span>· Scene 16, outro</span></div>
+<div class="slide cover">
+  <div class="g-bar" style="width:300px;margin-bottom:40px"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="font-size:20px">Coming Next</div>
+  <h1 style="font-size:64px;line-height:1.1">How to Build AI Agents<br>in Production in 2026</h1>
+  <div style="display:flex;flex-direction:column;gap:14px;width:1050px;margin-top:36px">
+    <div class="bigbullet" style="justify-content:center;font-size:26px"><span class="ic">⚙️</span>resilient_model · before_model_callback · Redis sessions · evals</div>
+    <div class="bigbullet" style="justify-content:center;font-size:26px"><span class="ic">🛠️</span>The dev workflow that shipped it — in weeks, not months</div>
+  </div>
+  <div style="margin-top:38px;font-family:var(--mono);font-size:20px;color:var(--g600)">Race Condition · open source · [REPO URL]</div>
+</div>
+
+<!-- ============ LOWER-THIRD 1 — PILLAR 1 ============ -->
+<div class="deck-label">Lower-third A — PILLAR 1 <span>· rides on Scene 1 open (~0:55) · export with transparent bg over video</span></div>
+<div class="lt-stage">
+  <div class="lower-third">
+    <div class="accent" style="background:var(--blue)"></div>
+    <div class="body">
+      <div class="kk">Pillar 1</div>
+      <div class="vv">The Compute Cost — Tokens</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LOWER-THIRD 2 — PILLAR 2 ============ -->
+<div class="deck-label">Lower-third B — PILLAR 2 <span>· rides on the bridge (~21:36) · export with transparent bg over video</span></div>
+<div class="lt-stage">
+  <div class="lower-third">
+    <div class="accent" style="background:var(--green)"></div>
+    <div class="body">
+      <div class="kk">Pillar 2</div>
+      <div class="vv">The State Cost — Sessions</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
