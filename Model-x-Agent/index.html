@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>模型 × Agent — ADK 与 Agent 的未来</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/phosphor/style.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="navhint">← → 翻页 · N 备注 · <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck" data-start="1">
+
+<!-- 1 · TITLE -->
+<div class="slide imgslide active" data-id="title">
+  <img class="bg" src="assets/divider-prism-A.png" alt="棱镜将白光折射成 Google 四色">
+  <div class="scrim left"></div>
+  <div class="ov">
+    <h1>模型 <span class="x">×</span> Agent</h1>
+    <div class="tline">用 ADK 构建可信的 Hybrid System</div>
+    <div class="sub2">Deterministic where you can, probabilistic where you must.</div>
+    <div class="pills2"><span class="pill2">ADK 2.0</span><span class="pill2">Gemma 4</span><span class="pill2">Hybrid Systems</span><span class="pill2">A2A</span></div>
+  </div>
+  <div class="notes"><div class="nlbl">讲者备注 · 开场</div>一句定调，30 秒内进正题。Pills 是全场地图：ADK / Gemma / Hybrid / A2A。</div>
+</div>
+
+<!-- 2 · §0 控制问题 -->
+<div class="slide center" data-id="control">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue" style="justify-content:center">ACT 1 · 设问</div>
+  <div class="statement">我们不再有智能问题。<br>我们有一个 <span class="hl">控制</span> 问题。</div>
+  <div class="substmt" style="margin-left:auto;margin-right:auto">过去两年，所有人都在追更强的模型。接下来两年，赢的人追的是——<b>可控</b>。</div>
+  <div class="teaser">（记住：等下有一个 2.7 亿参数的小模型，会告诉你为什么这让你们更重要。）</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注 · 开场 (Option C)</div>thesis-first 立旗。最后一句是开场种环——只说"2.7 亿小模型"，<b>不报数字</b>，§8 付清。停一拍再翻页。</div>
+</div>
+
+<!-- 3 · §1 失败模式 -->
+<div class="slide" data-id="cliff">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 1 · 问题</div>
+  <div class="tick"><i style="background:var(--blue)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></div>
+  <h2>Agent 一上生产就裂开</h2>
+  <div class="lead">Agent = <b>控制流由模型在运行时决定</b>的软件。这是超能力，也是负债。</div>
+  <div class="grid2">
+    <div class="ccard"><span class="gd" style="color:var(--red)"></span><div class="cm m-red"><i class="ph-fill ph-compass-tool"></i></div><div><h3 class="c-red">Drift</h3><p>多轮之后慢慢偏离任务，没人察觉。</p></div></div>
+    <div class="ccard"><span class="gd" style="color:var(--yellow)"></span><div class="cm m-yellow"><i class="ph-fill ph-infinity"></i></div><div><h3 class="c-yellow">停不下来的 Loop</h3><p>没有退出条件的循环，烧钱烧到超时。</p></div></div>
+    <div class="ccard"><span class="gd" style="color:var(--blue)"></span><div class="cm m-blue"><i class="ph-fill ph-seal-warning"></i></div><div><h3 class="c-blue">自信的错答</h3><p>语气笃定、工具调错、结果是错的。</p></div></div>
+    <div class="ccard"><span class="gd" style="color:var(--gray)"></span><div class="cm m-gray"><i class="ph-fill ph-dice-five"></i></div><div><h3 class="c-gray">无法复现</h3><p>同样输入，两次不同结果——没法 debug。</p></div></div>
+  </div>
+  <div class="foot">第一代追能力。下一代做 <b>可靠性工程</b>。</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注</div>把"agent 很强"立起来，为 §7 的隐忧埋雷。四个失败模式点到为止。落点那句过桥。</div>
+</div>
+
+<!-- 4 · §2 双实验室 thesis ★ -->
+<div class="slide" data-id="thesis">
+  <div class="glow g-soft"></div>
+  <div class="kicker c-yellow">ACT 1 · THESIS <span class="star"><i class="ph-fill ph-star"></i></span></div>
+  <h2>不是我的一家之言</h2>
+  <div class="lead"><b>Deterministic where you can, probabilistic where you must.</b> 两大实验室独立收敛到同一条分界线。</div>
+  <div class="twoq">
+    <div class="qpanel"><div class="qhead c-blue"><i class="ph-fill ph-google-logo"></i>Google · ADK 官方文档</div><div class="qq">"Agents… act as <b>deterministic controllers of the execution</b> — workflow agents (Sequential, Parallel, Loop)."</div><div class="qsrc">adk.dev / get-started</div></div>
+    <div class="qpanel"><div class="qhead" style="color:#cdd1d6"><i class="ph-fill ph-asterisk"></i>Anthropic · Building Effective Agents</div><div class="qq">"Workflows… orchestrated through <b>predefined code paths</b>. Agents… <b>dynamically direct their own processes</b>."</div><div class="qsrc">anthropic.com / research</div></div>
+  </div>
+  <div class="punch">两个领头实验室都同意——那不是 trend，是 <b>ground truth</b>。</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注 · ★ Money beat</div>本场可信度支点。两句逐字念。收口："我没发明这个。"出处：adk.dev/get-started/about · anthropic.com/research/building-effective-agents</div>
+</div>
+
+<!-- 5 · §2.5 Why ADK = control -->
+<div class="slide" data-id="why-adk">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 1 · WHY ADK</div>
+  <h2>Why ADK？一个词：<span style="color:var(--blue)">CONTROL</span></h2>
+  <div class="lead">对非确定性的控制。下面四个 primitive，就是它的展开——不是 feature dump。</div>
+  <div class="crow">
+    <div class="citem"><div class="cmed m-blue"><i class="ph-fill ph-flow-arrow"></i></div><div class="ct">Flow</div><div class="cd">workflow + LLM agents 可混嵌套</div></div>
+    <div class="citem"><div class="cmed m-green"><i class="ph-fill ph-shield-check"></i></div><div class="ct">Step</div><div class="cd">callbacks · plugins · 确认</div></div>
+    <div class="citem"><div class="cmed m-yellow"><i class="ph-fill ph-seal-check"></i></div><div class="ct">Quality</div><div class="cd">内建 eval（11 metrics）</div></div>
+    <div class="citem"><div class="cmed m-red"><i class="ph-fill ph-database"></i></div><div class="ct">Context</div><div class="cd">Session · Memory · compaction · rewind</div></div>
+    <div class="citem"><div class="cmed m-gray"><i class="ph-fill ph-stack"></i></div><div class="ct">Stack</div><div class="cd">model-agnostic · A2A / MCP</div></div>
+  </div>
+  <div class="foot" style="font-size:28px">第 5 个 <b>Stack</b> 是给在座各位的：整个 agent 系统，建在你 <b>fine-tuned 的 Gemma</b> 上。</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注</div><span class="warn">Quality 说"11 metrics"，不是 8。</span> Stack 那句是 host hook，眼神给台下工程师。</div>
+</div>
+
+<!-- 6 · DIVIDER THE TURN -->
+<div class="slide imgslide" data-id="turn">
+  <img class="bg" src="assets/divider-prism-B.png" alt="棱镜折射出四色光束，上扬成星尘">
+  <div class="scrim bl"></div>
+  <div class="ov">
+    <div class="k2">ACT 2 · THE TURN</div>
+    <div class="lg2">模型 <span class="x">×</span> Agent</div>
+    <div class="sub2">不是 model vs agent —— 是 model × agent。</div>
+  </div>
+  <div class="notes"><div class="nlbl">讲者备注 · 分隔</div>呼吸一下，提示"转折来了"。慢。</div>
+</div>
+
+<!-- 7 · §3 模型 × agent ★ -->
+<div class="slide" data-id="model-x-agent">
+  <div class="glow g-green"></div>
+  <div class="kicker c-green">ACT 2 · THE TURN <span class="star"><i class="ph-fill ph-star"></i></span></div>
+  <h2>不是 model <span style="color:var(--ink3)">vs</span> agent —— 是 model <span class="x">×</span> agent</h2>
+  <div class="fearq">"你们可能在想：agent 这么强，会不会哪天就不需要 fine-tune 了？"</div>
+  <div class="eq"><span class="g">模型</span> <small>(fine-tuned Gemma)</small> <span class="b">×</span> <span class="b">Agent</span> <small>(ADK)</small></div>
+  <div class="eqsub">Fine-tuning 让核心降熵 · ADK 让系统降熵 · 右边越大，左边越值钱</div>
+  <div class="reasons">
+    <span class="rchip rc-green"><i class="ph-fill ph-users-three"></i>multi-agent = 团队要专家</span>
+    <span class="rchip rc-blue"><i class="ph-fill ph-arrows-clockwise"></i>eval/loop = 产微调数据（飞轮）</span>
+    <span class="rchip rc-yellow"><i class="ph-fill ph-wrench"></i>fine-tuning = 让 open 上生产</span>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注 · ★ Money beat (host)</div>当众点破隐忧 → 翻转。诚实分寸：prompt/RAG 解决"知道什么"，fine-tuning 解决"怎么做/多快/多便宜/多专"。净效应：agentic 化让专精模型需求<b>变多</b>。</div>
+</div>
+
+<!-- 8 · §3b FunctionGemma ★ -->
+<div class="slide center" data-id="functiongemma">
+  <div class="glow g-green"></div>
+  <div class="bigwrap">
+    <div class="smedal m-green"><i class="ph-fill ph-lightning"></i></div>
+    <div class="kicker c-green" style="justify-content:center">ACT 2 · 铁证 <span class="star"><i class="ph-fill ph-star"></i></span></div>
+    <div class="eyetop">开场那个 2.7 亿参数小模型 = <b>FunctionGemma</b></div>
+    <div class="stat"><span style="color:var(--ink3)">58%</span> <span class="x">→</span> <span style="color:var(--green)">85%</span></div>
+    <div class="statcap">Gemma 3 · 270M · fine-tuned for function calling · 跑在边缘（手机 / Jetson）</div>
+    <div class="note note-green"><i class="ph-fill ph-quotes"></i><div><p>"for edge agents, a dedicated, trained specialist is <b>an efficient path to production-grade performance</b>."</p><div class="src">— Google · blog.google / FunctionGemma</div></div></div>
+    <div class="statpunch">那就是你的 router。那就是你们的产品。</div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注 · ★ Money slide</div>付清开场的环。已多来源核实（DeepMind / ai.google.dev / HF / Ollama）。"router"是我的框架、非原话。让数字停 2 秒。</div>
+</div>
+
+<!-- 9 · §4 四个 primitive -->
+<div class="slide" data-id="primitives">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 2 · 方法</div>
+  <h2>四个 primitive = 四种 control</h2>
+  <div class="lead">ADK 给你对非确定性的四层控制——下面每一层，都是你 <b>fine-tuned Gemma</b> 的位置。</div>
+  <div class="flow">
+    <div class="stage"><div class="medal m-blue"><i class="ph-fill ph-stack"></i></div><div class="sname">Compose</div><div class="sdesc">确定性外壳 + LLM 内核<br>workflow agent 包住会推理的核</div><span class="ghook h-blue">被包住的"思考"步 = Gemma</span></div>
+    <div class="flowarrow">→</div>
+    <div class="stage"><div class="medal m-green"><i class="ph-fill ph-tree-structure"></i></div><div class="sname">Orchestrate</div><div class="sdesc">协作 + 动态编排<br>coordinator 运行时决定谁上</div><span class="ghook h-green">每个 specialist = 一个 Gemma</span></div>
+    <div class="flowarrow">→</div>
+    <div class="stage"><div class="medal m-yellow"><i class="ph-fill ph-arrows-clockwise"></i></div><div class="sname">Iterate</div><div class="sdesc">generate → critique → refine<br>+ 退出条件，不是 vibe</div><span class="ghook h-yellow">critic = 便宜的 Gemma judge</span></div>
+    <div class="flowarrow">→</div>
+    <div class="stage"><div class="medal m-red"><i class="ph-fill ph-gavel"></i></div><div class="sname">Judge</div><div class="sdesc">eval 当控制信号<br>loop 出口 · router 闸 · guardrail</div><span class="ghook h-red">traces = 下一轮微调数据</span></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注</div>全场骨架。每张只讲一句 + 它的 Gemma hook。Judge 是连接组织——下一页用代码落地 Compose。</div>
+</div>
+
+<!-- 10 · §code -->
+<div class="slide" data-id="code">
+  <div class="glow g-soft"></div>
+  <div class="kicker c-blue">ACT 2 · 方法</div>
+  <h2>Hybrid，落到代码里</h2>
+  <div class="codewrap">
+    <div class="codecard"><div class="tab"><i class="ph-fill ph-code"></i>&nbsp;research_agent.py</div><pre><span class="tok-k">from</span> google.adk.agents <span class="tok-k">import</span> (
+    SequentialAgent, LoopAgent, LlmAgent)
+
+research = <span class="tok-f">SequentialAgent</span>(name=<span class="tok-s">"research"</span>, sub_agents=[
+    plan,                       <span class="tok-c"># LlmAgent · Gemini 推理</span>
+    <span class="tok-f">LoopAgent</span>(name=<span class="tok-s">"dig"</span>, max_iterations=<span class="tok-n">4</span>,
+      sub_agents=[search, extract, critic]),
+                                <span class="tok-c"># critic = fine-tuned Gemma</span>
+    synthesize,                 <span class="tok-c"># LlmAgent · Gemini 合成</span>
+])</pre></div>
+    <div class="anno"><h3>确定性外壳，LLM 内核</h3><p><b>Sequential / Loop</b> 决定流程——<b>不咨询模型</b>，可预测。包在里面的 <b>LlmAgent</b> 才负责推理。</p><p>退出条件交给 <b>critic</b>：一个便宜的 fine-tuned Gemma judge。这段代码，就是 "deterministic where you can, probabilistic where you must"。</p></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注</div>给技术听众一个"真能写出来"的锚点。<span class="warn">别说 template agents 被 deprecated——2.0 是 "superseded by" graph/dynamic，三个仍可用。</span></div>
+</div>
+
+<!-- 11 · §5 深度研究系统 -->
+<div class="slide" data-id="systems">
+  <div class="glow g-green"></div>
+  <div class="kicker c-green">ACT 2 · 兑现</div>
+  <h2>把四个 primitive 拼成一个系统</h2>
+  <div class="lead">深度研究 agent：前三步 = fine-tuned Gemma，合成 = Gemini。<b>Frontier when you must, open when you can.</b></div>
+  <div class="pipe">
+    <div class="pstep"><div class="pm m-blue"><i class="ph-fill ph-strategy"></i></div><div class="pn">Plan</div><div class="pt c-blue">Gemini</div></div>
+    <div class="parrow">→</div>
+    <div class="loopbox"><span class="looplbl">LoopAgent · 退出 = eval</span>
+      <div class="pstep"><div class="pm m-green"><i class="ph-fill ph-magnifying-glass"></i></div><div class="pn">Search</div><div class="pt c-green">Gemma</div></div>
+      <div class="parrow">→</div>
+      <div class="pstep"><div class="pm m-green"><i class="ph-fill ph-scissors"></i></div><div class="pn">Extract</div><div class="pt c-green">Gemma</div></div>
+      <div class="parrow">→</div>
+      <div class="pstep"><div class="pm m-yellow"><i class="ph-fill ph-gavel"></i></div><div class="pn">Critic</div><div class="pt c-yellow">Gemma</div></div>
+    </div>
+    <div class="parrow">→</div>
+    <div class="pstep"><div class="pm m-blue"><i class="ph-fill ph-sparkle"></i></div><div class="pn">Synthesize</div><div class="pt c-blue">Gemini</div></div>
+  </div>
+  <div class="memstrip">
+    <div class="memcard"><i class="ph-fill ph-chat-circle"></i><div><div class="mt">Session / State</div><div class="md">当前对话（4 种 scope）</div></div></div>
+    <div class="memcard"><i class="ph-fill ph-database"></i><div><div class="mt">MemoryService</div><div class="md">跨 session 语义召回</div></div></div>
+    <div class="memcard"><i class="ph-fill ph-arrows-in-simple"></i><div><div class="mt">Compaction</div><div class="md">长会话防 overflow</div></div></div>
+    <div class="memcard"><i class="ph-fill ph-arrow-counter-clockwise"></i><div><div class="mt">Rewind</div><div class="md">出错回滚到某步前</div></div></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注</div>最好接你真跑的深度研究 agent 录屏。memory 一次讲完，别单开节。dev 全 in-memory，prod 一行换 Database/Vertex。</div>
+</div>
+
+<!-- 12 · DIVIDER ACT 3 -->
+<div class="slide imgslide" data-id="act3">
+  <img class="bg" src="assets/divider-act3.png" alt="绿色主导的棱镜光束，向上扬起">
+  <div class="scrim bl"></div>
+  <div class="ov">
+    <div class="k2">ACT 3</div>
+    <div class="lg2">未来已经在发生</div>
+    <div class="sub2">ADK 2.0 · 开放协议 · 你们的位置</div>
+  </div>
+  <div class="notes"><div class="nlbl">讲者备注 · 分隔</div>从"方法"转到"这是不是一时风潮"。下面用证据回答。</div>
+</div>
+
+<!-- 13 · §6 ADK 2.0 -->
+<div class="slide" data-id="adk2">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 3 · ADK 2.0</div>
+  <h2>框架，长成了这套架构</h2>
+  <div class="timeline">
+    <div class="tnode"><div class="tv">1.0 GA</div><div class="td">2025-05-20 · I/O</div></div>
+    <div class="tseg"><span>~ 一年</span></div>
+    <div class="tnode"><div class="tv">2.0 GA</div><div class="td">2026-05-19 · I/O</div></div>
+  </div>
+  <div class="crow">
+    <div class="citem"><div class="cmed m-blue"><i class="ph-fill ph-graph"></i></div><div class="ct">Deterministic graph</div><div class="cd">图引擎里的确定性工作流</div></div>
+    <div class="citem"><div class="cmed m-green"><i class="ph-fill ph-git-branch"></i></div><div class="ct">Dynamic</div><div class="cd">code-driven 的 loop / branch</div></div>
+    <div class="citem"><div class="cmed m-yellow"><i class="ph-fill ph-users-three"></i></div><div class="ct">Collaborative</div><div class="cd">coordinator + 多 subagents</div></div>
+  </div>
+  <div class="foot" style="font-size:28px">这三大支柱，<b>就是我刚走完的架构</b>（+ Task API）。1.x 和 2.x 并行维护——今天演示的 1.x 现在就能跑。</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注</div>2.0 是<b>证据</b>不是头条。台词："Google 把这场 talk 的结构 ship 成了 runtime。" <span class="warn">统一说"三大支柱"；版本号当天早上复核。</span></div>
+</div>
+
+<!-- 14 · §6b A2A ★ -->
+<div class="slide" data-id="a2a">
+  <div class="glow g-green"></div>
+  <div class="kicker c-green">ACT 3 · 开放栈 <span class="star"><i class="ph-fill ph-star"></i></span></div>
+  <h2>Interop 是新的护城河——而且是开放的</h2>
+  <div class="stats">
+    <div class="statcard"><i class="ph-fill ph-buildings c-blue"></i><div class="bn c-blue">150+</div><div class="bl">组织采用 A2A</div></div>
+    <div class="statcard"><i class="ph-fill ph-star c-green"></i><div class="bn c-green">22k+</div><div class="bl">GitHub stars</div></div>
+    <div class="statcard"><i class="ph-fill ph-cloud c-yellow"></i><div class="bn c-yellow">7</div><div class="bl">家创始伙伴 · 含三大云</div></div>
+  </div>
+  <div class="lead" style="text-align:center;max-width:1640px;margin-left:auto;margin-right:auto">A2A <b>2025-06-23 捐给 Linux Foundation</b>；进了 Azure AI Foundry · AWS Bedrock AgentCore · Google Cloud。<b>MCP</b> = agent↔工具 · <b>A2A</b> = agent↔agent，ADK 两个都说。</div>
+  <div class="punch">AWS、Microsoft、Google ship 同一个协议——那是未来在自报家门。</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注 · ★ Money beat</div>创始 7 家里 AWS、Google、Microsoft 三大云全在——最有分量。已多来源核实（LF press · PRNewswire · IBM）。收口接回 host。</div>
+</div>
+
+<!-- 15 · §7 三句话 -->
+<div class="slide" data-id="takeaways">
+  <div class="glow g-soft"></div>
+  <div class="kicker c-blue">收束</div>
+  <h2>带走三句话</h2>
+  <div class="takeaways">
+    <div class="tcard"><div class="tnum c-blue">1</div><div class="tt">画那条线</div><p>Deterministic where you can, probabilistic where you must.</p></div>
+    <div class="tcard"><div class="tnum c-green">2</div><div class="tt">模型 × agent</div><p>fine-tuned Gemma 与 ADK 互相成就。右边越大，左边越值钱。</p></div>
+    <div class="tcard"><div class="tnum c-yellow">3</div><div class="tt">ADK = control</div><p>Compose · Orchestrate · Iterate · Judge。</p></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注</div>三句话收口。大数字让它读作 takeaways。</div>
+</div>
+
+<!-- 16 · CTA / 前向交棒 -->
+<div class="slide center" data-id="cta">
+  <div class="glow g-soft"></div>
+  <div style="max-width:1560px">
+    <div class="tick" style="justify-content:center"><i style="background:var(--blue)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></div>
+    <div class="statement" style="font-size:80px">模型 × agent —— 右边越大，左边越值钱</div>
+    <div class="substmt" style="margin-left:auto;margin-right:auto;font-size:32px">我讲的是 × 号 <b>右边</b>——怎么把一群专家，组成一个你敢信的系统。<br>接下来 <b>[同事]</b> 会讲 × 号 <b>左边</b>——怎么先把 Gemma 调成那个专家。</div>
+    <div style="font-size:34px;font-weight:700;color:#fff;margin-top:22px">两半合起来，才是完整的 stack。</div>
+    <div class="pills2" style="justify-content:center"><span class="pill2">ADK 2.0</span><span class="pill2">Gemma 4</span><span class="pill2">A2A</span><span class="pill2">MCP</span></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">讲者备注 · 前向交棒</div>同事在你<b>之后</b>讲：这里是 forward pass，不是接球。把"× 号左边"交给他，自然衔接他的 fine-tuning 场。和 title 做 bookend。</div>
+</div>
+
+</div>
+<script src="deck.js"></script>
+</body>
+</html>

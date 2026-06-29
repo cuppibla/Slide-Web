@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Model × Agent — The Future of ADK & Agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/phosphor/style.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="navhint">← → nav · N notes · <span id="cur">1</span>/<span id="tot"></span></div>
+<div class="deck" data-start="1">
+
+<!-- 1 · TITLE -->
+<div class="slide imgslide active" data-id="title">
+  <img class="bg" src="assets/divider-prism-A.png" alt="A prism refracting white light into the four Google colors">
+  <div class="scrim left"></div>
+  <div class="ov">
+    <h1>Model <span class="x">×</span> Agent</h1>
+    <div class="tline">Building trustworthy hybrid systems with ADK</div>
+    <div class="sub2">Deterministic where you can, probabilistic where you must.</div>
+    <div class="pills2"><span class="pill2">ADK 2.0</span><span class="pill2">Gemma 4</span><span class="pill2">Hybrid Systems</span><span class="pill2">A2A</span></div>
+  </div>
+  <div class="notes"><div class="nlbl">Notes · Open</div>One line to set the tone. Into the substance within 30s. Pills = map of the whole talk.</div>
+</div>
+
+<!-- 2 · §0 control problem -->
+<div class="slide center" data-id="control">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue" style="justify-content:center">ACT 1 · THE QUESTION</div>
+  <div class="statement" style="font-size:82px">We don't have an intelligence problem.<br>We have a <span class="hl">control</span> problem.</div>
+  <div class="substmt" style="margin-left:auto;margin-right:auto">For two years, everyone chased a stronger model. For the next two, the winners chase <b>control</b>.</div>
+  <div class="teaser">(Hold this: a 270-million-parameter model is about to show you why that makes <i>you</i> more important.)</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes · Open (Option C)</div>Thesis-first. The last line is the open loop — name "a 270M model," <b>don't give the number</b>; §8 pays it off. Beat, then advance.</div>
+</div>
+
+<!-- 3 · §1 failure modes -->
+<div class="slide" data-id="cliff">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 1 · THE PROBLEM</div>
+  <div class="tick"><i style="background:var(--blue)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></div>
+  <h2>Agents crack the moment they ship</h2>
+  <div class="lead">An agent is software whose <b>control flow is decided by a model at runtime</b>. That's the superpower — and the liability.</div>
+  <div class="grid2">
+    <div class="ccard"><span class="gd" style="color:var(--red)"></span><div class="cm m-red"><i class="ph-fill ph-compass-tool"></i></div><div><h3 class="c-red">Drift</h3><p>Wanders off-task over many turns — unnoticed.</p></div></div>
+    <div class="ccard"><span class="gd" style="color:var(--yellow)"></span><div class="cm m-yellow"><i class="ph-fill ph-infinity"></i></div><div><h3 class="c-yellow">Runaway loops</h3><p>No exit condition — burns budget until it times out.</p></div></div>
+    <div class="ccard"><span class="gd" style="color:var(--blue)"></span><div class="cm m-blue"><i class="ph-fill ph-seal-warning"></i></div><div><h3 class="c-blue">Confidently wrong</h3><p>Sounds certain, calls the wrong tool, ships a wrong answer.</p></div></div>
+    <div class="ccard"><span class="gd" style="color:var(--gray)"></span><div class="cm m-gray"><i class="ph-fill ph-dice-five"></i></div><div><h3 class="c-gray">Not reproducible</h3><p>Same input, two different runs — impossible to debug.</p></div></div>
+  </div>
+  <div class="foot">Gen 1 chased capability. Gen 2 engineers <b>reliability</b>.</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes</div>Establish "agents are powerful" to set up the §7 fear. Four failure modes, briefly. Landing line is the bridge.</div>
+</div>
+
+<!-- 4 · §2 dual-lab thesis ★ -->
+<div class="slide" data-id="thesis">
+  <div class="glow g-soft"></div>
+  <div class="kicker c-yellow">ACT 1 · THESIS <span class="star"><i class="ph-fill ph-star"></i></span></div>
+  <h2>Not just my opinion</h2>
+  <div class="lead"><b>Deterministic where you can, probabilistic where you must.</b> Two leading labs converged on the same line — independently.</div>
+  <div class="twoq">
+    <div class="qpanel"><div class="qhead c-blue"><i class="ph-fill ph-google-logo"></i>Google · ADK docs</div><div class="qq">"Agents… act as <b>deterministic controllers of the execution</b> — workflow agents (Sequential, Parallel, Loop)."</div><div class="qsrc">adk.dev / get-started</div></div>
+    <div class="qpanel"><div class="qhead" style="color:#cdd1d6"><i class="ph-fill ph-asterisk"></i>Anthropic · Building Effective Agents</div><div class="qq">"Workflows… orchestrated through <b>predefined code paths</b>. Agents… <b>dynamically direct their own processes</b>."</div><div class="qsrc">anthropic.com / research</div></div>
+  </div>
+  <div class="punch">When the two leading labs agree — that's not a trend, it's <b>ground truth</b>.</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes · ★ Money beat</div>Credibility anchor. Read both quotes verbatim. Close: "I didn't invent this." Sources: adk.dev/get-started/about · anthropic.com/research/building-effective-agents</div>
+</div>
+
+<!-- 5 · §2.5 Why ADK = control -->
+<div class="slide" data-id="why-adk">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 1 · WHY ADK</div>
+  <h2>Why ADK? One word: <span style="color:var(--blue)">CONTROL</span></h2>
+  <div class="lead">Control over non-determinism. The four primitives ahead are just its expansion — not a feature dump.</div>
+  <div class="crow">
+    <div class="citem"><div class="cmed m-blue"><i class="ph-fill ph-flow-arrow"></i></div><div class="ct">Flow</div><div class="cd">workflow + LLM agents, mixed &amp; nested</div></div>
+    <div class="citem"><div class="cmed m-green"><i class="ph-fill ph-shield-check"></i></div><div class="ct">Step</div><div class="cd">callbacks · plugins · confirmations</div></div>
+    <div class="citem"><div class="cmed m-yellow"><i class="ph-fill ph-seal-check"></i></div><div class="ct">Quality</div><div class="cd">built-in eval (11 metrics)</div></div>
+    <div class="citem"><div class="cmed m-red"><i class="ph-fill ph-database"></i></div><div class="ct">Context</div><div class="cd">Session · Memory · compaction · rewind</div></div>
+    <div class="citem"><div class="cmed m-gray"><i class="ph-fill ph-stack"></i></div><div class="ct">Stack</div><div class="cd">model-agnostic · A2A / MCP</div></div>
+  </div>
+  <div class="foot" style="font-size:28px">#5, <b>Stack</b>, is for this room: build the whole agent system on <b>your fine-tuned Gemma</b>.</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes</div><span class="warn">Quality is "11 metrics," not 8.</span> The Stack line is the host hook — look at the engineers in the room.</div>
+</div>
+
+<!-- 6 · DIVIDER THE TURN -->
+<div class="slide imgslide" data-id="turn">
+  <img class="bg" src="assets/divider-prism-B.png" alt="Prism refracting four colored beams arcing into particles">
+  <div class="scrim bl"></div>
+  <div class="ov">
+    <div class="k2">ACT 2 · THE TURN</div>
+    <div class="lg2">Model <span class="x">×</span> Agent</div>
+    <div class="sub2">Not model vs agent — model × agent.</div>
+  </div>
+  <div class="notes"><div class="nlbl">Notes · Divider</div>Breathe. Signal "the turn is here." Slow.</div>
+</div>
+
+<!-- 7 · §3 model × agent ★ -->
+<div class="slide" data-id="model-x-agent">
+  <div class="glow g-green"></div>
+  <div class="kicker c-green">ACT 2 · THE TURN <span class="star"><i class="ph-fill ph-star"></i></span></div>
+  <h2>Not model <span style="color:var(--ink3)">vs</span> agent — it's model <span class="x">×</span> agent</h2>
+  <div class="fearq">"You might be thinking: agents are this strong — will we even need to fine-tune someday?"</div>
+  <div class="eq"><span class="g">Model</span> <small>(fine-tuned Gemma)</small> <span class="b">×</span> <span class="b">Agent</span> <small>(ADK)</small></div>
+  <div class="eqsub">Fine-tuning lowers entropy at the core · ADK lowers it at the system · the bigger the right, the more the left is worth</div>
+  <div class="reasons">
+    <span class="rchip rc-green"><i class="ph-fill ph-users-three"></i>multi-agent = a team needs specialists</span>
+    <span class="rchip rc-blue"><i class="ph-fill ph-arrows-clockwise"></i>eval/loop = generates fine-tuning data (flywheel)</span>
+    <span class="rchip rc-yellow"><i class="ph-fill ph-wrench"></i>fine-tuning = makes open production-ready</span>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes · ★ Money beat (host)</div>Name the fear out loud → flip it. Honest nuance: prompt/RAG = "know what," fine-tuning = "how / how fast / how cheap / how specialized." Net effect: agentic systems need <b>more</b> specialist models.</div>
+</div>
+
+<!-- 8 · §3b FunctionGemma ★ -->
+<div class="slide center" data-id="functiongemma">
+  <div class="glow g-green"></div>
+  <div class="bigwrap">
+    <div class="smedal m-green"><i class="ph-fill ph-lightning"></i></div>
+    <div class="kicker c-green" style="justify-content:center">ACT 2 · THE RECEIPT <span class="star"><i class="ph-fill ph-star"></i></span></div>
+    <div class="eyetop">That 270M model from the opening = <b>FunctionGemma</b></div>
+    <div class="stat"><span style="color:var(--ink3)">58%</span> <span class="x">→</span> <span style="color:var(--green)">85%</span></div>
+    <div class="statcap">Gemma 3 · 270M · fine-tuned for function calling · runs at the edge (phone / Jetson)</div>
+    <div class="note note-green"><i class="ph-fill ph-quotes"></i><div><p>"for edge agents, a dedicated, trained specialist is <b>an efficient path to production-grade performance</b>."</p><div class="src">— Google · blog.google / FunctionGemma</div></div></div>
+    <div class="statpunch">That's your router. That's your product.</div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes · ★ Money slide</div>Pays off the opening loop. Verified across multiple sources (DeepMind / ai.google.dev / HF / Ollama). "router" is my framing, not a quote. Hold the number for 2s.</div>
+</div>
+
+<!-- 9 · §4 four primitives -->
+<div class="slide" data-id="primitives">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 2 · THE METHOD</div>
+  <h2>Four primitives = four kinds of control</h2>
+  <div class="lead">Four layers of control over non-determinism — and every layer is a home for <b>your fine-tuned Gemma</b>.</div>
+  <div class="flow">
+    <div class="stage"><div class="medal m-blue"><i class="ph-fill ph-stack"></i></div><div class="sname">Compose</div><div class="sdesc">Deterministic shell + LLM core<br>a workflow agent wraps the reasoning core</div><span class="ghook h-blue">the wrapped "thinking" step = Gemma</span></div>
+    <div class="flowarrow">→</div>
+    <div class="stage"><div class="medal m-green"><i class="ph-fill ph-tree-structure"></i></div><div class="sname">Orchestrate</div><div class="sdesc">Collaborative + dynamic<br>a coordinator decides who acts at runtime</div><span class="ghook h-green">each specialist = one Gemma</span></div>
+    <div class="flowarrow">→</div>
+    <div class="stage"><div class="medal m-yellow"><i class="ph-fill ph-arrows-clockwise"></i></div><div class="sname">Iterate</div><div class="sdesc">generate → critique → refine<br>+ an exit condition, not a vibe</div><span class="ghook h-yellow">critic = a cheap Gemma judge</span></div>
+    <div class="flowarrow">→</div>
+    <div class="stage"><div class="medal m-red"><i class="ph-fill ph-gavel"></i></div><div class="sname">Judge</div><div class="sdesc">eval as the control signal<br>loop exit · router gate · guardrail</div><span class="ghook h-red">traces = next round's fine-tuning data</span></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes</div>The skeleton of the whole talk. One line each + its Gemma hook. Judge is the connective tissue — next slide lands Compose in code.</div>
+</div>
+
+<!-- 10 · §code -->
+<div class="slide" data-id="code">
+  <div class="glow g-soft"></div>
+  <div class="kicker c-blue">ACT 2 · THE METHOD</div>
+  <h2>Hybrid, in actual code</h2>
+  <div class="codewrap">
+    <div class="codecard"><div class="tab"><i class="ph-fill ph-code"></i>&nbsp;research_agent.py</div><pre><span class="tok-k">from</span> google.adk.agents <span class="tok-k">import</span> (
+    SequentialAgent, LoopAgent, LlmAgent)
+
+research = <span class="tok-f">SequentialAgent</span>(name=<span class="tok-s">"research"</span>, sub_agents=[
+    plan,                       <span class="tok-c"># LlmAgent · Gemini reasoning</span>
+    <span class="tok-f">LoopAgent</span>(name=<span class="tok-s">"dig"</span>, max_iterations=<span class="tok-n">4</span>,
+      sub_agents=[search, extract, critic]),
+                                <span class="tok-c"># critic = fine-tuned Gemma</span>
+    synthesize,                 <span class="tok-c"># LlmAgent · Gemini synthesis</span>
+])</pre></div>
+    <div class="anno"><h3>Deterministic shell, LLM core</h3><p><b>Sequential / Loop</b> decide the flow — <b>without consulting the model</b>, predictable. The <b>LlmAgent</b> inside does the reasoning.</p><p>The exit condition goes to a <b>critic</b>: a cheap fine-tuned Gemma judge. This snippet <i>is</i> "deterministic where you can, probabilistic where you must."</p></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes</div>An anchor that says "you can actually write this." <span class="warn">Don't say the template agents are deprecated — in 2.0 they're "superseded by" graph/dynamic, still available.</span></div>
+</div>
+
+<!-- 11 · §5 deep-research system -->
+<div class="slide" data-id="systems">
+  <div class="glow g-green"></div>
+  <div class="kicker c-green">ACT 2 · PAYOFF</div>
+  <h2>Assemble the four primitives into one system</h2>
+  <div class="lead">A deep-research agent: first three steps = fine-tuned Gemma, synthesis = Gemini. <b>Frontier when you must, open when you can.</b></div>
+  <div class="pipe">
+    <div class="pstep"><div class="pm m-blue"><i class="ph-fill ph-strategy"></i></div><div class="pn">Plan</div><div class="pt c-blue">Gemini</div></div>
+    <div class="parrow">→</div>
+    <div class="loopbox"><span class="looplbl">LoopAgent · exit = eval</span>
+      <div class="pstep"><div class="pm m-green"><i class="ph-fill ph-magnifying-glass"></i></div><div class="pn">Search</div><div class="pt c-green">Gemma</div></div>
+      <div class="parrow">→</div>
+      <div class="pstep"><div class="pm m-green"><i class="ph-fill ph-scissors"></i></div><div class="pn">Extract</div><div class="pt c-green">Gemma</div></div>
+      <div class="parrow">→</div>
+      <div class="pstep"><div class="pm m-yellow"><i class="ph-fill ph-gavel"></i></div><div class="pn">Critic</div><div class="pt c-yellow">Gemma</div></div>
+    </div>
+    <div class="parrow">→</div>
+    <div class="pstep"><div class="pm m-blue"><i class="ph-fill ph-sparkle"></i></div><div class="pn">Synthesize</div><div class="pt c-blue">Gemini</div></div>
+  </div>
+  <div class="memstrip">
+    <div class="memcard"><i class="ph-fill ph-chat-circle"></i><div><div class="mt">Session / State</div><div class="md">current conversation (4 scopes)</div></div></div>
+    <div class="memcard"><i class="ph-fill ph-database"></i><div><div class="mt">MemoryService</div><div class="md">semantic recall across sessions</div></div></div>
+    <div class="memcard"><i class="ph-fill ph-arrows-in-simple"></i><div><div class="mt">Compaction</div><div class="md">keeps long sessions from overflowing</div></div></div>
+    <div class="memcard"><i class="ph-fill ph-arrow-counter-clockwise"></i><div><div class="mt">Rewind</div><div class="md">roll back to before a step on error</div></div></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes</div>Best paired with a recording of your real deep-research agent. Cover memory here, don't make it its own section. Dev = all in-memory, prod = one line to Database/Vertex.</div>
+</div>
+
+<!-- 12 · DIVIDER ACT 3 -->
+<div class="slide imgslide" data-id="act3">
+  <img class="bg" src="assets/divider-act3.png" alt="Green-led prism beams sweeping upward">
+  <div class="scrim bl"></div>
+  <div class="ov">
+    <div class="k2">ACT 3</div>
+    <div class="lg2">The future is already here</div>
+    <div class="sub2">ADK 2.0 · open protocols · your place in it</div>
+  </div>
+  <div class="notes"><div class="nlbl">Notes · Divider</div>From "the method" to "is this just a fad?" The evidence answers it.</div>
+</div>
+
+<!-- 13 · §6 ADK 2.0 -->
+<div class="slide" data-id="adk2">
+  <div class="glow g-blue"></div>
+  <div class="kicker c-blue">ACT 3 · ADK 2.0</div>
+  <h2>The framework grew into this architecture</h2>
+  <div class="timeline">
+    <div class="tnode"><div class="tv">1.0 GA</div><div class="td">2025-05-20 · I/O</div></div>
+    <div class="tseg"><span>~ one year</span></div>
+    <div class="tnode"><div class="tv">2.0 GA</div><div class="td">2026-05-19 · I/O</div></div>
+  </div>
+  <div class="crow">
+    <div class="citem"><div class="cmed m-blue"><i class="ph-fill ph-graph"></i></div><div class="ct">Deterministic graph</div><div class="cd">deterministic workflows in a graph engine</div></div>
+    <div class="citem"><div class="cmed m-green"><i class="ph-fill ph-git-branch"></i></div><div class="ct">Dynamic</div><div class="cd">code-driven loops / branches</div></div>
+    <div class="citem"><div class="cmed m-yellow"><i class="ph-fill ph-users-three"></i></div><div class="ct">Collaborative</div><div class="cd">coordinator + many subagents</div></div>
+  </div>
+  <div class="foot" style="font-size:28px">These three pillars <b>are the architecture I just walked you through</b> (+ a Task API). 1.x and 2.x ship in parallel — what I demo'd in 1.x runs today.</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes</div>2.0 is <b>evidence</b>, not the headline. Line: "Google shipped this talk's structure as a runtime." <span class="warn">Say "three pillars"; recheck version numbers the morning of.</span></div>
+</div>
+
+<!-- 14 · §6b A2A ★ -->
+<div class="slide" data-id="a2a">
+  <div class="glow g-green"></div>
+  <div class="kicker c-green">ACT 3 · THE OPEN STACK <span class="star"><i class="ph-fill ph-star"></i></span></div>
+  <h2>Interop is the new moat — and it's open</h2>
+  <div class="stats">
+    <div class="statcard"><i class="ph-fill ph-buildings c-blue"></i><div class="bn c-blue">150+</div><div class="bl">orgs adopting A2A</div></div>
+    <div class="statcard"><i class="ph-fill ph-star c-green"></i><div class="bn c-green">22k+</div><div class="bl">GitHub stars</div></div>
+    <div class="statcard"><i class="ph-fill ph-cloud c-yellow"></i><div class="bn c-yellow">7</div><div class="bl">founding partners · incl. the big 3 clouds</div></div>
+  </div>
+  <div class="lead" style="text-align:center;max-width:1680px;margin-left:auto;margin-right:auto">A2A was <b>donated to the Linux Foundation on 2025-06-23</b>; it's in Azure AI Foundry · AWS Bedrock AgentCore · Google Cloud. <b>MCP</b> = agent↔tools · <b>A2A</b> = agent↔agent — ADK speaks both.</div>
+  <div class="punch">When AWS, Microsoft &amp; Google ship the same protocol — that's the future announcing itself.</div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes · ★ Money beat</div>Of the 7 founders, AWS, Google &amp; Microsoft — all three big clouds are in. Verified across sources (LF press · PRNewswire · IBM). Close back to the host.</div>
+</div>
+
+<!-- 15 · §7 takeaways -->
+<div class="slide" data-id="takeaways">
+  <div class="glow g-soft"></div>
+  <div class="kicker c-blue">WRAP-UP</div>
+  <h2>Three things to take with you</h2>
+  <div class="takeaways">
+    <div class="tcard"><div class="tnum c-blue">1</div><div class="tt">Draw the line</div><p>Deterministic where you can, probabilistic where you must.</p></div>
+    <div class="tcard"><div class="tnum c-green">2</div><div class="tt">Model × agent</div><p>Fine-tuned Gemma and ADK make each other better. The bigger the right, the more the left is worth.</p></div>
+    <div class="tcard"><div class="tnum c-yellow">3</div><div class="tt">ADK = control</div><p>Compose · Orchestrate · Iterate · Judge.</p></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes</div>Three lines to close. The big numbers make it read as takeaways.</div>
+</div>
+
+<!-- 16 · CTA / forward pass -->
+<div class="slide center" data-id="cta">
+  <div class="glow g-soft"></div>
+  <div style="max-width:1620px">
+    <div class="tick" style="justify-content:center"><i style="background:var(--blue)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></div>
+    <div class="statement" style="font-size:58px">Model × agent — the bigger the right, the more the left is worth</div>
+    <div class="substmt" style="margin-left:auto;margin-right:auto;font-size:32px">I covered the <b>right</b> of the × — turning a team of specialists into a system you can trust.<br>Next, <b>[colleague]</b> covers the <b>left</b> — fine-tuning Gemma into that specialist.</div>
+    <div style="font-size:34px;font-weight:700;color:#fff;margin-top:22px">Put both halves together — that's the full stack.</div>
+    <div class="pills2" style="justify-content:center"><span class="pill2">ADK 2.0</span><span class="pill2">Gemma 4</span><span class="pill2">A2A</span><span class="pill2">MCP</span></div>
+  </div>
+  <div class="snum"></div>
+  <div class="notes"><div class="nlbl">Notes · Forward pass</div>The colleague speaks <b>after</b> you: this is a forward pass, not a catch. Hand them the "left of the ×" so it leads into their fine-tuning talk. Bookends the title.</div>
+</div>
+
+</div>
+<script src="deck.js"></script>
+</body>
+</html>
