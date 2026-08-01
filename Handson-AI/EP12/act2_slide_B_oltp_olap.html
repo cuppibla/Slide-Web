@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Act 2 · 2-B — OLTP vs OLAP</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+ul{list-style:none;margin-top:8px}
+ul li{font-size:23px;color:var(--g800);padding:12px 0;padding-left:36px;position:relative;line-height:1.5}
+ul li::before{content:'';position:absolute;left:0;top:22px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.dot-red::before{background:var(--red)!important}
+.dot-green::before{background:var(--green)!important}
+.dot-yellow::before{background:var(--yellow)!important}
+.dot-gray::before{background:var(--g600)!important}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+
+/* Comparison cards */
+.compare-card{flex:1;padding:40px 44px}
+.compare-head{display:flex;align-items:center;gap:24px;margin-bottom:14px}
+.compare-title{font-size:29px;font-weight:700}
+.compare-sub{font-size:18px;color:var(--g600);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- SLIDE 2-B: OLTP VS OLAP -->
+<div class="slide active" data-id="2B">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">ACT 2 · THE CROSS-SERVICE JUMP</div>
+  <h2>Why is the data even split?</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="row" style="align-items:stretch">
+      <div class="glass glass-red compare-card">
+        <div class="compare-head">
+          <svg width="148" height="100" viewBox="0 0 148 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="92" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
+            <rect x="2" y="26" width="26" height="18" rx="3" fill="#EA4335" opacity="0.8"/><rect x="32" y="26" width="26" height="18" rx="3" fill="#EA4335" opacity="0.8"/><rect x="62" y="26" width="26" height="18" rx="3" fill="#EA4335" opacity="0.8"/><rect x="92" y="26" width="26" height="18" rx="3" fill="#EA4335" opacity="0.8"/><rect x="122" y="26" width="26" height="18" rx="3" fill="#EA4335" opacity="0.8"/>
+            <rect x="2" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="92" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
+            <rect x="2" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="92" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
+          </svg>
+          <div>
+            <div class="compare-title" style="color:var(--red)">OLTP — Cloud SQL Postgres</div>
+            <div class="compare-sub">runs the business, one row at a time</div>
+          </div>
+        </div>
+        <ul>
+          <li class="dot-red">Row store</li>
+          <li class="dot-red">Live operations</li>
+          <li class="dot-red">High concurrency</li>
+          <li class="dot-red">Row-by-row updates</li>
+        </ul>
+      </div>
+
+      <div class="glass glass-blue compare-card">
+        <div class="compare-head">
+          <svg width="148" height="100" viewBox="0 0 148 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="2" width="26" height="18" rx="3" fill="#4285F4" opacity="0.8"/><rect x="92" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="2" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
+            <rect x="2" y="26" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="26" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="26" width="26" height="18" rx="3" fill="#4285F4" opacity="0.8"/><rect x="92" y="26" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="26" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
+            <rect x="2" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="50" width="26" height="18" rx="3" fill="#4285F4" opacity="0.8"/><rect x="92" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="50" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
+            <rect x="2" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="74" width="26" height="18" rx="3" fill="#4285F4" opacity="0.8"/><rect x="92" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
+          </svg>
+          <div>
+            <div class="compare-title" style="color:var(--blue)">OLAP — BigQuery</div>
+            <div class="compare-sub">answers questions about the business</div>
+          </div>
+        </div>
+        <ul>
+          <li>Columnar store</li>
+          <li>Scans billions of rows</li>
+          <li>Heavy aggregation</li>
+          <li>Built for analysis, not updates</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="align-self:center;margin-top:44px;padding:14px 36px;border-radius:999px;background:rgba(66,133,244,0.12);color:var(--blue);font-size:22px;font-weight:600">The split is why the investigation is cross-service.</div>
+  </div>
+  <div class="slide-num">2-B</div>
+</div>
+
+</div>
+</body>
+</html>

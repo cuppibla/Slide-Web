@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Act 3 · 3-A — Install (Live Demo)</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+pre{background:var(--g800);color:#E8EAED;border-radius:16px;padding:28px;font-family:var(--mono);font-size:18px;line-height:1.6;overflow:hidden;margin-top:12px}
+code{font-family:var(--mono);font-size:18px}
+.kw{color:#8AB4F8}.str{color:#81C995}.cm{color:#9AA0A6}.fn{color:#F28B82}.op{color:#FDD663}.num{color:#FDD663}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+
+/* Demo slide — dark */
+.demo-slide{background:var(--g800);color:white}
+.demo-slide h2{color:white}
+.demo-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:20px;background:rgba(234,67,53,0.18);color:#F28B82;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:32px}
+.demo-badge .live-dot{width:10px;height:10px;border-radius:50%;background:var(--red);animation:pulse-dot 1.5s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+.agent-pills{display:flex;gap:16px;justify-content:center}
+.agent-pills .pill{background:rgba(255,255,255,0.10);color:rgba(255,255,255,0.85);font-size:18px;padding:10px 24px}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- SLIDE 3-A: INSTALL — LIVE DEMO BACKDROP -->
+<div class="slide demo-slide active" data-id="3A">
+  <div class="section-tag" style="color:#8AB4F8">ACT 3 · THE UNIVERSAL AGENT</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div class="demo-badge"><span class="live-dot"></span>Live Demo</div>
+    <h2 style="font-size:48px;margin-bottom:24px">Zero to first query in one command</h2>
+
+    <pre style="font-size:26px;line-height:1.8;padding:36px 44px;border-radius:18px;background:#282A2D;border:1px solid rgba(255,255,255,0.14);margin-top:24px"><span class="cm">$</span> <span class="fn">claude</span> plugin install <span class="str">data-agent-kit-starter-pack@claude-plugins-official</span>
+
+<span class="cm">&gt;</span> <span class="kw">/mcp</span>   <span class="str">✓ connected</span></pre>
+
+    <div style="margin-top:56px;text-align:center">
+      <div style="font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:16px">Also works in</div>
+      <div class="agent-pills">
+        <span class="pill">VS Code</span>
+        <span class="pill">Gemini CLI</span>
+        <span class="pill">Codex</span>
+        <span class="pill">Antigravity</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num" style="color:rgba(255,255,255,0.4)">3-A</div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Act 1 · 1-D — The Onboarding Manual: Skills</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+
+/* Bookshelf */
+.shelf-row{display:flex;align-items:flex-end;justify-content:center;gap:20px}
+.spine{width:94px;border-radius:10px 10px 6px 6px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.spine span{writing-mode:vertical-rl;font-family:var(--mono);font-size:19px;font-weight:500;letter-spacing:0.5px}
+.spine-blue{background:rgba(66,133,244,0.10);border:1.5px solid rgba(66,133,244,0.35)}.spine-blue span{color:var(--blue)}
+.spine-green{background:rgba(52,168,83,0.10);border:1.5px solid rgba(52,168,83,0.35)}.spine-green span{color:var(--green)}
+.spine-yellow{background:rgba(251,188,4,0.14);border:1.5px solid rgba(251,188,4,0.45)}.spine-yellow span{color:#E37400}
+.spine-red{background:rgba(234,67,53,0.10);border:1.5px solid rgba(234,67,53,0.30)}.spine-red span{color:var(--red)}
+.spine-gray{background:var(--g100);border:1.5px solid var(--g200)}.spine-gray span{color:var(--g600);font-family:var(--font);font-weight:700}
+.shelf-bar{height:12px;width:1140px;margin:0 auto;background:var(--g200);border-radius:6px;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- SLIDE 1-D: THE ONBOARDING MANUAL — SKILLS -->
+<div class="slide active" data-id="1D">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">ACT 1 · DISCOVERY</div>
+  <h2>18 playbooks, written by Google's data team</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="shelf-row">
+      <div class="spine spine-blue" style="height:500px"><span>dbt-bigquery</span></div>
+      <div class="spine spine-green" style="height:468px"><span>dataform-bigquery</span></div>
+      <div class="spine spine-yellow" style="height:488px"><span>gcp-spark</span></div>
+      <div class="spine spine-red" style="height:458px"><span>gcp-pipeline-orchestration</span></div>
+      <div class="spine spine-blue" style="height:496px"><span>ml-best-practices</span></div>
+      <div class="spine spine-green" style="height:464px"><span>data-autocleaning</span></div>
+      <div class="spine spine-yellow" style="height:482px"><span>building-data-apps</span></div>
+      <div class="spine spine-red" style="height:454px"><span>notebook-guidance</span></div>
+      <div class="spine spine-gray" style="height:472px"><span>+10 more</span></div>
+    </div>
+    <div class="shelf-bar"></div>
+    <p style="text-align:center;font-size:22px;font-style:italic;margin-top:32px">Loaded into context exactly when relevant</p>
+  </div>
+  <div class="slide-num">1-D</div>
+</div>
+
+</div>
+</body>
+</html>

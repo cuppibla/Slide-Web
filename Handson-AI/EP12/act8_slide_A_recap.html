@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Close · 8-A — Six Concepts Recap</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+
+/* Recap grid */
+.recap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.recap-card{padding:32px 34px;display:flex;flex-direction:column;gap:10px}
+.recap-num{font-family:var(--mono);font-size:19px;font-weight:700}
+.recap-title{font-size:27px;font-weight:700;color:var(--g800);line-height:1.2}
+.recap-sub{font-size:18px;color:var(--g600);line-height:1.45}
+.next-pill{align-self:center;margin-top:48px;padding:15px 42px;border-radius:999px;background:var(--g800);color:#FFFFFF;font-size:22px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- SLIDE 8-A: SIX CONCEPTS RECAP -->
+<div class="slide active" data-id="8A">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">CLOSE</div>
+  <h2>Six things you now actually understand</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div class="recap-grid">
+      <div class="glass glass-blue recap-card">
+        <div class="recap-num" style="color:var(--blue)">01</div>
+        <div class="recap-title">OLTP vs OLAP</div>
+        <div class="recap-sub">why companies split their data in the first place</div>
+      </div>
+      <div class="glass glass-green recap-card">
+        <div class="recap-num" style="color:var(--green)">02</div>
+        <div class="recap-title">Model Context Protocol</div>
+        <div class="recap-sub">write a tool once — every agent can use it</div>
+      </div>
+      <div class="glass glass-yellow recap-card">
+        <div class="recap-num" style="color:#E37400">03</div>
+        <div class="recap-title">Mix shift</div>
+        <div class="recap-sub">the average lied while every segment stayed healthy</div>
+      </div>
+      <div class="glass glass-red recap-card">
+        <div class="recap-num" style="color:var(--red)">04</div>
+        <div class="recap-title">Dimensional grain</div>
+        <div class="recap-sub">what one row means — and the silent fan-out</div>
+      </div>
+      <div class="glass glass-blue recap-card">
+        <div class="recap-num" style="color:var(--blue)">05</div>
+        <div class="recap-title">The ReAct loop</div>
+        <div class="recap-sub">execute · observe · reflect · retry</div>
+      </div>
+      <div class="glass glass-green recap-card">
+        <div class="recap-num" style="color:var(--green)">06</div>
+        <div class="recap-title">Zero-shot time-series models</div>
+        <div class="recap-sub">TimesFM forecasts with no training step</div>
+      </div>
+    </div>
+
+    <div class="next-pill">The build, not the button — next episode.</div>
+  </div>
+  <div class="slide-num">8-A</div>
+</div>
+
+</div>
+</body>
+</html>

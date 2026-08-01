@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Act 1 · 1-A — The Data Estate</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+
+/* Estate map */
+.estate{flex:1;display:flex;flex-direction:column;justify-content:center}
+.estate-inner{position:relative}
+.catalog-band{position:absolute;top:0;left:10px;right:10px;height:92px;z-index:3;display:flex;align-items:center;justify-content:center;gap:14px;border-radius:999px;background:rgba(66,133,244,0.10);backdrop-filter:blur(8px) saturate(1.4);-webkit-backdrop-filter:blur(8px) saturate(1.4);border:2px dashed rgba(66,133,244,0.45);font-size:25px;font-weight:600;color:var(--blue)}
+.catalog-band .band-sub{font-size:18px;font-weight:400;color:var(--g600)}
+.estate-row{display:flex;gap:44px;justify-content:center;align-items:flex-start;margin-top:46px}
+.svc{width:470px;padding:64px 34px 30px}
+.svc-head{display:flex;align-items:center;gap:18px;margin-bottom:20px}
+.svc-icon{font-size:42px}
+.svc-name{font-size:27px;font-weight:700}
+.svc-sub{font-size:17px;color:var(--g600)}
+.svc-tables{display:flex;flex-direction:column;gap:10px}
+.tbl{background:var(--g800);color:#8AB4F8;font-family:var(--mono);font-size:20px;padding:12px 18px;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- SLIDE 1-A: THE DATA ESTATE MAP -->
+<div class="slide active" data-id="1A">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">ACT 1 · DISCOVERY</div>
+  <h2>Where the data actually lives</h2>
+
+  <div class="estate">
+   <div class="estate-inner">
+    <div class="catalog-band">🔍 Dataplex Knowledge Catalog <span class="band-sub">— one search surface across the whole estate</span></div>
+
+    <div class="estate-row">
+      <div class="glass glass-blue svc">
+        <div class="svc-head">
+          <span class="svc-icon">📊</span>
+          <div>
+            <div class="svc-name" style="color:var(--blue)">BigQuery</div>
+            <div class="svc-sub">analytical warehouse</div>
+          </div>
+        </div>
+        <div class="svc-tables">
+          <div class="tbl">orders</div>
+          <div class="tbl">order_items</div>
+        </div>
+      </div>
+
+      <div class="glass glass-red svc" style="margin-top:26px">
+        <div class="svc-head">
+          <span class="svc-icon">🐘</span>
+          <div>
+            <div class="svc-name" style="color:var(--red)">Cloud SQL · Postgres</div>
+            <div class="svc-sub">transactional store</div>
+          </div>
+        </div>
+        <div class="svc-tables">
+          <div class="tbl">customers</div>
+          <div class="tbl">pet_profiles</div>
+          <div class="tbl">products</div>
+        </div>
+      </div>
+
+      <div class="glass glass-yellow svc" style="margin-top:12px">
+        <div class="svc-head">
+          <span class="svc-icon">🪣</span>
+          <div>
+            <div class="svc-name" style="color:#E37400">Cloud Storage</div>
+            <div class="svc-sub">object bucket</div>
+          </div>
+        </div>
+        <div class="svc-tables">
+          <div class="tbl">promo_events.json</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:23px;font-style:italic;margin-top:44px">Three services. One investigation.</p>
+   </div>
+  </div>
+  <div class="slide-num">1-A</div>
+</div>
+
+</div>
+</body>
+</html>

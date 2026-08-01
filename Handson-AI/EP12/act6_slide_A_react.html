@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Act 6 · 6-A — The ReAct Loop</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- SLIDE 6-A: THE REACT LOOP -->
+<div class="slide active" data-id="6A">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag" style="color:var(--green)">ACT 6 · SELF-HEALING PIPELINES</div>
+  <h2>Self-healing, demystified</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <svg viewBox="0 0 980 640" width="940" xmlns="http://www.w3.org/2000/svg">
+      <!-- loop arcs (clockwise) -->
+      <path d="M607.5,116.5 A235,235 0 0 1 693.5,202.5" fill="none" stroke="#34A853" stroke-width="3"/>
+      <polygon points="701.5,216.4 699.6,199.0 687.4,206.0" fill="#34A853"/>
+      <path d="M693.5,437.5 A235,235 0 0 1 607.5,523.5" fill="none" stroke="#34A853" stroke-width="3"/>
+      <polygon points="593.6,531.5 611.0,529.6 604.0,517.4" fill="#34A853"/>
+      <path d="M372.5,523.5 A235,235 0 0 1 286.5,437.5" fill="none" stroke="#34A853" stroke-width="3"/>
+      <polygon points="278.5,423.6 280.4,441.0 292.6,434.0" fill="#34A853"/>
+      <path d="M286.5,202.5 A235,235 0 0 1 372.5,116.5" fill="none" stroke="#34A853" stroke-width="3"/>
+      <polygon points="386.4,108.5 369.0,110.4 376.0,122.6" fill="#34A853"/>
+
+      <!-- node: Execute (top) -->
+      <rect x="375" y="39" width="230" height="92" rx="20" fill="rgba(52,168,83,0.08)" stroke="rgba(52,168,83,0.45)" stroke-width="1.5"/>
+      <circle cx="383" cy="47" r="16" fill="#34A853"/>
+      <text x="383" y="53" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">1</text>
+      <text x="490" y="80" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="25" font-weight="700" fill="#3C4043">Execute</text>
+      <text x="490" y="110" text-anchor="middle" font-family="Google Sans Mono, monospace" font-size="17" fill="#5F6368">dbt build</text>
+
+      <!-- node: Observe (right) -->
+      <rect x="610" y="274" width="230" height="92" rx="20" fill="rgba(52,168,83,0.08)" stroke="rgba(52,168,83,0.45)" stroke-width="1.5"/>
+      <circle cx="618" cy="282" r="16" fill="#34A853"/>
+      <text x="618" y="288" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">2</text>
+      <text x="725" y="315" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="25" font-weight="700" fill="#3C4043">Observe</text>
+      <text x="725" y="345" text-anchor="middle" font-family="Google Sans Mono, monospace" font-size="17" fill="#5F6368">parse stderr</text>
+
+      <!-- node: Reflect (bottom) -->
+      <rect x="375" y="509" width="230" height="92" rx="20" fill="rgba(52,168,83,0.08)" stroke="rgba(52,168,83,0.45)" stroke-width="1.5"/>
+      <circle cx="383" cy="517" r="16" fill="#34A853"/>
+      <text x="383" y="523" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">3</text>
+      <text x="490" y="550" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="25" font-weight="700" fill="#3C4043">Reflect</text>
+      <text x="490" y="580" text-anchor="middle" font-family="Google Sans Mono, monospace" font-size="17" fill="#5F6368">diagnose the grain</text>
+
+      <!-- node: Retry (left) -->
+      <rect x="140" y="274" width="230" height="92" rx="20" fill="rgba(52,168,83,0.08)" stroke="rgba(52,168,83,0.45)" stroke-width="1.5"/>
+      <circle cx="148" cy="282" r="16" fill="#34A853"/>
+      <text x="148" y="288" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">4</text>
+      <text x="255" y="315" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="25" font-weight="700" fill="#3C4043">Retry</text>
+      <text x="255" y="345" text-anchor="middle" font-family="Google Sans Mono, monospace" font-size="17" fill="#5F6368">rewrite the SQL</text>
+
+      <!-- center label -->
+      <text x="490" y="310" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="46" font-weight="700" fill="#34A853">ReAct</text>
+      <text x="490" y="348" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="23" fill="#5F6368">the loop</text>
+    </svg>
+
+    <p style="text-align:center;font-size:23px;font-style:italic;margin-top:8px">Assertions are the guardrails. That's all it is — mechanically.</p>
+  </div>
+  <div class="slide-num">6-A</div>
+</div>
+
+</div>
+</body>
+</html>

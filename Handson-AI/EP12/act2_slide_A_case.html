@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Act 2 · 2-A — The Case</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#4285F4;--red:#EA4335;--yellow:#FBBC04;--green:#34A853;--g800:#3C4043;--g600:#5F6368;--g200:#E8EAED;--g100:#F1F3F4;--g50:#F8F9FA;--white:#FFFFFF;--font:'Google Sans',system-ui,sans-serif;--mono:'Google Sans Mono',monospace}
+body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:hidden;width:1920px;height:1080px}
+.deck{position:relative;width:1920px;height:1080px}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
+.slide.active{display:flex}
+.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
+h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
+p{font-size:24px;color:var(--g600);line-height:1.6}
+.g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
+.g-bar span{flex:1}.g-bar .b{background:var(--blue)}.g-bar .r{background:var(--red)}.g-bar .y{background:var(--yellow)}.g-bar .g{background:var(--green)}
+.glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);border:1px solid rgba(255,255,255,0.7);border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.8);padding:32px 36px;position:relative;overflow:hidden}
+.glass::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.4) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.glass-blue{background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2)}
+.glass-green{background:rgba(52,168,83,0.08);border:1px solid rgba(52,168,83,0.2)}
+.glass-red{background:rgba(234,67,53,0.08);border:1px solid rgba(234,67,53,0.15)}
+.glass-yellow{background:rgba(251,188,4,0.08);border:1px solid rgba(251,188,4,0.2)}
+.row{display:flex;gap:32px;align-items:flex-start}
+.pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
+
+/* Case KPI + chart */
+.case-left{width:540px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.kpi-label{font-size:44px;font-weight:700;color:var(--g800);letter-spacing:1px}
+.kpi-num{font-size:190px;font-weight:700;line-height:1;color:var(--red);letter-spacing:-6px}
+.kpi-sub{font-size:27px;color:var(--g600);line-height:1.5;margin-top:18px}
+.chart-card{flex:1;display:flex;flex-direction:column;padding:36px 40px}
+.chart-title{font-family:var(--mono);font-size:19px;color:var(--g600);margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- SLIDE 2-A: THE CASE -->
+<div class="slide active" data-id="2A">
+  <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
+  <div class="section-tag">ACT 2 · THE CROSS-SERVICE JUMP</div>
+  <h2>The case</h2>
+
+  <div style="flex:1;display:flex;gap:60px;align-items:stretch">
+    <div class="case-left">
+      <div class="kpi-label">AOV</div>
+      <div class="kpi-num">↓7%</div>
+      <div class="kpi-sub">Revenue flat.<br>Board wants answers <strong style="color:var(--g800)">Friday</strong>.</div>
+    </div>
+
+    <div class="glass chart-card">
+      <div class="chart-title">monthly average order value · Aug 2024 → Jan 2025</div>
+      <svg viewBox="0 0 880 470" width="100%" style="flex:1" xmlns="http://www.w3.org/2000/svg">
+        <!-- Jan highlight band -->
+        <rect x="748" y="40" width="124" height="360" rx="10" fill="rgba(234,67,53,0.06)"/>
+        <!-- gridlines -->
+        <line x1="70" y1="160" x2="850" y2="160" stroke="#E8EAED" stroke-width="2"/>
+        <line x1="70" y1="260" x2="850" y2="260" stroke="#E8EAED" stroke-width="2"/>
+        <line x1="70" y1="360" x2="850" y2="360" stroke="#E8EAED" stroke-width="2"/>
+        <text x="62" y="166" text-anchor="end" font-family="Google Sans, system-ui, sans-serif" font-size="16" fill="#9AA0A6">$100</text>
+        <text x="62" y="266" text-anchor="end" font-family="Google Sans, system-ui, sans-serif" font-size="16" fill="#9AA0A6">$95</text>
+        <text x="62" y="366" text-anchor="end" font-family="Google Sans, system-ui, sans-serif" font-size="16" fill="#9AA0A6">$90</text>
+        <!-- axis -->
+        <line x1="70" y1="400" x2="850" y2="400" stroke="#DADCE0" stroke-width="2"/>
+        <!-- flat months: blue -->
+        <polyline points="100,160 244,140 388,160 532,180 676,160" fill="none" stroke="#4285F4" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- the dip: red -->
+        <line x1="676" y1="160" x2="820" y2="300" stroke="#EA4335" stroke-width="5" stroke-linecap="round"/>
+        <!-- dots -->
+        <circle cx="100" cy="160" r="7" fill="#FFFFFF" stroke="#4285F4" stroke-width="4"/>
+        <circle cx="244" cy="140" r="7" fill="#FFFFFF" stroke="#4285F4" stroke-width="4"/>
+        <circle cx="388" cy="160" r="7" fill="#FFFFFF" stroke="#4285F4" stroke-width="4"/>
+        <circle cx="532" cy="180" r="7" fill="#FFFFFF" stroke="#4285F4" stroke-width="4"/>
+        <circle cx="676" cy="160" r="7" fill="#FFFFFF" stroke="#4285F4" stroke-width="4"/>
+        <circle cx="820" cy="300" r="10" fill="#EA4335"/>
+        <text x="820" y="346" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="27" font-weight="700" fill="#EA4335">−7%</text>
+        <!-- month labels -->
+        <text x="100" y="438" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="18" fill="#5F6368">Aug</text>
+        <text x="244" y="438" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="18" fill="#5F6368">Sep</text>
+        <text x="388" y="438" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="18" fill="#5F6368">Oct</text>
+        <text x="532" y="438" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="18" fill="#5F6368">Nov</text>
+        <text x="676" y="438" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="18" fill="#5F6368">Dec</text>
+        <text x="820" y="438" text-anchor="middle" font-family="Google Sans, system-ui, sans-serif" font-size="18" font-weight="700" fill="#EA4335">Jan</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-num">2-A</div>
+</div>
+
+</div>
+</body>
+</html>
