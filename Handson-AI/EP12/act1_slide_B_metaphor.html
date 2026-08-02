@@ -12,7 +12,7 @@ body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:
 .deck{position:relative;width:1920px;height:1080px}
 .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
 .slide.active{display:flex}
-.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.slide-num{display:none}
 .section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
 h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
 h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
@@ -31,7 +31,7 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
 
 /* Title slide — hero gradient */
 .title-slide{background:linear-gradient(160deg,#F8F9FA 0%,#E8F0FE 40%,#F0F4FF 100%);justify-content:center;align-items:center;text-align:center;padding:100px 140px}
-.title-slide h1{font-size:64px;background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 50%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:28px}
+.title-slide h1{font-size:72px;background:linear-gradient(135deg,var(--blue) 0%,#1A73E8 50%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:28px}
 .title-slide .subtitle{font-size:27px;color:var(--g600);font-weight:400;margin-bottom:56px}
 .title-logos{display:flex;gap:24px;justify-content:center;margin-top:40px}
 .title-logos .pill{font-size:18px;padding:10px 24px;background:rgba(66,133,244,0.08);color:var(--blue);font-weight:500}
@@ -53,9 +53,9 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
     <div class="g-bar" style="width:400px;margin:0 auto 48px">
       <span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span>
     </div>
-    <div class="section-tag">ACT 1 · DISCOVERY</div>
-    <h1>Your coding agent just got hired<br>by Google's data team</h1>
-    <div class="subtitle">Data Agent Kit — a Google Cloud plugin (preview) that equips coding agents for data work</div>
+
+    <h1>Equipping coding agents<br>for real-world data engineering</h1>
+    <div class="subtitle"><strong>Data Agent Kit</strong> · a Google Cloud plugin and extension (preview) that equips coding agents for data work</div>
 
     <div class="metaphor-row">
       <div class="glass glass-blue metaphor-card">
@@ -71,15 +71,17 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
       <div class="glass glass-red metaphor-card">
         <div class="metaphor-icon">📕</div>
         <div class="metaphor-title" style="color:var(--red)">The onboarding manual</div>
-        <div class="metaphor-sub">18 skills</div>
+        <div class="metaphor-sub">agent skills</div>
       </div>
     </div>
 
     <div class="title-logos">
+      <span class="pill">Antigravity 2.0</span>
+      <span class="pill">Antigravity CLI</span>
+      <span class="pill">Antigravity IDE</span>
       <span class="pill">Claude Code</span>
-      <span class="pill">Gemini CLI</span>
       <span class="pill">Codex</span>
-      <span class="pill">Antigravity</span>
+      <span class="pill">Cursor</span>
     </div>
   </div>
   <div class="slide-num">1-B</div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920,height=1080">
-<title>Act 1 · 1-A — The Data Estate</title>
+<title>Act 8 · 8-A — BigQuery AI & Semantic Search</title>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -29,81 +29,76 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
 .row{display:flex;gap:32px;align-items:flex-start}
 .pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
 
-/* Estate map */
+/* Estate layout (inherited from 1-A design system) */
 .estate{flex:1;display:flex;flex-direction:column;justify-content:center}
 .estate-inner{position:relative}
-.catalog-band{position:absolute;top:0;left:10px;right:10px;height:92px;z-index:3;display:flex;align-items:center;justify-content:center;gap:14px;border-radius:999px;background:rgba(66,133,244,0.10);backdrop-filter:blur(8px) saturate(1.4);-webkit-backdrop-filter:blur(8px) saturate(1.4);border:2px dashed rgba(66,133,244,0.45);font-size:25px;font-weight:600;color:var(--blue)}
-.catalog-band .band-sub{font-size:20px;font-weight:400;color:var(--g600)}
 .estate-row{display:flex;gap:44px;justify-content:center;align-items:flex-start;margin-top:46px}
 .svc{width:470px;padding:64px 34px 30px}
 .svc-head{display:flex;align-items:center;gap:18px;margin-bottom:20px}
 .svc-icon{font-size:42px}
 .svc-name{font-size:27px;font-weight:700}
 .svc-sub{font-size:17px;color:var(--g600)}
-.svc-tables{display:flex;flex-direction:column;gap:10px}
 .tbl{background:var(--g800);color:#8AB4F8;font-family:var(--mono);font-size:20px;padding:12px 18px;border-radius:10px}
 </style>
 </head>
 <body>
 <div class="deck">
 
-<!-- SLIDE 1-A: THE DATA ESTATE MAP -->
-<div class="slide active" data-id="1A">
+<!-- SLIDE 8-A: BIGQUERY AI & SEMANTIC SEARCH -->
+<div class="slide active" data-id="8A">
   <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
-  <h2 style="font-size:52px">Where the data actually lives</h2>
+  <h2>BigQuery AI: Generative AI &amp; Semantic Search</h2>
+  <p style="font-size:23px;margin-top:-10px;margin-bottom:4px"><strong style="color:var(--g800)">No external vector database required.</strong> LLM inference and similarity searches run directly in SQL.</p>
 
-  <div class="estate">
-   <div class="estate-inner" style="display:flex;flex-direction:column;align-items:center">
-    <div class="catalog-band">🔍 Dataplex Knowledge Catalog <span class="band-sub">— one search surface across the whole estate</span></div>
+  <div class="estate" style="margin-top:20px">
+   <div class="estate-inner">
+    <div class="estate-row" style="gap:36px;margin-top:20px;align-items:stretch">
 
-    <div class="estate-row">
-      <div class="glass glass-blue svc">
-        <div class="svc-head">
-          <span class="svc-icon">📊</span>
+      <!-- Box 1: Generate Text -->
+      <div class="glass glass-blue svc" style="width:480px;padding:40px 32px 36px">
+        <div class="svc-head" style="margin-bottom:16px">
+          <span class="svc-icon">✨</span>
           <div>
-            <div class="svc-name" style="color:var(--blue)">BigQuery</div>
-            <div class="svc-sub">OLAP · Analytical Warehouse (Columnar)</div>
+            <div class="svc-name" style="color:var(--blue);font-size:24px">LLM Inference</div>
+            <div class="svc-sub" style="font-family:var(--mono);font-size:16px">ML.GENERATE_TEXT</div>
           </div>
         </div>
-        <div class="svc-tables">
-          <div class="tbl">orders</div>
-          <div class="tbl">order_items</div>
-        </div>
+        <p style="font-size:18px;color:var(--g600);line-height:1.5;margin-bottom:18px">Call Gemini models in a <code style="font-family:var(--mono);color:var(--g800)">SELECT</code> query to generate marketing descriptions and product tags.</p>
+        <div class="tbl" style="font-size:16px;text-align:center">model = 'cymbal_pets_gemini'</div>
       </div>
 
-      <div class="glass glass-red svc" style="margin-top:26px">
-        <div class="svc-head">
-          <span class="svc-icon">🐘</span>
+      <!-- Box 2: Generate Embeddings -->
+      <div class="glass glass-yellow svc" style="width:480px;padding:40px 32px 36px">
+        <div class="svc-head" style="margin-bottom:16px">
+          <span class="svc-icon">📐</span>
           <div>
-            <div class="svc-name" style="color:var(--red)">Cloud SQL · Postgres</div>
-            <div class="svc-sub">OLTP · Transactional Store (Row-by-Row)</div>
+            <div class="svc-name" style="color:#E37400;font-size:24px">Vector Indexing</div>
+            <div class="svc-sub" style="font-family:var(--mono);font-size:16px">ML.GENERATE_EMBEDDING</div>
           </div>
         </div>
-        <div class="svc-tables">
-          <div class="tbl">customers</div>
-          <div class="tbl">pet_profiles</div>
-          <div class="tbl">products</div>
-        </div>
+        <p style="font-size:18px;color:var(--g600);line-height:1.5;margin-bottom:18px">Convert catalog text into 768-dim embeddings stored as native table columns. Zero Python sync pipelines needed.</p>
+        <div class="tbl" style="font-size:16px;text-align:center;color:#FBBC04">768-dim vector space</div>
       </div>
 
-      <div class="glass glass-yellow svc" style="margin-top:12px">
-        <div class="svc-head">
-          <span class="svc-icon">🪣</span>
+      <!-- Box 3: Vector Search -->
+      <div class="glass glass-green svc" style="width:480px;padding:40px 32px 36px">
+        <div class="svc-head" style="margin-bottom:16px">
+          <span class="svc-icon">🔍</span>
           <div>
-            <div class="svc-name" style="color:#E37400">Cloud Storage</div>
-            <div class="svc-sub">Object Store · Raw Files & Events</div>
+            <div class="svc-name" style="color:var(--green);font-size:24px">Live App Search</div>
+            <div class="svc-sub" style="font-family:var(--mono);font-size:16px">VECTOR_SEARCH</div>
           </div>
         </div>
-        <div class="svc-tables">
-          <div class="tbl">promo_events.json</div>
-        </div>
+        <p style="font-size:18px;color:var(--g600);line-height:1.5;margin-bottom:18px">Connect web apps to BigQuery for real-time semantic matching, e.g. "kidney health" resolves to "Urinary Care Kibble."</p>
+        <div class="tbl" style="font-size:16px;text-align:center;color:#81C995">distance metric = 'COSINE'</div>
       </div>
+
     </div>
 
-    <p style="text-align:center;font-size:23px;font-style:italic;margin-top:44px">Three specialized storage architectures, unified under a single metadata catalog.</p>
+    <p style="text-align:center;font-size:22px;font-style:italic;margin-top:40px">Bridging enterprise data engineering with real-time user applications.</p>
    </div>
   </div>
-  <div class="slide-num">1-A</div>
+  <div class="slide-num">8-A</div>
 </div>
 
 </div>

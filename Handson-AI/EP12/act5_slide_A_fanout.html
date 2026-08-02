@@ -12,10 +12,10 @@ body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:
 .deck{position:relative;width:1920px;height:1080px}
 .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
 .slide.active{display:flex}
-.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.slide-num{display:none}
 .section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
 h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
-h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h2{font-size:52px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
 h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
 p{font-size:24px;color:var(--g600);line-height:1.6}
 .g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
@@ -30,13 +30,13 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
 .pill{display:inline-block;padding:6px 16px;border-radius:20px;font-size:16px;font-weight:500;background:var(--g100);color:var(--g600)}
 
 /* Fan-out stages */
-.stage-row{display:flex;align-items:center;justify-content:center}
+.stage-row{display:flex;align-items:stretch;justify-content:center}
 .stage{width:440px;min-height:330px;padding:36px 34px;display:flex;flex-direction:column;justify-content:center;gap:16px;text-align:center}
 .stage-tag{font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
 .stage-big{font-size:62px;font-weight:700;color:var(--g800);line-height:1.1}
 .stage-sub{font-size:19px;color:var(--g600);line-height:1.5}
 .stage-code{font-family:var(--mono);font-size:21px;background:var(--g800);color:#8AB4F8;padding:12px 16px;border-radius:10px;align-self:center}
-.stage-arrow{flex:none;margin:0 10px}
+.stage-arrow{flex:none;margin:0 10px;align-self:center}
 .catch-pill{align-self:center;margin-top:40px;padding:14px 38px;border-radius:999px;background:rgba(52,168,83,0.12);color:var(--green);font-size:21px;font-weight:600}
 .catch-pill code{font-family:var(--mono);font-weight:500}
 </style>
@@ -47,22 +47,21 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
 <!-- SLIDE 5-A: THE $300 PHANTOM — GRAIN FAN-OUT -->
 <div class="slide active" data-id="5A">
   <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
-  <div class="section-tag" style="color:var(--red)">ACT 5 · INVESTIGATOR → ENGINEER</div>
-  <h2>The $300 phantom</h2>
-  <p style="font-size:23px;margin-top:-10px;margin-bottom:4px"><strong style="color:var(--g800)">Grain</strong> — what does one row mean? &nbsp;Target: <strong style="color:var(--g800)">one row per order</strong>. A fan-out join silently breaks it.</p>
+  <h2>The Fan-Out Join Bug</h2>
+  <p style="font-size:23px;margin-top:-10px;margin-bottom:4px"><strong style="color:var(--g800)">Grain</strong> = what one row represents. Target: <strong style="color:var(--g800)">one row per order</strong>. A 1-to-many join silently breaks it.</p>
 
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
     <div class="stage-row">
       <div class="glass glass-blue stage">
-        <div class="stage-tag" style="color:var(--blue)">Stage 1 · The truth</div>
+        <div class="stage-tag" style="color:var(--blue)">Base Order Grain</div>
         <div class="stage-big">$100</div>
-        <div class="stage-sub">one order · one row<br>grain intact</div>
+        <div class="stage-sub">1 order = 1 row<br>Correct baseline revenue</div>
       </div>
       <svg class="stage-arrow" width="44" height="30" viewBox="0 0 44 30" xmlns="http://www.w3.org/2000/svg"><path d="M3,15 L31,15" stroke="#5F6368" stroke-width="3"/><path d="M28,6 L41,15 L28,24" fill="#5F6368"/></svg>
 
       <div class="glass glass-yellow stage">
-        <div class="stage-tag" style="color:#E37400">Stage 2 · The join</div>
-        <div class="stage-code">LEFT JOIN pet_profiles</div>
+        <div class="stage-tag" style="color:#E37400">Unsafe 1-to-Many Join</div>
+        <div class="stage-code">LEFT JOIN pet_profiles ON customer_id</div>
         <svg width="300" height="120" viewBox="0 0 300 120" style="align-self:center" xmlns="http://www.w3.org/2000/svg">
           <line x1="46" y1="60" x2="252" y2="20" stroke="#9AA0A6" stroke-width="2.5"/>
           <line x1="46" y1="60" x2="252" y2="60" stroke="#9AA0A6" stroke-width="2.5"/>
@@ -72,18 +71,18 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
           <circle cx="266" cy="60" r="12" fill="#FBBC04"/>
           <circle cx="266" cy="100" r="12" fill="#FBBC04"/>
         </svg>
-        <div class="stage-sub">customer owns 3 pets<br>1 row becomes 3</div>
+        <div class="stage-sub">Customer owns 3 pets<br>1 order row multiplies into 3 rows</div>
       </div>
       <svg class="stage-arrow" width="44" height="30" viewBox="0 0 44 30" xmlns="http://www.w3.org/2000/svg"><path d="M3,15 L31,15" stroke="#5F6368" stroke-width="3"/><path d="M28,6 L41,15 L28,24" fill="#5F6368"/></svg>
 
       <div class="glass glass-red stage">
-        <div class="stage-tag" style="color:var(--red)">Stage 3 · The phantom</div>
+        <div class="stage-tag" style="color:var(--red)">Silently Inflated Metrics</div>
         <div class="stage-big" style="color:var(--red)">3 × $100<br>= $300</div>
-        <div class="stage-sub">revenue $100 → $300 · orders 1 → 3<br>every metric inflated —<br><strong style="color:var(--red)">and nothing crashed</strong></div>
+        <div class="stage-sub">Revenue triples ($100 → $300)<br>BI dashboards silently corrupted.<br><strong style="color:var(--red)">No errors, no crashes</strong></div>
       </div>
     </div>
 
-    <div class="catch-pill"><code>unique_order_id</code> test: Got 287 results, expected 0 — the only thing that caught it.</div>
+    <div class="catch-pill">Why dbt? A <code>unique</code> test on <code>order_id</code> catches duplicated rows before they reach production.</div>
   </div>
   <div class="slide-num">5-A</div>
 </div>

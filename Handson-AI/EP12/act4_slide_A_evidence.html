@@ -12,10 +12,10 @@ body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:
 .deck{position:relative;width:1920px;height:1080px}
 .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
 .slide.active{display:flex}
-.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.slide-num{display:none}
 .section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
 h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
-h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h2{font-size:52px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
 h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
 p{font-size:24px;color:var(--g600);line-height:1.6}
 .g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
@@ -52,42 +52,42 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
     <div class="glass glass-yellow chain-node">
       <div class="step-tag">01 · The anomaly</div>
       <div class="node-title">AOV ↓7%</div>
-      <div class="node-sub">blended average dips in January — revenue flat</div>
+      <div class="node-sub">Blended average dips in January while overall revenue remains steady</div>
     </div>
     <svg class="chain-arrow" width="32" height="24" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg"><path d="M2,12 L22,12" stroke="#5F6368" stroke-width="2.5"/><path d="M20,5 L30,12 L20,19" fill="#5F6368"/></svg>
 
     <div class="glass glass-yellow chain-node">
-      <div class="step-tag">02 · The wall</div>
+      <div class="step-tag">02 · Missing Table</div>
       <div class="node-code">Not found:<br>customers</div>
-      <div class="node-sub">the table isn't in BigQuery at all</div>
+      <div class="node-sub">Customer profile table is not present in BigQuery analytical warehouse</div>
     </div>
     <svg class="chain-arrow" width="32" height="24" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg"><path d="M2,12 L22,12" stroke="#5F6368" stroke-width="2.5"/><path d="M20,5 L30,12 L20,19" fill="#5F6368"/></svg>
 
     <div class="glass glass-yellow chain-node">
-      <div class="step-tag">03 · Recovery</div>
-      <div class="node-title">Catalog search</div>
-      <div class="node-sub">Dataplex points to Cloud SQL — no human hint</div>
+      <div class="step-tag">03 · Catalog Discovery</div>
+      <div class="node-title">Dataplex Search</div>
+      <div class="node-sub">Knowledge Catalog locates transactional customer records in Cloud SQL Postgres</div>
     </div>
     <svg class="chain-arrow" width="32" height="24" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg"><path d="M2,12 L22,12" stroke="#5F6368" stroke-width="2.5"/><path d="M20,5 L30,12 L20,19" fill="#5F6368"/></svg>
 
     <div class="glass glass-yellow chain-node">
-      <div class="step-tag">04 · The jump</div>
+      <div class="step-tag">04 · Federated Join</div>
       <div class="node-title" style="font-family:var(--mono);font-size:20px">EXTERNAL_QUERY</div>
-      <div class="node-sub">federated join across two databases</div>
+      <div class="node-sub">Dynamic cross-engine join connecting BigQuery directly to Cloud SQL</div>
     </div>
     <svg class="chain-arrow" width="32" height="24" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg"><path d="M2,12 L22,12" stroke="#5F6368" stroke-width="2.5"/><path d="M20,5 L30,12 L20,19" fill="#5F6368"/></svg>
 
     <div class="glass glass-yellow chain-node">
-      <div class="step-tag">05 · The pattern</div>
+      <div class="step-tag">05 · Root Cause Pattern</div>
       <div class="node-title">92% = <span style="font-family:var(--mono);font-size:19px">BIGORDER25</span></div>
-      <div class="node-sub">of B2B-Wholesale orders carry one promo code</div>
+      <div class="node-sub">Of new B2B-Wholesale accounts utilize a uniform discount code</div>
     </div>
     <svg class="chain-arrow" width="32" height="24" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg"><path d="M2,12 L22,12" stroke="#5F6368" stroke-width="2.5"/><path d="M20,5 L30,12 L20,19" fill="#5F6368"/></svg>
 
     <div class="glass glass-red chain-node">
-      <div class="step-tag" style="color:var(--red)">06 · Verdict</div>
+      <div class="step-tag" style="color:var(--red)">06 · Root Cause Confirmed</div>
       <div class="node-code" style="color:#81C995">promo_events<br>.json</div>
-      <div class="node-title" style="color:var(--red);font-size:20px">B2B Wholesale Push · 25% off</div>
+      <div class="node-title" style="color:var(--red);font-size:20px">GCS log confirms 25% off wholesale campaign</div>
     </div>
   </div>
   <div class="slide-num">4-A</div>

@@ -12,10 +12,10 @@ body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:
 .deck{position:relative;width:1920px;height:1080px}
 .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
 .slide.active{display:flex}
-.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.slide-num{display:none}
 .section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
 h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
-h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h2{font-size:52px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
 h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
 p{font-size:24px;color:var(--g600);line-height:1.6}
 .g-bar{display:flex;gap:0;height:6px;margin-bottom:48px;border-radius:3px;overflow:hidden}
@@ -45,8 +45,8 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
 <!-- SLIDE 3-B: WHAT IS MCP (30-second theory) -->
 <div class="slide active" data-id="3B">
   <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
-  <div class="section-tag">ACT 3 · THE UNIVERSAL AGENT</div>
-  <h2>MCP: a universal USB port for AI</h2>
+
+  <h2>MCP: One open standard for all data tools</h2>
 
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:56px">
     <div class="mcp-flow">
@@ -54,10 +54,12 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
         <div class="mcp-icon">🤖</div>
         <div class="mcp-title" style="color:var(--blue)">Any agent</div>
         <div class="mcp-chips">
+          <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Antigravity 2.0</span>
+          <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Antigravity CLI</span>
+          <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Antigravity IDE</span>
           <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Claude Code</span>
-          <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Gemini CLI</span>
           <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Codex</span>
-          <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Antigravity</span>
+          <span class="mcp-chip" style="background:rgba(66,133,244,0.14);color:var(--blue)">Cursor</span>
         </div>
       </div>
       <div class="mcp-link">
@@ -83,7 +85,7 @@ p{font-size:24px;color:var(--g600);line-height:1.6}
       </div>
     </div>
 
-    <p style="text-align:center;font-size:27px;color:var(--g600)"><strong style="color:var(--g800)">Open standard.</strong> Write tools once — every agent can use them.</p>
+    <p style="text-align:center;font-size:27px;color:var(--g600)"><strong style="color:var(--g800)">Open standard.</strong> Write tools once. Every agent can use them.</p>
   </div>
   <div class="slide-num">3-B</div>
 </div>

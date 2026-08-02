@@ -12,10 +12,10 @@ body{font-family:var(--font);background:var(--white);color:var(--g800);overflow:
 .deck{position:relative;width:1920px;height:1080px}
 .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:80px 100px;background:var(--white)}
 .slide.active{display:flex}
-.slide-num{position:absolute;bottom:40px;right:60px;font-size:16px;color:var(--g600);font-weight:500}
+.slide-num{display:none}
 .section-tag{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
 h1{font-size:56px;font-weight:700;line-height:1.15;color:var(--g800);margin-bottom:24px}
-h2{font-size:42px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
+h2{font-size:52px;font-weight:700;line-height:1.2;color:var(--g800);margin-bottom:20px}
 h3{font-size:26px;font-weight:500;color:var(--g600);margin-bottom:20px}
 p{font-size:24px;color:var(--g600);line-height:1.6}
 ul{list-style:none;margin-top:8px}
@@ -49,8 +49,8 @@ ul li::before{content:'';position:absolute;left:0;top:22px;width:10px;height:10p
 <!-- SLIDE 2-B: OLTP VS OLAP -->
 <div class="slide active" data-id="2B">
   <div class="g-bar"><span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span></div>
-  <div class="section-tag">ACT 2 · THE CROSS-SERVICE JUMP</div>
-  <h2>Why is the data even split?</h2>
+  <h2>Two databases, one dataset</h2>
+  <p style="font-size:23px;margin-top:-10px;margin-bottom:4px">Each storage engine is purpose-built for a different workload.</p>
 
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
     <div class="row" style="align-items:stretch">
@@ -63,15 +63,15 @@ ul li::before{content:'';position:absolute;left:0;top:22px;width:10px;height:10p
             <rect x="2" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="92" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
           </svg>
           <div>
-            <div class="compare-title" style="color:var(--red)">OLTP — Cloud SQL Postgres</div>
-            <div class="compare-sub">runs the business, one row at a time</div>
+            <div class="compare-title" style="color:var(--red)">OLTP · Cloud SQL Postgres</div>
+            <div class="compare-sub">Operational system of record, optimized for transactional write latency</div>
           </div>
         </div>
         <ul>
-          <li class="dot-red">Row store</li>
-          <li class="dot-red">Live operations</li>
-          <li class="dot-red">High concurrency</li>
-          <li class="dot-red">Row-by-row updates</li>
+          <li class="dot-red">Row-oriented storage architecture</li>
+          <li class="dot-red">Live customer application backend</li>
+          <li class="dot-red">High concurrent write volume</li>
+          <li class="dot-red">ACID-compliant single-row mutations</li>
         </ul>
       </div>
 
@@ -84,20 +84,20 @@ ul li::before{content:'';position:absolute;left:0;top:22px;width:10px;height:10p
             <rect x="2" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="32" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="62" y="74" width="26" height="18" rx="3" fill="#4285F4" opacity="0.8"/><rect x="92" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/><rect x="122" y="74" width="26" height="18" rx="3" fill="#F1F3F4" stroke="#E8EAED"/>
           </svg>
           <div>
-            <div class="compare-title" style="color:var(--blue)">OLAP — BigQuery</div>
-            <div class="compare-sub">answers questions about the business</div>
+            <div class="compare-title" style="color:var(--blue)">OLAP · BigQuery</div>
+            <div class="compare-sub">Analytical enterprise warehouse, optimized for large-scale aggregations</div>
           </div>
         </div>
         <ul>
-          <li>Columnar store</li>
-          <li>Scans billions of rows</li>
-          <li>Heavy aggregation</li>
-          <li>Built for analysis, not updates</li>
+          <li>Columnar-oriented compression</li>
+          <li>Scans billions of records instantly</li>
+          <li>Optimized for complex joins & aggregations</li>
+          <li>Designed for historical BI & AI training</li>
         </ul>
       </div>
     </div>
 
-    <div style="align-self:center;margin-top:44px;padding:14px 36px;border-radius:999px;background:rgba(66,133,244,0.12);color:var(--blue);font-size:22px;font-weight:600">The split is why the investigation is cross-service.</div>
+    <div style="align-self:center;margin-top:44px;padding:14px 36px;border-radius:999px;background:rgba(66,133,244,0.12);color:var(--blue);font-size:22px;font-weight:600">Architectural Takeaway: Investigating warehouse anomalies requires querying upstream transactional tables directly.</div>
   </div>
   <div class="slide-num">2-B</div>
 </div>
